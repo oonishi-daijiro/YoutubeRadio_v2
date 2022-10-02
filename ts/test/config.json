@@ -1,0 +1,25 @@
+{
+  "Playlists": [
+    {
+      "name": "myFavorite",
+      "videos": [
+        {
+          "id": "ue092",
+          "title": "foobar"
+        },
+        {
+          "id": "ue092",
+          "title": "foobar"
+        },
+        {
+          "id": "ue092",
+          "title": "foobar"
+        },
+        {
+          "id": "ue092",
+          "title": "foobar"
+        }
+      ]
+    }
+  ]
+}
