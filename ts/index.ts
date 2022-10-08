@@ -10,8 +10,8 @@ import * as youtube from "./lib/youtube/main";
 app.disableHardwareAcceleration()
 
 
-let mainWindow: BrowserWindow;
-let playlistWindow: BrowserWindow;
+let mainWindow: BrowserWindow=null;
+let playlistWindow: BrowserWindow = null;
 
 
 
@@ -136,6 +136,7 @@ ipcMain.on('open-playlist-window', () => {
 
 ipcMain.handle('close-playlist-window', () => {
   playlistWindow.close()
+  playlistWindow=null
 })
 
 ipcMain.handle('load-playlist', (_, name: string) => {

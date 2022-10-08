@@ -26,8 +26,11 @@ class ButtonCreatePlaylist {
 
     const plusIcon = document.createElement('i')
     plusIcon.className = "fas fa-plus plus-icon"
-
+    const buttonTextValue=document.createElement('div')
+    buttonTextValue.textContent="New Playlist"
+    
     button.appendChild(plusIcon)
+    button.appendChild(buttonTextValue)
 
     playlistDisplayWrapper.appendChild(button)
 
@@ -74,4 +77,3 @@ class PlaylistDisplay {
   static listLength: number = 0
   protected dom: HTMLDivElement
 }
-
