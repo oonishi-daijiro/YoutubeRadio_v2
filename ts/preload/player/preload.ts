@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { Playlist } from "../../lib/config/main";
 import * as config from "../../lib/config/main";
+import { playlistNavigation } from "../playlist/preload";
 export default interface YoutubeRadioPreload {
   getPlaylists(): Promise<Playlist[]>
   close(): void
@@ -21,6 +22,7 @@ export default interface YoutubeRadioPreload {
   saveVolume(volume: number): Promise<void>
   getVolume(): Promise<number>
   emitAllRendered(): void
+  onReqNavigation(callback: (playlistNavigation: playlistNavigation) => void): void
 }
 
 
@@ -91,7 +93,12 @@ const api: YoutubeRadioPreload = {
   },
   emitAllRendered() {
     ipcRenderer.invoke('ready-to-show')
-  }
+  },
+  onReqNavigation(callback) {
+    ipcRenderer.on('navigate-playlist', (_, navigation: playlistNavigation) => {
+      callback(navigation)
+    });
+  },
 }
 
 contextBridge.exposeInMainWorld("YoutubeRadio", api)

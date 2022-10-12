@@ -4,13 +4,15 @@ import * as config from "./lib/config/main";
 import {
   YoutubeRadioThumbarButtons
 } from "./lib/thumbnailToolbar/main";
-
+import { playlistNavigation } from './preload/playlist/preload';
 import * as youtube from "./lib/youtube/main";
+
+
 
 app.disableHardwareAcceleration()
 
 
-let mainWindow: BrowserWindow=null;
+let mainWindow: BrowserWindow = null;
 let playlistWindow: BrowserWindow = null;
 
 
@@ -74,8 +76,22 @@ app.on('ready', () => {
   })
 }) // end of app on ready
 
+async function hoge(url: string, name: string) {
+  const pl = await config.createPlaylist({
+    name: name,
+    ID: youtube.getPlaylistID(url)
+  })
+  console.log(pl);
+
+  config.setPlaylist(pl)
+}
+
 ipcMain.handle('create-youtube-video', (_, info: config.youtubeVideoInfo) => {
   return new config.YoutubeVideo(info)
+})
+
+ipcMain.handle('navigate-playlist', (_, navigation: playlistNavigation) => {
+  mainWindow.webContents.send('navigate-playlist', navigation)
 })
 
 ipcMain.handle('get-playlists', () => {
@@ -136,7 +152,7 @@ ipcMain.on('open-playlist-window', () => {
 
 ipcMain.handle('close-playlist-window', () => {
   playlistWindow.close()
-  playlistWindow=null
+  playlistWindow = null
 })
 
 ipcMain.handle('load-playlist', (_, name: string) => {

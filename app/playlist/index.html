@@ -2,16 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self';font-src 'self' https://use.fontawesome.com https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.googleapis.com;">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self';font-src 'self' https://use.fontawesome.com https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.googleapis.com https://cdnjs.cloudflare.com;">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
-  <title>Document</title>
+  <title>Select your playlist :)</title>
 </head>
 <body>
+  <input type="radio" class="hidden" id="ui-state-holder-playlist-display" name="ui-toggler">
+  <input type="radio" class="hidden" id="ui-state-holder-playlist-editor" name="ui-toggler">
   <div id="playlist-display-wrapper"></div>
+  <div id="playlist-editor-wrapper"></div>
 </body>
 <script type="text/javascript" src="./exports.js"></script>
 <script src="main.js"></script>

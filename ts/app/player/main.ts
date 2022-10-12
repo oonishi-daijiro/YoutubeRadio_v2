@@ -1,5 +1,6 @@
 import { Playlist, YoutubePlaylist, YoutubeRadioPlaylist, YoutubeVideo } from "../../lib/config/main";
 import YoutubeRadioPreload from "../../preload/player/preload";
+import { playlistNavigation } from "../../preload/playlist/preload";
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -39,7 +40,7 @@ function stopServer(): void {
   })
 }
 
- function onYouTubeIframeAPIReady() { // when youtube iframe api get ready, this function will call
+function onYouTubeIframeAPIReady() { // when youtube iframe api get ready, this function will call
   player = new YT.Player('player', {
     height: '300',
     width: '288',
@@ -62,6 +63,15 @@ function stopServer(): void {
 async function getPlaylists(): Promise<Playlist[]> {
   return await window.YoutubeRadio.getPlaylists()
 }
+
+window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation) => {
+  const playlist = (await getPlaylists()).find(e => {
+    return e.name === navigation.name
+  })
+  await loadPlaylist(playlist)
+  player.playVideoAt(navigation.index)
+  player.setShuffle(navigation.shuffle)
+})
 
 window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
   const playlist = (await getPlaylists()).find(e => {
@@ -191,7 +201,6 @@ buttonOpenSelectPlaylist.addEventListener('click', () => {
 const pauseButton = document.getElementById('pause')
 
 pauseButton.addEventListener('click', () => {
-
   if (player.getPlaylist() === null) { // when the player didnt has any playlist
     return
   }
