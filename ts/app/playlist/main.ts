@@ -21,15 +21,6 @@ window.addEventListener('load', async () => {
 
 const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
-
-const buttonCloseWindow = document.createElement('i')
-buttonCloseWindow.id = 'button-close-window'
-buttonCloseWindow.className = 'fa-solid fa-xmark'
-buttonCloseWindow.addEventListener('click', () => {
-  window.YoutubeRadio.close()
-})
-playlistDisplayWrapper.appendChild(buttonCloseWindow)
-
 class ButtonCreatePlaylist {
   constructor() {
     const button = document.createElement('div')
@@ -38,6 +29,7 @@ class ButtonCreatePlaylist {
     const plusIcon = document.createElement('i')
     plusIcon.className = "fas fa-plus plus-icon"
     const buttonTextValue = document.createElement('div')
+    buttonTextValue.id='new-playlist-text'
     buttonTextValue.textContent = "New Playlist"
 
     button.appendChild(plusIcon)

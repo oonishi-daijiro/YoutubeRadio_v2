@@ -75,7 +75,7 @@ app.on('ready', () => {
     mainWindow.webContents.removeAllListeners()
   })
   hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2', 'My favorite music')
-  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST')
+  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST Undertale OST Undertale OST Undertale OST')
   hoge('https://www.youtube.com/playlist?list=PLyyBMVVhBOc3VkRqPKdqx1eL4F2ymapDM', 'Splatune')
 
 }) // end of app on ready

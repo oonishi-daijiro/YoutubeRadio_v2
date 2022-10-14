@@ -1,5 +1,5 @@
 body {
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -23,7 +23,7 @@ select {
 }
 
 .playlist-display {
-  background-color: #FFFFFFFF;
+  background-color: #ffffffff;
   width: 79vw;
   display: flex;
   align-items: center;
@@ -46,7 +46,7 @@ select {
 }
 
 .playlist-title-display {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-weight: 900;
   color: #353535;
   font-size: 150%;
@@ -55,6 +55,8 @@ select {
   display: flex;
   align-items: center;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .playlist-title-display {
@@ -66,7 +68,7 @@ select {
   position: absolute;
   height: 80vh;
   padding-top: 10vh;
-  width: 100vw;
+  width: 91vw;
   -webkit-app-region: no-drag;
   flex-direction: column;
   justify-content: flex-start;
@@ -82,7 +84,7 @@ select {
 
 ::-webkit-scrollbar {
   -webkit-app-region: no-drag;
-  width: 4.5px;
+  width: 2.5px;
   height: 2.5px;
   margin-right: 10vw;
 }
@@ -91,8 +93,7 @@ select {
   -webkit-app-region: no-drag;
   background-color: #888888;
   border-radius: 10px;
-  transition: all 300ms 0s ease;
-  opacity: 0;
+  opacity: 1;
   margin-right: 10vw;
 }
 
@@ -107,7 +108,7 @@ select {
   position: absolute;
   margin-left: 40px;
   font-size: 150%;
-  color: #FFFFFFFF;
+  color: #ffffffff;
   cursor: pointer;
   opacity: 0;
   transition: all 300ms 0s ease;
@@ -116,17 +117,15 @@ select {
 .button-create-playlist {
   display: flex;
   background-color: #ffffffff;
-  height: 31px;
-  width: 70%;
-  margin: 0 auto 0 auto;
+  width: 53%;
+  height: 59px;
   border-radius: 8px;
-  display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
   color: #353535;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
 }
 
 .hidden {
@@ -134,15 +133,21 @@ select {
 }
 
 .plus-icon {
+  display: flex;
+  height: 100%;
   margin-right: 10px;
   color: #353535;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  height: 50px;
 }
 
 #playlist-editor-wrapper {
   -webkit-app-region: drag;
   position: absolute;
   height: 100vh;
-  width: 100Vw;
+  width: 100vw;
   justify-content: flex-start;
   padding-right: 10px;
   right: 0vw;
@@ -151,13 +156,12 @@ select {
   top: 0;
   left: 50%;
   transform: translateX(150%);
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   padding: 0;
   will-change: transform opacity;
 }
 
 .playlist-editor {
-
   -webkit-app-region: drag;
 
   overflow: hidden;
@@ -172,19 +176,19 @@ select {
   opacity: 0;
 } */
 
-#ui-state-holder-playlist-editor:checked+#playlist-display-wrapper {
+#ui-state-holder-playlist-editor:checked + #playlist-display-wrapper {
   animation: fade-out-to-left 0.7s ease forwards;
 }
 
-#ui-state-holder-playlist-editor:checked~#playlist-editor-wrapper {
+#ui-state-holder-playlist-editor:checked ~ #playlist-editor-wrapper {
   animation: fade-in-from-right 0.7s ease forwards;
 }
 
-#ui-state-holder-playlist-display:checked~#playlist-editor-wrapper {
+#ui-state-holder-playlist-display:checked ~ #playlist-editor-wrapper {
   animation: fade-out-to-right 0.7s ease forwards;
 }
 
-#ui-state-holder-playlist-display:checked~#playlist-display-wrapper {
+#ui-state-holder-playlist-display:checked ~ #playlist-display-wrapper {
   animation: fade-in-from-left 0.7s ease forwards;
 }
 
@@ -236,9 +240,6 @@ select {
   }
 }
 
-
-
-
 .video-url-display {
   display: none;
   width: 100%;
@@ -266,13 +267,12 @@ select {
   align-items: center;
   width: 80%;
   margin: 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   -webkit-app-region: no-drag;
   border-radius: 7px;
 }
 
 .playlist-thumbnail {
-
   clip-path: circle(31px at center);
 
   height: 85px;
@@ -291,9 +291,10 @@ select {
 
 #playlist-title-display {
   color: #353535;
+  white-space: nowrap;
   font-size: 157%;
   font-weight: 900;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   user-select: none;
 }
 
@@ -326,7 +327,7 @@ select {
 }
 
 .charter-display {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 68%;
   height: 45px;
   color: #353535;
@@ -344,7 +345,6 @@ select {
   opacity: 1;
 }
 
-
 #button-back {
   position: relative;
   left: 20px;
@@ -356,15 +356,30 @@ select {
   height: 16px;
 }
 
-.button-close-window {}
+.button-close-window {
+}
 
 #title-display-and-navigator {
   -webkit-user-region: drag;
 }
-#button-close-window{
-    position: absolute;
-    top: 11px;
-    right: 20px;
-    cursor: pointer;
-    color: #353535;
+#button-close-window {
+  position: absolute;
+  top: 11px;
+  right: 20px;
+  cursor: pointer;
+  color: #353535;
+}
+
+#new-playlist-text {
+  display: flex;
+
+  text-align: center;
+
+  justify-content: center;
+
+  height: 100%;
+
+  align-items: center;
+
+  align-content: center;
 }

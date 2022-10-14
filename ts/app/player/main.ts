@@ -112,7 +112,6 @@ async function loadPlaylist(appliedPlaylist: Playlist) {
     }))
     window.YoutubeRadio.setPlaylist(appliedPlaylist)
   } else {
-
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videoList) {
       return
     }
@@ -311,4 +310,3 @@ const minimize = document.getElementById('minimize')
 minimize.addEventListener('click', () => {
   window.YoutubeRadio.minimize()
 }, false)
-
