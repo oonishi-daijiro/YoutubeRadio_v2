@@ -6,7 +6,7 @@ export interface playlistNavigation {
   name: string
   index?: number
   shuffle?: boolean
-  delete?: boolean
+
 }
 
 export interface YoutubeRadioPreload {
@@ -15,6 +15,7 @@ export interface YoutubeRadioPreload {
   loadPlaylist(index: string): void
   openEditPlaylist(playlistName: string): void
   navigatePlaylist(index: playlistNavigation): void
+  deletePlaylist(name: string): void
 }
 
 const api: YoutubeRadioPreload = {
@@ -30,8 +31,11 @@ const api: YoutubeRadioPreload = {
   openEditPlaylist(playlistName: string): void {
     ipcRenderer.send('open-edit-playlist', playlistName)
   },
-  navigatePlaylist(navigate: playlistNavigation) {
-    ipcRenderer.invoke('navigate-playlist', navigate)
+  navigatePlaylist(navigation: playlistNavigation) {
+    ipcRenderer.invoke('navigate-playlist', navigation)
+  },
+  deletePlaylist(name: string) {
+    ipcRenderer.invoke('delete-playlist', name)
   }
 
 }

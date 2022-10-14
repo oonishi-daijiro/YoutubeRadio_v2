@@ -74,6 +74,10 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
+  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2', 'My favorite music')
+  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST')
+  hoge('https://www.youtube.com/playlist?list=PLyyBMVVhBOc3VkRqPKdqx1eL4F2ymapDM', 'Splatune')
+
 }) // end of app on ready
 
 async function hoge(url: string, name: string) {
@@ -81,8 +85,6 @@ async function hoge(url: string, name: string) {
     name: name,
     ID: youtube.getPlaylistID(url)
   })
-  console.log(pl);
-
   config.setPlaylist(pl)
 }
 
@@ -137,6 +139,8 @@ ipcMain.on('open-playlist-window', () => {
       maximizable: false,
       resizable: false,
       useContentSize: true,
+      modal: true,
+      parent: mainWindow,
       webPreferences: {
         contextIsolation: true,
         preload: __dirname + "/preload/playlist/preload.js",
@@ -157,4 +161,8 @@ ipcMain.handle('close-playlist-window', () => {
 
 ipcMain.handle('load-playlist', (_, name: string) => {
   mainWindow.webContents.send('load-playlist', name)
+})
+
+ipcMain.handle('delete-playlist', (_, name: string) => {
+  config.deletePlaylist(name)
 })

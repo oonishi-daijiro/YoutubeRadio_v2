@@ -1,6 +1,6 @@
 
 import { resolve } from "path";
-import { Playlist } from "../../lib/config/main";
+import { Playlist, YoutubePlaylist } from "../../lib/config/main";
 import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist/preload";
 
 
@@ -20,6 +20,15 @@ window.addEventListener('load', async () => {
 })
 
 const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
+
+
+const buttonCloseWindow = document.createElement('i')
+buttonCloseWindow.id = 'button-close-window'
+buttonCloseWindow.className = 'fa-solid fa-xmark'
+buttonCloseWindow.addEventListener('click', () => {
+  window.YoutubeRadio.close()
+})
+playlistDisplayWrapper.appendChild(buttonCloseWindow)
 
 class ButtonCreatePlaylist {
   constructor() {
@@ -66,6 +75,7 @@ class PlaylistDisplay {
       window.YoutubeRadio.loadPlaylist(playlist.name)
       window.YoutubeRadio.close()
     })
+
 
     display.appendChild(thumbnail)
     display.appendChild(playlistTitleDisplay)
@@ -141,7 +151,8 @@ function createPlaylistInfoDisplay(playlist: Playlist) {
   buttonPlay.className = "fa-solid fa-play button-play navigator"
 
   buttonPlay.addEventListener('click', () => {
-
+    window.YoutubeRadio.loadPlaylist(playlist.name)
+    window.YoutubeRadio.close()
   })
 
   const buttonShuffle = document.createElement('i')
@@ -159,8 +170,7 @@ function createPlaylistInfoDisplay(playlist: Playlist) {
     window.YoutubeRadio.navigatePlaylist({
       name: playlist.name,
       index: getRandomInt(1, playlist.videoList.length),
-      shuffle: true,
-      delete: false
+      shuffle: true
     })
     window.YoutubeRadio.close()
   })
@@ -169,7 +179,8 @@ function createPlaylistInfoDisplay(playlist: Playlist) {
   buttonDelete.className = "fa-solid fa-trash button-remove navigator"
 
   buttonDelete.addEventListener('click', () => {
-
+    window.YoutubeRadio.deletePlaylist(playlist.name)
+    window.YoutubeRadio.close()
   })
 
   if (playlist.playlistID) {
@@ -225,8 +236,7 @@ function createVideoDisplay(playlist: Playlist): HTMLDivElement {
       window.YoutubeRadio.navigatePlaylist({
         name: playlist.name,
         index: index,
-        shuffle: false,
-        delete: false
+        shuffle: false
       })
       window.YoutubeRadio.close()
     })

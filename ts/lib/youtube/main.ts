@@ -77,6 +77,8 @@ export async function getAllVideoFromYoutubePlaylistID(id: string): Promise<Yout
     const response: string = await new Promise((resolve, reject) => {
       let data: string = ""
       https.get(url, res => {
+        console.log(res.headers.charset);
+
         res.on('data', chunk => {
           data += chunk
         })

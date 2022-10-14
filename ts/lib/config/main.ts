@@ -172,3 +172,17 @@ export function getVolume(): number {
 export function setVolume(volume: number) {
   configFile.set('volume', volume)
 }
+
+export function deletePlaylist(name: string) {
+  let index = -1
+  const playlists = getPlaylists()
+  playlists.forEach((playlist: Playlist, i: number) => {
+    if (playlist.name === name) {
+      index = i
+    }
+  })
+  if (index != -1) {
+    playlists.splice(index, 1)
+    configFile.set('playlists', playlists)
+  }
+}

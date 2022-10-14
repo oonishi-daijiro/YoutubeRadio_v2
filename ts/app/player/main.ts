@@ -312,4 +312,3 @@ minimize.addEventListener('click', () => {
   window.YoutubeRadio.minimize()
 }, false)
 
-console.log("sus");
