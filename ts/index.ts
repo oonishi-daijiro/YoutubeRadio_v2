@@ -74,9 +74,9 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2', 'My favorite music')
-  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST Undertale OST Undertale OST Undertale OST')
-  hoge('https://www.youtube.com/playlist?list=PLyyBMVVhBOc3VkRqPKdqx1eL4F2ymapDM', 'Splatune')
+  // hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2', 'My favorite music')
+  // hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST Undertale OST Undertale OST Undertale OST')
+  // hoge('https://www.youtube.com/playlist?list=PLyyBMVVhBOc3VkRqPKdqx1eL4F2ymapDM', 'Hoge')
 
 }) // end of app on ready
 
@@ -85,6 +85,11 @@ async function hoge(url: string, name: string) {
     name: name,
     ID: youtube.getPlaylistID(url)
   })
+
+  // const ytrPl = await config.createPlaylist({
+  //   name: 'name',
+  //   videoList: pl.videoList
+  // })
   config.setPlaylist(pl)
 }
 

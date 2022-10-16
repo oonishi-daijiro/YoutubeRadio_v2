@@ -76,10 +76,13 @@ export async function getAllVideoFromYoutubePlaylistID(id: string): Promise<Yout
     const url = 'https://www.googleapis.com/youtube/v3/playlistItems?' + stringify(query)
     const response: string = await new Promise((resolve, reject) => {
       let data: string = ""
+
       https.get(url, res => {
-        console.log(res.headers.charset);
+        // console.log(res.headers);
 
         res.on('data', chunk => {
+          console.log(chunk[chunk.length - 1]);
+
           data += chunk
         })
         res.on('end', () => {
