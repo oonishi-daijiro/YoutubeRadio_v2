@@ -18,36 +18,31 @@ window.addEventListener('load', async () => {
   new ButtonCreatePlaylist()
 })
 
-class TabSwitcher {
-  constructor(doms: HTMLElement[]) {
-    this.doms = doms
-  }
-  switchToRight() {
-    if (this.currentIndex === this.doms.length - 1) {
-      return
-    }
-    this.doms[this.currentIndex].classList.add('fade-out-to-left')
 
-    this.currentIndex += 1
 
+const animationNames = [
+  'fade-out-to-right',
+  'fade-out-to-left',
+  'fade-in-from-left',
+  'fade-in-from-right'
+]
+
+async function animate(dom:HTMLElement,animationName:string):Promise<void> {
+  animationNames.forEach(e => {
+    dom.classList.remove(e)
+  })
+  dom.classList.add(animationName)
+  return new Promise((resolve, reject) => {
+
+    dom.addEventListener('animationend', AnimationEndCallback)
+
+    function AnimationEndCallback(): void {
+      dom.removeEventListener('animationend',AnimationEndCallback)
+      resolve()
   }
-  switchToLeft() {
-    if (this.currentIndex === 0) {
-      return
-    }
-    this.currentIndex -= 1
-  }
-  private static waitAnimateEnd(animationDom: HTMLElement): Promise<void> {
-    function emitter(resolove: (PromiseLike<void> | void)=>void): void {
-      resolove()
-    }
-    return new Promise((resolove, reject) => {
-      animationDom.addEventListener('animationend')
-    })
-  }
-  private currentIndex: number = 0
-  private doms: HTMLElement[]
+  })
 }
+
 
 const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
@@ -86,8 +81,9 @@ class PlaylistDisplay {
     playlistTitleDisplay.className = 'playlist-title-display'
 
     playlistTitleDisplay.addEventListener('click', async () => {
-      // new PlaylistDetailDisplay(playlist)
-      // PlaylistDetailDisplay.activate()
+      animate(playlistDisplayWrapper,'fade-out-to-left')
+      new PlaylistDetailDisplay(playlist)
+      animate(playlistDetailDisplayWrapper,'fade-in-from-right')
     })
 
     const playButton = document.createElement('i')
@@ -122,8 +118,11 @@ class PlaylistDetailDisplay {
     buttonBack.id = 'button-back-to-playlist-display'
 
     buttonBack.addEventListener('click', async () => {
-      // await PlaylistDisplay.activate()
-      // playlistDetailDisplayWrapper.innerHTML = ''
+      await Promise.all([
+        animate(playlistDetailDisplayWrapper, 'fade-out-to-right'),
+        animate(playlistDisplayWrapper,'fade-in-from-left')
+      ])
+      playlistDetailDisplayWrapper.removeChild(detailDisplay)
     })
 
     detailDisplay.appendChild(buttonBack)
@@ -195,9 +194,11 @@ class PlaylistDetailDisplay {
     const buttonEdit = document.createElement('i')
     buttonEdit.className = 'fa-solid fa-pencil button-edit'
     buttonEdit.addEventListener('click', async () => {
-      // new PlaylistEditor(playlist)
-      // await PlaylistEditor.activate()
-      // playlistDetailDisplayWrapper.innerHTML = ''
+      new PlaylistEditor(playlist)
+      await Promise.all([
+        animate(playlistDetailDisplayWrapper, 'fade-out-to-left'),
+        animate(playlistEditorWrapper,'fade-in-from-right')
+      ])
     })
 
     const playlistNavigator = document.createElement('div')
@@ -325,8 +326,12 @@ class PlaylistEditor {
     buttonBack.className = 'fa-solid fa-arrow-left'
     buttonBack.id = 'button-back-to-playlist-detail'
 
-    buttonBack.addEventListener('click', () => {
-      // PlaylistDetailDisplay.activate()
+    buttonBack.addEventListener('click', async() => {
+      await Promise.all([
+        animate(playlistEditorWrapper, 'fade-out-to-right'),
+        animate(playlistDetailDisplayWrapper,'fade-in-from-left')
+      ])
+      playlistEditorWrapper.removeChild(playlistEditor)
     })
 
     playlistEditor.appendChild(buttonBack)

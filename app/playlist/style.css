@@ -462,6 +462,13 @@ span {
   width: 100px;
 }
 
+#playlist-editor-wrapper{
+    position: absolute;
+    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 #button-back-to-playlist-detail {}
 
 
