@@ -16,6 +16,7 @@ window.addEventListener('load', async () => {
     new PlaylistDisplay(pl)
   })
   new ButtonCreatePlaylist()
+  window.YoutubeRadio.emitWindowGetReady()
 })
 
 
@@ -168,19 +169,14 @@ class PlaylistDetailDisplay {
     const buttonShuffle = document.createElement('i')
     buttonShuffle.className = "fa-solid fa-shuffle button-shuffle navigator"
 
-    buttonShuffle.addEventListener('click', () => {
-      function getRandomInt(min: number, max: number): number {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
-      }
+    if (!playlist.isShuffle) {
+      buttonShuffle.style.color='#A6A6A6'
+    }
 
-      window.YoutubeRadio.navigatePlaylist({
-        name: playlist.name,
-        index: getRandomInt(1, playlist.videoList.length),
-        shuffle: true
-      })
-      window.YoutubeRadio.close()
+    buttonShuffle.addEventListener('click', async() => {
+      playlist.isShuffle = !playlist.isShuffle
+      buttonShuffle.style.color=playlist.isShuffle?'#353535':'#A6A6A6'
+      await window.YoutubeRadio.setPlaylist(playlist)
     })
 
     const buttonDelete = document.createElement('i')
@@ -257,8 +253,7 @@ class PlaylistDetailDisplay {
       buttonPlayVideo.addEventListener('click', () => {
         window.YoutubeRadio.navigatePlaylist({
           name: playlist.name,
-          index: index,
-          shuffle: false
+          index: index
         })
         window.YoutubeRadio.close()
       })

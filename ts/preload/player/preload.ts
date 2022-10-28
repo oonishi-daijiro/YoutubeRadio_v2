@@ -21,7 +21,7 @@ export default interface YoutubeRadioPreload {
   test(): void
   saveVolume(volume: number): Promise<void>
   getVolume(): Promise<number>
-  emitAllRendered(): void
+  emitWindowGetReady(): void
   onReqNavigation(callback: (playlistNavigation: playlistNavigation) => void): void
 }
 
@@ -29,10 +29,7 @@ export default interface YoutubeRadioPreload {
 
 const api: YoutubeRadioPreload = {
   getPlaylists: async (): Promise<Playlist[]> => {
-    const playlists: Playlist[] = await ipcRenderer.invoke('get-playlists')
-    console.log(playlists);
-
-    return playlists
+    return ipcRenderer.invoke('get-playlists')
   },
   minimize() {
     ipcRenderer.invoke('minimize-player')
@@ -91,8 +88,8 @@ const api: YoutubeRadioPreload = {
   getVolume(): Promise<number> {
     return ipcRenderer.invoke('get-volume')
   },
-  emitAllRendered() {
-    ipcRenderer.invoke('ready-to-show')
+  emitWindowGetReady() {
+    ipcRenderer.invoke('ready-to-show-player')
   },
   onReqNavigation(callback) {
     ipcRenderer.on('navigate-playlist', (_, navigation: playlistNavigation) => {

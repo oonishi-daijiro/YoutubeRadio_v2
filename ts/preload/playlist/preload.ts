@@ -5,17 +5,17 @@ import * as config from "../../lib/config/main";
 export interface playlistNavigation {
   name: string
   index?: number
-  shuffle?: boolean
-
 }
 
 export interface YoutubeRadioPreload {
+  emitWindowGetReady():void
   getPlaylists(): Promise<config.Playlist[]>
   close(): void
-  loadPlaylist(index: string): void
+  loadPlaylist(name: string): void
   openEditPlaylist(playlistName: string): void
   navigatePlaylist(index: playlistNavigation): void
   deletePlaylist(name: string): void
+  setPlaylist(playlist:config.Playlist):Promise<void>
 }
 
 const api: YoutubeRadioPreload = {
@@ -36,6 +36,14 @@ const api: YoutubeRadioPreload = {
   },
   deletePlaylist(name: string) {
     ipcRenderer.invoke('delete-playlist', name)
+  },
+  emitWindowGetReady(): void{
+    ipcRenderer.invoke('ready-to-show-playlist-window')
+  },
+  setPlaylist(playlist: config.Playlist): Promise<void>{
+    console.log(playlist);
+    
+    return ipcRenderer.invoke('set-playlist',playlist)
   }
 
 }

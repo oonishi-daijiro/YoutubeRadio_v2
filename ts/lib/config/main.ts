@@ -15,6 +15,7 @@ export interface youtubeVideoInfo {
 }
 export interface playlistInfo {
   name: string
+  isShuffle: boolean
   videoList?: YoutubeVideo[]
   ID?: string
   thumbnail?: string
@@ -36,6 +37,7 @@ export class YoutubeVideo {
 export interface Playlist {
   name: string
   videoList: YoutubeVideo[]
+  isShuffle:boolean
   upDateVideoList(videoList: YoutubeVideo[]): Promise<void>
   playlistID?: string
   thumbnail?: string
@@ -46,10 +48,12 @@ export class YoutubePlaylist implements Playlist {
   videoList: YoutubeVideo[] = []
   playlistID: string
   thumbnail: string
+  isShuffle=false
   constructor(playlistInfo: playlistInfo) {
     this.playlistID = playlistInfo.ID ? playlistInfo.ID : ""
     this.name = playlistInfo.name ? playlistInfo.name : ""
     this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
+    this.isShuffle=playlistInfo.isShuffle
   }
   async upDateVideoList(videoList: YoutubeVideo[]): Promise<void> {
     this.videoList = await createVideoListFromDiff(this.videoList, videoList)
@@ -60,10 +64,12 @@ export class YoutubeRadioPlaylist implements Playlist {
   name: string
   videoList: YoutubeVideo[]
   thumbnail: string
+  isShuffle=false
   constructor(playlistInfo: playlistInfo) {
     this.videoList = playlistInfo.videoList ? playlistInfo.videoList : defaultPlaylist.videoList
     this.name = playlistInfo.name ? playlistInfo.name : ""
     this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
+    this.isShuffle=playlistInfo.isShuffle
   }
   async upDateVideoList(videoList: YoutubeVideo[]): Promise<void> {
     this.videoList = await createVideoListFromDiff(this.videoList, videoList)
@@ -99,7 +105,13 @@ export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], 
 }
 
 const defaultVideo = new YoutubeVideo()
-const defaultPlaylist: Playlist = new YoutubeRadioPlaylist({ name: "", videoList: [defaultVideo], thumbnail: "" })
+const defaultPlaylist: Playlist = new YoutubeRadioPlaylist(
+  {
+    name: "",
+    videoList: [defaultVideo],
+    thumbnail: "",
+    isShuffle:false
+  })
 const defaultPlaylists: Playlist[] = []
 
 export async function createPlaylist(info: playlistInfo): Promise<Playlist> {
@@ -121,14 +133,16 @@ export function getPlaylists(): Playlist[] {
     if (e.playlistID) {
       const pl = new YoutubePlaylist({
         name: e.name,
-        ID: e.playlistID
+        ID: e.playlistID,
+        isShuffle:e.isShuffle
       })
       pl.videoList = e.videoList
       return pl
     } else {
       return new YoutubeRadioPlaylist({
         name: e.name,
-        videoList: e.videoList
+        videoList: e.videoList,
+        isShuffle:e.isShuffle
       })
     }
   })

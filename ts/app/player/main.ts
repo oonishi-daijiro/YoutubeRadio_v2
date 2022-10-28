@@ -27,7 +27,7 @@ declare global {
 
 window.addEventListener('load', () => {
   stopServer()
-  window.YoutubeRadio.emitAllRendered()
+  window.YoutubeRadio.emitWindowGetReady()
 })
 
 function stopServer(): void {
@@ -68,9 +68,7 @@ window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation) => {
   const playlist = (await getPlaylists()).find(e => {
     return e.name === navigation.name
   })
-  await loadPlaylist(playlist)
-  player.playVideoAt(navigation.index)
-  player.setShuffle(navigation.shuffle)
+  await loadPlaylist(playlist,navigation.index)
 })
 
 window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
@@ -89,9 +87,7 @@ interface loadPlaylistParm {
   suggestedQuality?: string
 }
 
-async function loadPlaylist(appliedPlaylist: Playlist) {
-  console.log(appliedPlaylist);
-
+async function loadPlaylist(appliedPlaylist: Playlist,index:number=0) {
   if (!appliedPlaylist || !appliedPlaylist.name) {
     return
   }
@@ -124,6 +120,9 @@ async function loadPlaylist(appliedPlaylist: Playlist) {
       startSeconds: 0
     })
   }
+  player.setShuffle(false)
+  player.playVideoAt(index)
+  player.setShuffle(appliedPlaylist.isShuffle)
   player.setLoop(true)
 }
 
