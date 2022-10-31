@@ -74,24 +74,22 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2', 'My favorite music')
-  hoge('https://www.youtube.com/playlist?list=PLD9LTsJMicOnzkZP4ffL1dxjhMsGq8CXY', 'Undertale OST Undertale OST Undertale OST Undertale OST')
-  hoge('https://www.youtube.com/playlist?list=PLyyBMVVhBOc3VkRqPKdqx1eL4F2ymapDM', 'Hoge')
-
+  hoge("https://www.youtube.com/watch?v=GJI4Gv7NbmE&list=PLq0bL2COTPDf9LCZg7S7zG9ZRe02YHrMz", "ずっと真夜中でいいのに。")
 }) // end of app on ready
 
 async function hoge(url: string, name: string) {
   const pl = await config.createPlaylist({
     name: name,
     ID: youtube.getPlaylistID(url),
-    isShuffle:false
+    isShuffle: false
   })
 
-  // const ytrPl = await config.createPlaylist({
-  //   name: 'name',
-  //   videoList: pl.videoList
-  // })
-  config.setPlaylist(pl)
+  const ytrPl = await config.createPlaylist({
+    name: name,
+    videoList: pl.videoList,
+    isShuffle: false
+  })
+  config.setPlaylist(ytrPl)
 }
 
 ipcMain.handle('create-youtube-video', (_, info: config.youtubeVideoInfo) => {
@@ -123,7 +121,7 @@ ipcMain.handle('player-start-playing', () => {
 ipcMain.handle('set-playlist', async (_, newPlaylist: config.Playlist) => {
   const currentPlaylist = config.getPlaylist(newPlaylist.name)
   await currentPlaylist.upDateVideoList(newPlaylist.videoList)
-  currentPlaylist.isShuffle=newPlaylist.isShuffle
+  currentPlaylist.isShuffle = newPlaylist.isShuffle
   config.setPlaylist(currentPlaylist)
 })
 
@@ -141,13 +139,13 @@ ipcMain.on('open-playlist-window', () => {
     {
       frame: false,
       width: 520,
-      height: 320,
+      height: 350,
       fullscreenable: false,
       maximizable: false,
       resizable: false,
       useContentSize: true,
       modal: true,
-      show:false,
+      show: false,
       parent: mainWindow,
       webPreferences: {
         contextIsolation: true,

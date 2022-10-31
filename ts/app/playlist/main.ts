@@ -19,16 +19,21 @@ window.addEventListener('load', async () => {
   window.YoutubeRadio.emitWindowGetReady()
 })
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min);
+}
 
+async function animate(dom: HTMLElement, animationName: string): Promise<void> {
 
-const animationNames = [
-  'fade-out-to-right',
-  'fade-out-to-left',
-  'fade-in-from-left',
-  'fade-in-from-right'
-]
+  const animationNames = [
+    'fade-out-to-right',
+    'fade-out-to-left',
+    'fade-in-from-left',
+    'fade-in-from-right'
+  ]
 
-async function animate(dom:HTMLElement,animationName:string):Promise<void> {
   animationNames.forEach(e => {
     dom.classList.remove(e)
   })
@@ -38,9 +43,9 @@ async function animate(dom:HTMLElement,animationName:string):Promise<void> {
     dom.addEventListener('animationend', AnimationEndCallback)
 
     function AnimationEndCallback(): void {
-      dom.removeEventListener('animationend',AnimationEndCallback)
+      dom.removeEventListener('animationend', AnimationEndCallback)
       resolve()
-  }
+    }
   })
 }
 
@@ -82,16 +87,20 @@ class PlaylistDisplay {
     playlistTitleDisplay.className = 'playlist-title-display'
 
     playlistTitleDisplay.addEventListener('click', async () => {
-      animate(playlistDisplayWrapper,'fade-out-to-left')
+      animate(playlistDisplayWrapper, 'fade-out-to-left')
       new PlaylistDetailDisplay(playlist)
-      animate(playlistDetailDisplayWrapper,'fade-in-from-right')
+      animate(playlistDetailDisplayWrapper, 'fade-in-from-right')
     })
 
     const playButton = document.createElement('i')
     playButton.className = 'fas fa-play play-button'
 
     playButton.addEventListener('click', () => {
-      window.YoutubeRadio.loadPlaylist(playlist.name)
+      window.YoutubeRadio.navigatePlaylist({
+        name: playlist.name,
+        index: 0,
+        shuffle: playlist.isShuffle
+      })
       window.YoutubeRadio.close()
     })
 
@@ -121,7 +130,7 @@ class PlaylistDetailDisplay {
     buttonBack.addEventListener('click', async () => {
       await Promise.all([
         animate(playlistDetailDisplayWrapper, 'fade-out-to-right'),
-        animate(playlistDisplayWrapper,'fade-in-from-left')
+        animate(playlistDisplayWrapper, 'fade-in-from-left')
       ])
       playlistDetailDisplayWrapper.removeChild(detailDisplay)
     })
@@ -162,7 +171,11 @@ class PlaylistDetailDisplay {
     buttonPlay.className = "fa-solid fa-play button-play navigator"
 
     buttonPlay.addEventListener('click', () => {
-      window.YoutubeRadio.loadPlaylist(playlist.name)
+      window.YoutubeRadio.navigatePlaylist({
+        name: playlist.name,
+        shuffle: playlist.isShuffle,
+        index: playlist.isShuffle ? getRandomInt(0, playlist.videoList.length) : 0
+      })
       window.YoutubeRadio.close()
     })
 
@@ -170,12 +183,12 @@ class PlaylistDetailDisplay {
     buttonShuffle.className = "fa-solid fa-shuffle button-shuffle navigator"
 
     if (!playlist.isShuffle) {
-      buttonShuffle.style.color='#A6A6A6'
+      buttonShuffle.style.color = '#A6A6A6'
     }
 
-    buttonShuffle.addEventListener('click', async() => {
+    buttonShuffle.addEventListener('click', async () => {
       playlist.isShuffle = !playlist.isShuffle
-      buttonShuffle.style.color=playlist.isShuffle?'#353535':'#A6A6A6'
+      buttonShuffle.style.color = playlist.isShuffle ? '#353535' : '#A6A6A6'
       await window.YoutubeRadio.setPlaylist(playlist)
     })
 
@@ -193,7 +206,7 @@ class PlaylistDetailDisplay {
       new PlaylistEditor(playlist)
       await Promise.all([
         animate(playlistDetailDisplayWrapper, 'fade-out-to-left'),
-        animate(playlistEditorWrapper,'fade-in-from-right')
+        animate(playlistEditorWrapper, 'fade-in-from-right')
       ])
     })
 
@@ -232,7 +245,6 @@ class PlaylistDetailDisplay {
     playlist.videoList.forEach((e, index: number) => {
       const id = e.id
       const title = e.title
-      const isYoutubePlaylist = playlist.playlistID as unknown as boolean
 
       const videoDisplay = document.createElement('div')
       const videoUrlDisplay = document.createElement('input')
@@ -253,40 +265,17 @@ class PlaylistDetailDisplay {
       buttonPlayVideo.addEventListener('click', () => {
         window.YoutubeRadio.navigatePlaylist({
           name: playlist.name,
-          index: index
+          index: index,
+          shuffle: playlist.isShuffle
         })
         window.YoutubeRadio.close()
       })
       videoTitleDisplay.value = htmlspecialchars(title)
 
-      if (!isYoutubePlaylist) {
-
-        videoTitleDisplay.addEventListener('focus', event => {
-          event.stopPropagation()
-          videoTitleDisplay.style.display = 'none'
-          videoUrlDisplay.style.display = 'flex'
-          videoUrlDisplay.focus()
-        })
-
-        videoUrlDisplay.addEventListener('focusout', event => {
-          event.stopPropagation()
-          videoUrlDisplay.style.display = 'none'
-          videoTitleDisplay.style.display = 'flex'
-        })
-
-        const buttonRemove = document.createElement('i')
-        buttonRemove.className = 'fas fa-times button-remove-video'
-        buttonRemove.addEventListener('click', () => {
-          videoDisplay.remove()
-        })
-        videoDisplay.appendChild(buttonRemove)
-      } else {
-        const iconMusic = document.createElement('i')
-        iconMusic.className = 'fa-solid fa-music icon-music'
-        videoDisplay.appendChild(iconMusic)
-        videoTitleDisplay.style.pointerEvents = 'none'
-      }
-
+      const iconMusic = document.createElement('i')
+      iconMusic.className = 'fa-solid fa-music icon-music'
+      videoDisplay.appendChild(iconMusic)
+      videoTitleDisplay.style.pointerEvents = 'none'
 
       videoDisplay.appendChild(videoUrlDisplay)
       videoDisplay.appendChild(videoTitleDisplay)
@@ -312,25 +301,123 @@ class PlaylistEditor {
     thumbnail.src = thumbnailURL
     thumbnail.className = 'thumbnail-playlist-editor'
 
+    const playlistNameEditorWrapper = document.createElement('div')
+    playlistNameEditorWrapper.id = 'palylist-name-editor-wrapper'
     const playlistNameEditor = document.createElement('input')
+
+    playlistNameEditor.spellcheck = false
     playlistNameEditor.type = 'text'
     playlistNameEditor.id = 'playlist-name-editor'
     playlistNameEditor.value = playlist.name
+    playlistNameEditorWrapper.appendChild(playlistNameEditor)
+
+    playlistNameEditorWrapper.addEventListener('click', event => {
+      console.log("sus");
+      //playlistNameEditor.value.length, playlistNameEditor.value.length
+      playlistNameEditor.focus()
+    })
+
+    const videoContentDisplay = document.createElement('div')
+    videoContentDisplay.id = 'editor-video-content-display'
+
+
+    if (playlist.playlistID) {
+      const playlistURLDisplay = document.createElement('input')
+      playlistURLDisplay.type = 'text'
+      playlistURLDisplay.value = `www.youtube.com/playlist?list=${playlist.playlistID}`
+
+      videoContentDisplay.appendChild(playlistURLDisplay)
+    } else {
+      playlist.videoList.forEach(e => {
+
+        const videoDisplay = document.createElement('div')
+        videoDisplay.className = 'editor-video-display'
+
+        const buttonRemoveVideo = document.createElement('i')
+        buttonRemoveVideo.className = 'fas fa-times button-remove-video'
+
+        buttonRemoveVideo.addEventListener('click', () => {
+          videoDisplay.remove()
+        })
+
+        const videoTitleDisplay = document.createElement('input')
+        videoTitleDisplay.type = 'text'
+        videoTitleDisplay.className = 'charter-display'
+        videoTitleDisplay.value = htmlspecialchars(e.title)
+
+        const videoUrlDisplay = document.createElement('input')
+        videoUrlDisplay.className = 'charter-display'
+        videoUrlDisplay.type = 'text'
+        videoUrlDisplay.value = `www.youtube.com/watch?v=${htmlspecialchars(e.id)}`
+        videoUrlDisplay.style.display = 'none'
+
+        videoTitleDisplay.addEventListener('focus', () => {
+          event.stopPropagation()
+          videoTitleDisplay.style.display = 'none'
+          videoUrlDisplay.style.display = 'flex'
+          videoUrlDisplay.focus()
+        })
+
+        videoUrlDisplay.addEventListener('focusout', () => {
+          event.stopPropagation()
+          videoUrlDisplay.style.display = 'none'
+          videoTitleDisplay.style.display = 'flex'
+        })
+        videoDisplay.appendChild(buttonRemoveVideo)
+        videoDisplay.appendChild(videoTitleDisplay)
+        videoDisplay.appendChild(videoUrlDisplay)
+
+        videoContentDisplay.appendChild(videoDisplay)
+      })
+
+      const buttonAddVideo = document.createElement('i')
+      buttonAddVideo.id = 'button-add-video'
+      buttonAddVideo.className = 'fas fa-plus-circle'
+
+      buttonAddVideo.addEventListener('click', () => {
+        const videoDisplay = document.createElement('div')
+
+        const buttonRemoveVideo = document.createElement('i')
+        buttonRemoveVideo.className = 'fas fa-times button-remove-video'
+
+        buttonRemoveVideo.addEventListener('click', () => {
+          videoDisplay.remove()
+        })
+        videoDisplay.appendChild(buttonRemoveVideo)
+
+        videoDisplay.className = 'editor-video-display'
+
+        const videoUrlDisplay = document.createElement('input')
+        videoUrlDisplay.className = 'charter-display'
+        videoUrlDisplay.type = 'text'
+
+        videoUrlDisplay.placeholder = 'Youtube URL'
+        videoDisplay.appendChild(videoUrlDisplay)
+        videoUrlDisplay.focus()
+        buttonAddVideo.before(videoDisplay)
+        console.log(videoDisplay.offsetTop);
+        videoContentDisplay.scrollTo(0, videoDisplay.offsetTop)
+      })
+
+      videoContentDisplay.appendChild(buttonAddVideo)
+    }
 
     const buttonBack = document.createElement('i')
     buttonBack.className = 'fa-solid fa-arrow-left'
     buttonBack.id = 'button-back-to-playlist-detail'
 
-    buttonBack.addEventListener('click', async() => {
+    buttonBack.addEventListener('click', async () => {
       await Promise.all([
         animate(playlistEditorWrapper, 'fade-out-to-right'),
-        animate(playlistDetailDisplayWrapper,'fade-in-from-left')
+        animate(playlistDetailDisplayWrapper, 'fade-in-from-left')
       ])
       playlistEditorWrapper.removeChild(playlistEditor)
     })
 
     playlistEditor.appendChild(buttonBack)
     playlistEditor.appendChild(thumbnail)
+    playlistEditor.appendChild(playlistNameEditorWrapper)
+    playlistEditor.appendChild(videoContentDisplay)
     playlistEditorWrapper.appendChild(playlistEditor)
   }
 }

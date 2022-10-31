@@ -65,10 +65,24 @@ async function getPlaylists(): Promise<Playlist[]> {
 }
 
 window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation) => {
+
   const playlist = (await getPlaylists()).find(e => {
     return e.name === navigation.name
   })
-  await loadPlaylist(playlist,navigation.index)
+
+  if (playlist.playlistID) {
+    await loadPlaylist(playlist)
+    player.setShuffle(false)
+    if (navigation.index >= 0) {
+      player.playVideoAt(navigation.index)
+    }
+    player.setShuffle(playlist.isShuffle)
+  } else {
+    await loadPlaylist(playlist, navigation.index)
+    player.setShuffle(playlist.isShuffle)
+  }
+
+
 })
 
 window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
@@ -87,11 +101,14 @@ interface loadPlaylistParm {
   suggestedQuality?: string
 }
 
-async function loadPlaylist(appliedPlaylist: Playlist,index:number=0) {
+async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
+
   if (!appliedPlaylist || !appliedPlaylist.name) {
     return
   }
+
   player.stopVideo()
+  console.log(appliedPlaylist.playlistID);
 
   if (appliedPlaylist.playlistID) {
     player.loadPlaylist({
@@ -101,11 +118,13 @@ async function loadPlaylist(appliedPlaylist: Playlist,index:number=0) {
       startSeconds: 0
     })
     await window.YoutubeRadio.onPlayerStartPlaying()
-    await Promise.all(player.getPlaylist().map(async (e, index: number) => {
-      appliedPlaylist.videoList[index] = await window.YoutubeRadio.createYoutubeVideo({
-        id: e
+    await Promise.all(player.getPlaylist().map(
+      async (e, index: number) => {
+        appliedPlaylist.videoList[index] = await window.YoutubeRadio.createYoutubeVideo({
+          id: e
+        })
       })
-    }))
+    )
     window.YoutubeRadio.setPlaylist(appliedPlaylist)
   } else {
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videoList) {
@@ -115,14 +134,12 @@ async function loadPlaylist(appliedPlaylist: Playlist,index:number=0) {
       return e.id
     })
     player.loadPlaylist({
+      listType: "playlist",
       playlist: idList,
-      index: 0,
+      index: index,
       startSeconds: 0
     })
   }
-  player.setShuffle(false)
-  player.playVideoAt(index)
-  player.setShuffle(appliedPlaylist.isShuffle)
   player.setLoop(true)
 }
 
@@ -298,8 +315,6 @@ Array.from(bars).forEach((e) => {
 const closeButton = document.getElementById('close_button')
 
 closeButton.addEventListener('click', async () => {
-  console.log(player.getVolume());
-
   await window.YoutubeRadio.saveVolume(player.getVolume())
   window.YoutubeRadio.close()
 }, false)
