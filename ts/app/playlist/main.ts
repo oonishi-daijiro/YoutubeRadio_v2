@@ -1,5 +1,5 @@
 
-import { Playlist } from "../../lib/config/main";
+import { Playlist, YoutubeVideo, youtubeVideoInfo } from "../../lib/config/main";
 import { YoutubeRadioPreload } from "../../preload/playlist/preload";
 
 
@@ -31,7 +31,8 @@ async function animate(dom: HTMLElement, animationName: string): Promise<void> {
     'fade-out-to-right',
     'fade-out-to-left',
     'fade-in-from-left',
-    'fade-in-from-right'
+    'fade-in-from-right',
+    'fade-away'
   ]
 
   animationNames.forEach(e => {
@@ -312,8 +313,6 @@ class PlaylistEditor {
     playlistNameEditorWrapper.appendChild(playlistNameEditor)
 
     playlistNameEditorWrapper.addEventListener('click', event => {
-      console.log("sus");
-      //playlistNameEditor.value.length, playlistNameEditor.value.length
       playlistNameEditor.focus()
     })
 
@@ -328,7 +327,7 @@ class PlaylistEditor {
 
       videoContentDisplay.appendChild(playlistURLDisplay)
     } else {
-      playlist.videoList.forEach(e => {
+      playlist.videoList.forEach((e: YoutubeVideo, index: number) => {
 
         const videoDisplay = document.createElement('div')
         videoDisplay.className = 'editor-video-display'
@@ -336,8 +335,10 @@ class PlaylistEditor {
         const buttonRemoveVideo = document.createElement('i')
         buttonRemoveVideo.className = 'fas fa-times button-remove-video'
 
-        buttonRemoveVideo.addEventListener('click', () => {
+        buttonRemoveVideo.addEventListener('click', async () => {
+          await animate(videoDisplay, 'fade-away')
           videoDisplay.remove()
+          playlist.videoList.splice(index, 1)
         })
 
         const videoTitleDisplay = document.createElement('input')
@@ -370,6 +371,7 @@ class PlaylistEditor {
         videoContentDisplay.appendChild(videoDisplay)
       })
 
+
       const buttonAddVideo = document.createElement('i')
       buttonAddVideo.id = 'button-add-video'
       buttonAddVideo.className = 'fas fa-plus-circle'
@@ -380,8 +382,10 @@ class PlaylistEditor {
         const buttonRemoveVideo = document.createElement('i')
         buttonRemoveVideo.className = 'fas fa-times button-remove-video'
 
-        buttonRemoveVideo.addEventListener('click', () => {
+        buttonRemoveVideo.addEventListener('click', async () => {
+          await animate(videoDisplay, 'fade-away')
           videoDisplay.remove()
+
         })
         videoDisplay.appendChild(buttonRemoveVideo)
 
@@ -395,8 +399,9 @@ class PlaylistEditor {
         videoDisplay.appendChild(videoUrlDisplay)
         videoUrlDisplay.focus()
         buttonAddVideo.before(videoDisplay)
-        console.log(videoDisplay.offsetTop);
         videoContentDisplay.scrollTo(0, videoDisplay.offsetTop)
+
+
       })
 
       videoContentDisplay.appendChild(buttonAddVideo)

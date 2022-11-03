@@ -184,6 +184,10 @@ span {
   animation: fade-out-to-right 0.7s ease forwards;
 }
 
+.fade-away {
+  animation: fade-away 0.3s ease forwards;
+}
+
 @keyframes fade-in-from-right {
   0% {
     transform: translateX(150%);
@@ -232,9 +236,15 @@ span {
   }
 }
 
-@keyframes remove-video-url {
-  0%{
-    
+@keyframes fade-away {
+  0% {
+    height: 10vh;
+    opacity: 1;
+  }
+
+  100% {
+    height: 0vh;
+    opacity: 0;
   }
 }
 
@@ -474,7 +484,7 @@ span {
   height: 120px;
   object-fit: cover;
   clip-path: circle(44px at center);
-  margin-top: 14px;
+  margin-top: 6px;
   -webkit-app-region: drag;
 }
 
@@ -528,11 +538,9 @@ img {
   flex-wrap: nowrap;
 }
 
-.editor-video-title-display {}
-
-.editor-video-title-display {}
 
 #editor-video-content-display {
+  height: 100vh;
   width: 90%;
   overflow: scroll;
   display: flex;
@@ -544,6 +552,7 @@ img {
 }
 
 .editor-video-display {
+  opacity: 1;
   width: 80%;
   display: flex;
   background: #FFFFFFFF;
@@ -554,6 +563,7 @@ img {
   align-items: center;
   justify-content: center;
   align-content: flex-start;
+  will-change: height;
 }
 
 .editor-charter-display {
@@ -568,8 +578,10 @@ img {
 #palylist-name-editor-wrapper {
   display: flex;
   width: 85%;
-  height: inherit;
+  height: 19vh;
   cursor: pointer;
+  align-content: center;
+  align-items: center;
 }
 
 #button-add-video {
@@ -578,4 +590,9 @@ img {
   font-size: 135%;
   position: absolute;
   bottom: 7px;
+  transition: all 300ms 0s ease;
+}
+
+#button-add-video:active {
+  transform: scale(1.8);
 }

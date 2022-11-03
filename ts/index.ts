@@ -74,7 +74,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge("https://www.youtube.com/watch?v=GJI4Gv7NbmE&list=PLq0bL2COTPDf9LCZg7S7zG9ZRe02YHrMz", "ずっと真夜中でいいのに。")
+  // hoge("https://www.youtube.com/watch?v=GJI4Gv7NbmE&list=PLq0bL2COTPDf9LCZg7S7zG9ZRe02YHrMz", "ずっと真夜中でいいのに。")
 }) // end of app on ready
 
 async function hoge(url: string, name: string) {
