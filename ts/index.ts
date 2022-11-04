@@ -175,3 +175,7 @@ ipcMain.handle('load-playlist', (_, name: string) => {
 ipcMain.handle('delete-playlist', (_, name: string) => {
   config.deletePlaylist(name)
 })
+
+ipcMain.handle('get-youtube-title', async(_, url: string) => {
+  return await youtube.getTitle(youtube.getID(url))
+})

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import * as config from "../../lib/config/main";
+import * as youtube from "../../lib/youtube/main";
 
 
 export interface playlistNavigation {
@@ -17,6 +18,7 @@ export interface YoutubeRadioPreload {
   navigatePlaylist(navigation: playlistNavigation): void
   deletePlaylist(name: string): void
   setPlaylist(playlist: config.Playlist): Promise<void>
+  getYoutubeTitle(url: string): Promise<string>
 }
 
 const api: YoutubeRadioPreload = {
@@ -45,6 +47,9 @@ const api: YoutubeRadioPreload = {
     console.log(playlist);
 
     return ipcRenderer.invoke('set-playlist', playlist)
+  },
+  getYoutubeTitle(url: string): Promise<string> {
+    return ipcRenderer.invoke('get-youtube-title', url)
   }
 
 }

@@ -341,32 +341,23 @@ class PlaylistEditor {
           playlist.videoList.splice(index, 1)
         })
 
-        const videoTitleDisplay = document.createElement('input')
-        videoTitleDisplay.type = 'text'
-        videoTitleDisplay.className = 'charter-display'
-        videoTitleDisplay.value = htmlspecialchars(e.title)
+        const displayTitleAndURL = new PlaylistEditor.DisplayURLAndTitle(e.id, e.title)
 
-        const videoUrlDisplay = document.createElement('input')
-        videoUrlDisplay.className = 'charter-display'
-        videoUrlDisplay.type = 'text'
-        videoUrlDisplay.value = `www.youtube.com/watch?v=${htmlspecialchars(e.id)}`
-        videoUrlDisplay.style.display = 'none'
-
-        videoTitleDisplay.addEventListener('focus', () => {
+        displayTitleAndURL.title.addEventListener('focus', (event) => {
           event.stopPropagation()
-          videoTitleDisplay.style.display = 'none'
-          videoUrlDisplay.style.display = 'flex'
-          videoUrlDisplay.focus()
+          displayTitleAndURL.title.style.display = 'none'
+          displayTitleAndURL.url.style.display = 'flex'
+          displayTitleAndURL.url.focus()
         })
 
-        videoUrlDisplay.addEventListener('focusout', () => {
+        displayTitleAndURL.url.addEventListener('focusout', async (event) => {
           event.stopPropagation()
-          videoUrlDisplay.style.display = 'none'
-          videoTitleDisplay.style.display = 'flex'
+          displayTitleAndURL.url.style.display = 'none'
+          displayTitleAndURL.title.style.display = 'flex'
         })
         videoDisplay.appendChild(buttonRemoveVideo)
-        videoDisplay.appendChild(videoTitleDisplay)
-        videoDisplay.appendChild(videoUrlDisplay)
+        videoDisplay.appendChild(displayTitleAndURL.title)
+        videoDisplay.appendChild(displayTitleAndURL.url)
 
         videoContentDisplay.appendChild(videoDisplay)
       })
@@ -391,18 +382,26 @@ class PlaylistEditor {
 
         videoDisplay.className = 'editor-video-display'
 
-        const videoUrlDisplay = document.createElement('input')
-        videoUrlDisplay.className = 'charter-display'
-        videoUrlDisplay.type = 'text'
-
-        videoUrlDisplay.placeholder = 'Youtube URL'
-        videoDisplay.appendChild(videoUrlDisplay)
-        videoUrlDisplay.focus()
+        const displayURLAndTitle = new PlaylistEditor.DisplayURLAndTitle("", "")
+        displayURLAndTitle.title.style.display = 'none'
+        displayURLAndTitle.url.style.display = 'flex'
+        displayURLAndTitle.url.placeholder = 'Youtube URL'
+        videoDisplay.appendChild(displayURLAndTitle.url)
+        videoDisplay.appendChild(displayURLAndTitle.title)
+        displayURLAndTitle.url.focus()
         buttonAddVideo.before(videoDisplay)
         videoContentDisplay.scrollTo(0, videoDisplay.offsetTop)
-
-
       })
+
+      /*
+
+      const videoDisplay=new VideoDisplay()
+      videoDisplay.url.addEventListernner('click',()=>{...})
+      videoDisplay.url.addEventListernner('click',()=>{...})
+
+
+
+      */
 
       videoContentDisplay.appendChild(buttonAddVideo)
     }
@@ -424,6 +423,49 @@ class PlaylistEditor {
     playlistEditor.appendChild(playlistNameEditorWrapper)
     playlistEditor.appendChild(videoContentDisplay)
     playlistEditorWrapper.appendChild(playlistEditor)
+  }
+  private static DisplayURLAndTitle = class {
+    constructor(id: string, title: string = "") {
+      const videoTitleDisplay = document.createElement('input')
+      videoTitleDisplay.type = 'text'
+      videoTitleDisplay.className = 'charter-display'
+      videoTitleDisplay.value = htmlspecialchars(title)
+
+      const videoUrlDisplay = document.createElement('input')
+      videoUrlDisplay.className = 'charter-display'
+      videoUrlDisplay.type = 'text'
+      videoUrlDisplay.value = id != "" ? `www.youtube.com/watch?v=${htmlspecialchars(id)}` : ""
+      videoUrlDisplay.style.display = 'none'
+
+      videoUrlDisplay.addEventListener('focusout', async () => {
+        if (videoTitleDisplay.value === "") {
+          console.log("sus");
+
+          const title = await window.YoutubeRadio.getYoutubeTitle(videoUrlDisplay.value)
+          videoTitleDisplay.value = title
+          videoTitleDisplay.style.display = 'flex'
+          videoUrlDisplay.style.display = 'none'
+
+          videoTitleDisplay.addEventListener('focus', () => {
+            event.stopPropagation()
+            videoTitleDisplay.style.display = 'none'
+            videoUrlDisplay.style.display = 'flex'
+            videoUrlDisplay.focus()
+          })
+
+          videoUrlDisplay.addEventListener('focusout', () => {
+            event.stopPropagation()
+            videoUrlDisplay.style.display = 'none'
+            videoTitleDisplay.style.display = 'flex'
+          })
+        }
+      })
+
+      this.title = videoTitleDisplay
+      this.url = videoUrlDisplay
+    }
+    url: HTMLInputElement
+    title: HTMLInputElement
   }
 }
 

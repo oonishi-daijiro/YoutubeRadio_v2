@@ -37,7 +37,7 @@ async function getHTMLtitle(url: string): Promise<string> {
 }
 
 export async function getTitle(ID: string = ""): Promise<string> {
-  if (ID === "") {
+  if (ID === "" || ID.length != 11) {
     return ""
   }
   return await getHTMLtitle(`https://www.youtube.com/watch?v=${ID}`)
