@@ -40,7 +40,13 @@ export async function getTitle(ID: string = ""): Promise<string> {
   if (ID === "" || ID.length != 11) {
     return ""
   }
-  return await getHTMLtitle(`https://www.youtube.com/watch?v=${ID}`)
+  try {
+    const title = await getHTMLtitle(`https://www.youtube.com/watch?v=${ID}`)
+    return title
+
+  } catch (err) {
+    return ""
+  }
 }
 
 export function getPlaylistID(url: string): string {

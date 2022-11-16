@@ -74,7 +74,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  // hoge("https://www.youtube.com/watch?v=GJI4Gv7NbmE&list=PLq0bL2COTPDf9LCZg7S7zG9ZRe02YHrMz", "ずっと真夜中でいいのに。")
+  hoge("https://www.youtube.com/watch?v=3V9952osjnc&list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2&index=5", "Favorite-1")
 }) // end of app on ready
 
 async function hoge(url: string, name: string) {
@@ -83,13 +83,15 @@ async function hoge(url: string, name: string) {
     ID: youtube.getPlaylistID(url),
     isShuffle: false
   })
+  console.log(pl);
 
-  const ytrPl = await config.createPlaylist({
-    name: name,
-    videoList: pl.videoList,
-    isShuffle: false
-  })
-  config.setPlaylist(ytrPl)
+
+  // const ytrPl = await config.createPlaylist({
+  //   name: name,
+  //   videoList: pl.videoList,
+  //   isShuffle: false
+  // })
+  config.setPlaylist(pl)
 }
 
 ipcMain.handle('create-youtube-video', (_, info: config.youtubeVideoInfo) => {
@@ -176,6 +178,6 @@ ipcMain.handle('delete-playlist', (_, name: string) => {
   config.deletePlaylist(name)
 })
 
-ipcMain.handle('get-youtube-title', async(_, url: string) => {
+ipcMain.handle('get-youtube-title', async (_, url: string) => {
   return await youtube.getTitle(youtube.getID(url))
 })

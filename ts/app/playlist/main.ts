@@ -25,6 +25,21 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
+function createChild<K extends keyof HTMLElementTagNameMap>(parentDom: HTMLElement, tagName: K): HTMLElement {
+  const child = document.createElement(tagName)
+  parentDom.appendChild(child)
+  return child
+}
+
+function htmlspecialchars(str: string) {
+  return (str + '').replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '\"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+
 async function animate(dom: HTMLElement, animationName: string): Promise<void> {
 
   const animationNames = [
@@ -51,7 +66,6 @@ async function animate(dom: HTMLElement, animationName: string): Promise<void> {
 }
 
 
-const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
 class ButtonCreatePlaylist {
   constructor() {
@@ -72,6 +86,7 @@ class ButtonCreatePlaylist {
     })
   }
 }
+const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
 class PlaylistDisplay {
   constructor(playlist: Playlist) {
@@ -104,7 +119,6 @@ class PlaylistDisplay {
       })
       window.YoutubeRadio.close()
     })
-
 
     display.appendChild(thumbnail)
     display.appendChild(playlistTitleDisplay)
@@ -160,6 +174,7 @@ class PlaylistDetailDisplay {
     playlistDisplayWrapper.addEventListener('animationend', () => {
       (thumbnail.style as ext4webkit).appRegion = 'drag'
     })
+
     const playlistNameDisplayWrapper = document.createElement('div')
     const playlistNameDisplay = document.createElement('div')
     playlistNameDisplay.textContent = playlist.name
@@ -288,8 +303,6 @@ class PlaylistDetailDisplay {
   }
 }
 
-
-
 const playlistEditorWrapper = document.getElementById('playlist-editor-wrapper')
 
 class PlaylistEditor {
@@ -393,16 +406,6 @@ class PlaylistEditor {
         videoContentDisplay.scrollTo(0, videoDisplay.offsetTop)
       })
 
-      /*
-
-      const videoDisplay=new VideoDisplay()
-      videoDisplay.url.addEventListernner('click',()=>{...})
-      videoDisplay.url.addEventListernner('click',()=>{...})
-
-
-
-      */
-
       videoContentDisplay.appendChild(buttonAddVideo)
     }
 
@@ -436,28 +439,30 @@ class PlaylistEditor {
       videoUrlDisplay.type = 'text'
       videoUrlDisplay.value = id != "" ? `www.youtube.com/watch?v=${htmlspecialchars(id)}` : ""
       videoUrlDisplay.style.display = 'none'
+      videoUrlDisplay.readOnly = title == "" ? false : true
 
       videoUrlDisplay.addEventListener('focusout', async () => {
         if (videoTitleDisplay.value === "") {
-          console.log("sus");
-
           const title = await window.YoutubeRadio.getYoutubeTitle(videoUrlDisplay.value)
-          videoTitleDisplay.value = title
-          videoTitleDisplay.style.display = 'flex'
-          videoUrlDisplay.style.display = 'none'
-
-          videoTitleDisplay.addEventListener('focus', () => {
-            event.stopPropagation()
-            videoTitleDisplay.style.display = 'none'
-            videoUrlDisplay.style.display = 'flex'
-            videoUrlDisplay.focus()
-          })
-
-          videoUrlDisplay.addEventListener('focusout', () => {
-            event.stopPropagation()
-            videoUrlDisplay.style.display = 'none'
+          videoUrlDisplay.readOnly = title == "" ? false : true
+          if (title !== "") {
+            videoTitleDisplay.value = title
             videoTitleDisplay.style.display = 'flex'
-          })
+            videoUrlDisplay.style.display = 'none'
+
+            videoTitleDisplay.addEventListener('focus', () => {
+              event.stopPropagation()
+              videoTitleDisplay.style.display = 'none'
+              videoUrlDisplay.style.display = 'flex'
+              videoUrlDisplay.focus()
+            })
+
+            videoUrlDisplay.addEventListener('focusout', () => {
+              event.stopPropagation()
+              videoUrlDisplay.style.display = 'none'
+              videoTitleDisplay.style.display = 'flex'
+            })
+          }
         }
       })
 
@@ -467,12 +472,4 @@ class PlaylistEditor {
     url: HTMLInputElement
     title: HTMLInputElement
   }
-}
-
-function htmlspecialchars(str: string) {
-  return (str + '').replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '\"')
-    .replace(/&#39;/g, '\'')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
 }
