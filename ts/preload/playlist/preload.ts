@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import * as config from "../../lib/config/main";
+import { parse } from "url";
 import * as youtube from "../../lib/youtube/main";
 
 
@@ -19,6 +20,9 @@ export interface YoutubeRadioPreload {
   deletePlaylist(name: string): void
   setPlaylist(playlist: config.Playlist): Promise<void>
   getYoutubeTitle(url: string): Promise<string>
+  openExternal(url: string): void
+  savePlaylist(playlist: config.Playlist): Promise<void>
+  getPlaylistIDFromURL(youtubeURL: string): string
 }
 
 const api: YoutubeRadioPreload = {
@@ -50,7 +54,16 @@ const api: YoutubeRadioPreload = {
   },
   getYoutubeTitle(url: string): Promise<string> {
     return ipcRenderer.invoke('get-youtube-title', url)
-  }
+  },
+  openExternal(url: string): void {
+    ipcRenderer.invoke('open-external', url)
+  },
+  savePlaylist(playlist: config.Playlist): Promise<void> {
+    return ipcRenderer.invoke('save-playlist', playlist)
+  },
+  getPlaylistIDFromURL(youtubeURL: string): string {
+    return parse(youtubeURL, true).query.list as string
+  },
 
 }
 contextBridge.exposeInMainWorld('YoutubeRadio', api)

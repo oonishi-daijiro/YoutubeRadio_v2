@@ -237,7 +237,10 @@ class PlaylistDetailDisplay {
       const youtubePlaylistURLDisplay = document.createElement('div')
       youtubePlaylistURLDisplay.spellcheck = false
       youtubePlaylistURLDisplay.className = 'yt-playlist-url-display'
-      youtubePlaylistURLDisplay.textContent = `www.youtube.com/playlist?list=${playlist.playlistID}`
+      youtubePlaylistURLDisplay.textContent = `youtube.com/playlist?list=${playlist.playlistID}`
+      youtubePlaylistURLDisplay.addEventListener('click', () => {
+        window.YoutubeRadio.openExternal(`https://youtube.com/playlist?list=${playlist.playlistID}`)
+      })
       playlistNavigator.appendChild(youtubePlaylistURLDisplay)
     }
 
@@ -332,11 +335,20 @@ class PlaylistEditor {
     const videoContentDisplay = document.createElement('div')
     videoContentDisplay.id = 'editor-video-content-display'
 
+    const buttonSavePlaylist = document.createElement('i')
+    buttonSavePlaylist.id = 'button-save-playlist'
+    buttonSavePlaylist.className = 'fa-solid fa-floppy-disk'
 
     if (playlist.playlistID) {
       const playlistURLDisplay = document.createElement('input')
       playlistURLDisplay.type = 'text'
       playlistURLDisplay.value = `www.youtube.com/playlist?list=${playlist.playlistID}`
+
+      buttonSavePlaylist.addEventListener('click', () => {
+        playlist.name = playlistNameEditor.value
+        playlist.playlistID = window.YoutubeRadio.getPlaylistIDFromURL(playlistURLDisplay.value)
+        PlaylistEditor.
+      })
 
       videoContentDisplay.appendChild(playlistURLDisplay)
     } else {
@@ -425,6 +437,7 @@ class PlaylistEditor {
     playlistEditor.appendChild(thumbnail)
     playlistEditor.appendChild(playlistNameEditorWrapper)
     playlistEditor.appendChild(videoContentDisplay)
+    playlistEditor.appendChild(buttonSavePlaylist)
     playlistEditorWrapper.appendChild(playlistEditor)
   }
   private static DisplayURLAndTitle = class {
@@ -444,20 +457,20 @@ class PlaylistEditor {
       videoUrlDisplay.addEventListener('focusout', async () => {
         if (videoTitleDisplay.value === "") {
           const title = await window.YoutubeRadio.getYoutubeTitle(videoUrlDisplay.value)
-          videoUrlDisplay.readOnly = title == "" ? false : true
+          videoUrlDisplay.readOnly = title === "" ? false : true
           if (title !== "") {
             videoTitleDisplay.value = title
             videoTitleDisplay.style.display = 'flex'
             videoUrlDisplay.style.display = 'none'
 
-            videoTitleDisplay.addEventListener('focus', () => {
+            videoTitleDisplay.addEventListener('focus', event => {
               event.stopPropagation()
               videoTitleDisplay.style.display = 'none'
               videoUrlDisplay.style.display = 'flex'
               videoUrlDisplay.focus()
             })
 
-            videoUrlDisplay.addEventListener('focusout', () => {
+            videoUrlDisplay.addEventListener('focusout', event => {
               event.stopPropagation()
               videoUrlDisplay.style.display = 'none'
               videoTitleDisplay.style.display = 'flex'
@@ -468,6 +481,9 @@ class PlaylistEditor {
 
       this.title = videoTitleDisplay
       this.url = videoUrlDisplay
+    }
+    private static SavePlaylist(playlist: Playlist) {
+
     }
     url: HTMLInputElement
     title: HTMLInputElement

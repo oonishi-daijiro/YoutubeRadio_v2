@@ -1,4 +1,4 @@
-import { ipcMain, app, BrowserWindow, safeStorage } from 'electron';
+import { ipcMain, app, BrowserWindow, safeStorage, shell } from 'electron';
 import { launchServer } from "./lib/server/main";
 import * as config from "./lib/config/main";
 import {
@@ -6,6 +6,7 @@ import {
 } from "./lib/thumbnailToolbar/main";
 import { playlistNavigation } from './preload/playlist/preload';
 import * as youtube from "./lib/youtube/main";
+import * as url from "url";
 
 
 
@@ -74,7 +75,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge("https://www.youtube.com/watch?v=3V9952osjnc&list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2&index=5", "Favorite-1")
+  hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOlfRa7ePti9HhLRrMDjQ4L0", "YTRPL-Vocaloid")
 }) // end of app on ready
 
 async function hoge(url: string, name: string) {
@@ -83,15 +84,13 @@ async function hoge(url: string, name: string) {
     ID: youtube.getPlaylistID(url),
     isShuffle: false
   })
-  console.log(pl);
 
-
-  // const ytrPl = await config.createPlaylist({
-  //   name: name,
-  //   videoList: pl.videoList,
-  //   isShuffle: false
-  // })
-  config.setPlaylist(pl)
+  const ytrPl = await config.createPlaylist({
+    name: name,
+    videoList: pl.videoList,
+    isShuffle: false
+  })
+  config.setPlaylist(ytrPl)
 }
 
 ipcMain.handle('create-youtube-video', (_, info: config.youtubeVideoInfo) => {
@@ -180,4 +179,11 @@ ipcMain.handle('delete-playlist', (_, name: string) => {
 
 ipcMain.handle('get-youtube-title', async (_, url: string) => {
   return await youtube.getTitle(youtube.getID(url))
+})
+
+ipcMain.handle('open-external', (_, youtubeUrl: string) => {
+  const parsedUrl = url.parse(youtubeUrl)
+  if (parsedUrl.host === 'youtube.com' && parsedUrl.protocol === 'https:') {
+    shell.openExternal(youtubeUrl)
+  }
 })

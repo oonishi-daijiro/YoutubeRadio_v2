@@ -391,7 +391,7 @@ span {
   overflow-x: scroll;
   max-width: 46vw;
   font-family: "Noto Sans JP", sans-serif;
-  cursor: default;
+  cursor: pointer;
 }
 
 #button-close-window {
@@ -595,4 +595,13 @@ img {
 
 #button-add-video:active {
   transform: scale(1.8);
+}
+
+#button-save-playlist{
+    cursor: pointer;
+    color: #353535;
+    position: absolute;
+    top: 7px;
+    right: 13px;
+    font-size: 110%;
 }
