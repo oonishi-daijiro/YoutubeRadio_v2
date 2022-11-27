@@ -10,7 +10,7 @@ let player; //youtube iframe api instance will be here;
 
 async function onYouTubeIframeAPIReady() {
   const playlists = getPlaylists()
-  const ids = playlists[0].videoList.map(e => {
+  const ids = playlists[0].videos.map(e => {
     return e.id;
   });
   console.log(ids);

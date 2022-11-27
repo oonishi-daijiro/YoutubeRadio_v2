@@ -94,7 +94,7 @@ class PlaylistDisplay {
     display.className = 'playlist-display'
     const thumbnail = new Image()
 
-    const thumbnailURL = `https://img.youtube.com/vi/${playlist.videoList[0].id}/sddefault.jpg`
+    const thumbnailURL = `https://img.youtube.com/vi/${playlist.videos[0].id}/sddefault.jpg`
     thumbnail.src = thumbnailURL
     thumbnail.className = "thumbnail"
 
@@ -163,7 +163,7 @@ class PlaylistDetailDisplay {
     playlistInfoDisplay.id = "playlist-info-display"
 
     const thumbnail = document.createElement('img')
-    thumbnail.src = `https://img.youtube.com/vi/${playlist.videoList[0].id}/sddefault.jpg`
+    thumbnail.src = `https://img.youtube.com/vi/${playlist.videos[0].id}/sddefault.jpg`
     thumbnail.className = 'playlist-thumbnail'
 
     interface ext4webkit extends CSSStyleDeclaration {
@@ -190,7 +190,7 @@ class PlaylistDetailDisplay {
       window.YoutubeRadio.navigatePlaylist({
         name: playlist.name,
         shuffle: playlist.isShuffle,
-        index: playlist.isShuffle ? getRandomInt(0, playlist.videoList.length) : 0
+        index: playlist.isShuffle ? getRandomInt(0, playlist.videos.length) : 0
       })
       window.YoutubeRadio.close()
     })
@@ -205,7 +205,7 @@ class PlaylistDetailDisplay {
     buttonShuffle.addEventListener('click', async () => {
       playlist.isShuffle = !playlist.isShuffle
       buttonShuffle.style.color = playlist.isShuffle ? '#353535' : '#A6A6A6'
-      await window.YoutubeRadio.setPlaylist(playlist)
+      await window.YoutubeRadio.editPlaylist(playlist.name, playlist)
     })
 
     const buttonDelete = document.createElement('i')
@@ -261,7 +261,7 @@ class PlaylistDetailDisplay {
     const videoListDisplay = document.createElement('div')
     videoListDisplay.className = 'videolist-display'
 
-    playlist.videoList.forEach((e, index: number) => {
+    playlist.videos.forEach((e, index: number) => {
       const id = e.id
       const title = e.title
 
@@ -314,7 +314,7 @@ class PlaylistEditor {
     playlistEditor.id = 'playlist-editor'
 
     const thumbnail = new Image()
-    const thumbnailURL = `https://img.youtube.com/vi/${playlist.videoList[0].id}/sddefault.jpg`
+    const thumbnailURL = `https://img.youtube.com/vi/${playlist.videos[0].id}/sddefault.jpg`
     thumbnail.src = thumbnailURL
     thumbnail.className = 'thumbnail-playlist-editor'
 
@@ -344,15 +344,21 @@ class PlaylistEditor {
       playlistURLDisplay.type = 'text'
       playlistURLDisplay.value = `www.youtube.com/playlist?list=${playlist.playlistID}`
 
-      buttonSavePlaylist.addEventListener('click', () => {
+      buttonSavePlaylist.addEventListener('click', async () => {
+        const currentPlaylistName = playlist.name
         playlist.name = playlistNameEditor.value
         playlist.playlistID = window.YoutubeRadio.getPlaylistIDFromURL(playlistURLDisplay.value)
-        PlaylistEditor.
+        await window.YoutubeRadio.editPlaylist(currentPlaylistName, playlist)
+        console.log(currentPlaylistName);
+        console.log(playlist.name);
+
+        await window.YoutubeRadio.loadPlaylist(playlist.name)
+        // window.YoutubeRadio.close()
       })
 
       videoContentDisplay.appendChild(playlistURLDisplay)
     } else {
-      playlist.videoList.forEach((e: YoutubeVideo, index: number) => {
+      playlist.videos.forEach((e: YoutubeVideo, index: number) => {
 
         const videoDisplay = document.createElement('div')
         videoDisplay.className = 'editor-video-display'
@@ -363,7 +369,7 @@ class PlaylistEditor {
         buttonRemoveVideo.addEventListener('click', async () => {
           await animate(videoDisplay, 'fade-away')
           videoDisplay.remove()
-          playlist.videoList.splice(index, 1)
+          playlist.videos.splice(index, 1)
         })
 
         const displayTitleAndURL = new PlaylistEditor.DisplayURLAndTitle(e.id, e.title)

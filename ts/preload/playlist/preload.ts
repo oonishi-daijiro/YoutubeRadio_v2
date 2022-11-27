@@ -18,10 +18,9 @@ export interface YoutubeRadioPreload {
   openEditPlaylist(playlistName: string): void
   navigatePlaylist(navigation: playlistNavigation): void
   deletePlaylist(name: string): void
-  setPlaylist(playlist: config.Playlist): Promise<void>
   getYoutubeTitle(url: string): Promise<string>
   openExternal(url: string): void
-  savePlaylist(playlist: config.Playlist): Promise<void>
+  editPlaylist(playlsitName: string, playlist: config.Playlist): Promise<void>
   getPlaylistIDFromURL(youtubeURL: string): string
 }
 
@@ -47,19 +46,14 @@ const api: YoutubeRadioPreload = {
   emitWindowGetReady(): void {
     ipcRenderer.invoke('ready-to-show-playlist-window')
   },
-  setPlaylist(playlist: config.Playlist): Promise<void> {
-    console.log(playlist);
-
-    return ipcRenderer.invoke('set-playlist', playlist)
+  editPlaylist(playlsitName: string, playlist: config.Playlist): Promise<void> {
+    return ipcRenderer.invoke('edit-playlist', playlsitName, playlist)
   },
   getYoutubeTitle(url: string): Promise<string> {
     return ipcRenderer.invoke('get-youtube-title', url)
   },
   openExternal(url: string): void {
     ipcRenderer.invoke('open-external', url)
-  },
-  savePlaylist(playlist: config.Playlist): Promise<void> {
-    return ipcRenderer.invoke('save-playlist', playlist)
   },
   getPlaylistIDFromURL(youtubeURL: string): string {
     return parse(youtubeURL, true).query.list as string

@@ -108,7 +108,6 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
   }
 
   player.stopVideo()
-  console.log(appliedPlaylist.playlistID);
 
   if (appliedPlaylist.playlistID) {
     player.loadPlaylist({
@@ -120,17 +119,17 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
     await window.YoutubeRadio.onPlayerStartPlaying()
     await Promise.all(player.getPlaylist().map(
       async (e, index: number) => {
-        appliedPlaylist.videoList[index] = await window.YoutubeRadio.createYoutubeVideo({
+        appliedPlaylist.videos[index] = await window.YoutubeRadio.createYoutubeVideo({
           id: e
         })
       })
     )
-    window.YoutubeRadio.setPlaylist(appliedPlaylist)
+    window.YoutubeRadio.updatePlaylist(appliedPlaylist.name, appliedPlaylist)
   } else {
-    if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videoList) {
+    if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videos) {
       return
     }
-    const idList: string[] = appliedPlaylist.videoList.map(e => {
+    const idList: string[] = appliedPlaylist.videos.map(e => {
       return e.id
     })
     player.loadPlaylist({

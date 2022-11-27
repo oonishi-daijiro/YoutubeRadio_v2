@@ -13,6 +13,7 @@ export interface youtubeVideoInfo {
   id: string
   title?: string | undefined
 }
+
 export interface playlistInfo {
   name: string
   isShuffle: boolean
@@ -36,16 +37,15 @@ export class YoutubeVideo {
 
 export interface Playlist {
   name: string
-  videoList: YoutubeVideo[]
+  videos: YoutubeVideo[]
   isShuffle: boolean
-  upDateVideoList(videoList: YoutubeVideo[]): Promise<void>
   playlistID?: string
   thumbnail?: string
 }
 
 export class YoutubePlaylist implements Playlist {
   name: string = ""
-  videoList: YoutubeVideo[] = []
+  videos: YoutubeVideo[] = []
   playlistID: string
   thumbnail: string
   isShuffle = false
@@ -55,24 +55,18 @@ export class YoutubePlaylist implements Playlist {
     this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
     this.isShuffle = playlistInfo.isShuffle
   }
-  async upDateVideoList(videoList: YoutubeVideo[]): Promise<void> {
-    this.videoList = await createVideoListFromDiff(this.videoList, videoList)
-  }
 }
 
 export class YoutubeRadioPlaylist implements Playlist {
   name: string
-  videoList: YoutubeVideo[]
+  videos: YoutubeVideo[]
   thumbnail: string
   isShuffle = false
   constructor(playlistInfo: playlistInfo) {
-    this.videoList = playlistInfo.videoList ? playlistInfo.videoList : defaultPlaylist.videoList
+    this.videos = playlistInfo.videoList ? playlistInfo.videoList : defaultPlaylist.videos
     this.name = playlistInfo.name ? playlistInfo.name : ""
     this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
     this.isShuffle = playlistInfo.isShuffle
-  }
-  async upDateVideoList(videoList: YoutubeVideo[]): Promise<void> {
-    this.videoList = await createVideoListFromDiff(this.videoList, videoList)
   }
 }
 
@@ -117,12 +111,12 @@ const defaultPlaylists: Playlist[] = []
 export async function createPlaylist(info: playlistInfo): Promise<Playlist> {
   if (info.ID) {
     const playlist = new YoutubePlaylist(info)
-    playlist.videoList = await youtube.getAllVideoFromYoutubePlaylistID(playlist.playlistID)
+    playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(playlist.playlistID)
     return playlist
   } else {
     const currentPlaylist = getPlaylist(info.name)
     const playlist = new YoutubeRadioPlaylist(info)
-    playlist.videoList = await createVideoListFromDiff(currentPlaylist.videoList, playlist.videoList)
+    playlist.videos = await createVideoListFromDiff(currentPlaylist.videos, playlist.videos)
     return playlist
   }
 }
@@ -136,12 +130,12 @@ export function getPlaylists(): Playlist[] {
         ID: e.playlistID,
         isShuffle: e.isShuffle
       })
-      pl.videoList = e.videoList
+      pl.videos = e.videos
       return pl
     } else {
       return new YoutubeRadioPlaylist({
         name: e.name,
-        videoList: e.videoList,
+        videoList: e.videos,
         isShuffle: e.isShuffle
       })
     }
@@ -161,7 +155,7 @@ export function getPlaylist(playlistName: string) {
 
 
 export async function setPlaylist(playlist: Playlist = defaultPlaylist) {
-  if (!playlist.name.length || !playlist.videoList.length) {
+  if (!playlist.name.length || !playlist.videos.length) {
     return
   }
   const playlists = getPlaylists()
@@ -176,6 +170,10 @@ export async function setPlaylist(playlist: Playlist = defaultPlaylist) {
     playlists.push(playlist)
   }
   configFile.set('playlists', playlists)
+}
+
+export function isAlreadyExistPlaylist(name: string): boolean {
+  return getPlaylists().map(e => e.name).includes(name)
 }
 
 export function getVolume(): number {
@@ -199,4 +197,18 @@ export function deletePlaylist(name: string) {
     playlists.splice(index, 1)
     configFile.set('playlists', playlists)
   }
+}
+
+export function editPlaylist(playlistName: string, newPlaylist: Playlist) {
+  const playlists = getPlaylists()
+  if (isAlreadyExistPlaylist(playlistName)) {
+    playlists.forEach((playlist, index) => {
+      if (playlist.name === playlistName) {
+        console.log("sus");
+        
+        playlists[index] = newPlaylist
+      }
+    })
+  }
+  configFile.set('playlists', playlists)
 }

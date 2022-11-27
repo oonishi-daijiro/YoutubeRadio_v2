@@ -14,7 +14,6 @@ export default interface YoutubeRadioPreload {
   openSelectPlaylistWindow(): void
   onReqPreviousVideo(callback: () => void): void
   onLoadPlaylist(callback: (...args) => void): void
-  setPlaylist(playlist: Playlist): void
   createYoutubeVideo(info: config.youtubeVideoInfo): Promise<config.YoutubeVideo>
   emitPlayerStartPlaying(): void
   onPlayerStartPlaying(): Promise<any>
@@ -23,6 +22,7 @@ export default interface YoutubeRadioPreload {
   getVolume(): Promise<number>
   emitWindowGetReady(): void
   onReqNavigation(callback: (playlistNavigation: playlistNavigation) => void): void
+  updatePlaylist(playlistName: string, playlist: Playlist)
 }
 
 
@@ -63,8 +63,8 @@ const api: YoutubeRadioPreload = {
       callback(arg)
     })
   },
-  setPlaylist(playlist: Playlist) {
-    ipcRenderer.invoke('set-playlist', playlist)
+  updatePlaylist(playlistName: string, playlist: Playlist) {
+    ipcRenderer.invoke('update-playlist', playlist)
   },
   async createYoutubeVideo(info): Promise<config.YoutubeVideo> {
     return ipcRenderer.invoke('create-youtube-video', info)

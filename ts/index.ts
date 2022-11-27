@@ -75,19 +75,25 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOlfRa7ePti9HhLRrMDjQ4L0", "YTRPL-Vocaloid")
+  hoge("https://www.youtube.com/watch?v=jfvB3DPJ4FU&list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2&index=53", "Favorite-1", true)
 }) // end of app on ready
 
-async function hoge(url: string, name: string) {
+async function hoge(url: string, name: string, op: boolean) {
+
   const pl = await config.createPlaylist({
     name: name,
     ID: youtube.getPlaylistID(url),
     isShuffle: false
   })
 
+  if (op) {
+    config.setPlaylist(pl)
+    return
+  }
+
   const ytrPl = await config.createPlaylist({
     name: name,
-    videoList: pl.videoList,
+    videoList: pl.videos,
     isShuffle: false
   })
   config.setPlaylist(ytrPl)
@@ -119,9 +125,17 @@ ipcMain.handle('player-start-playing', () => {
   mainWindow.webContents.send('player-start-playing')
 })
 
+ipcMain.handle('update-playlist', async (_, newPlaylist: config.Playlist) => {
+  const currentPlaylist = config.getPlaylist(newPlaylist.name)
+  const newVideos = await config.createVideoListFromDiff(currentPlaylist.videos, newPlaylist.videos)
+  currentPlaylist.isShuffle = newPlaylist.isShuffle
+  currentPlaylist.videos = newVideos
+  config.setPlaylist(currentPlaylist)
+})
+
+
 ipcMain.handle('set-playlist', async (_, newPlaylist: config.Playlist) => {
   const currentPlaylist = config.getPlaylist(newPlaylist.name)
-  await currentPlaylist.upDateVideoList(newPlaylist.videoList)
   currentPlaylist.isShuffle = newPlaylist.isShuffle
   config.setPlaylist(currentPlaylist)
 })
@@ -186,4 +200,8 @@ ipcMain.handle('open-external', (_, youtubeUrl: string) => {
   if (parsedUrl.host === 'youtube.com' && parsedUrl.protocol === 'https:') {
     shell.openExternal(youtubeUrl)
   }
+})
+
+ipcMain.handle('edit-playlist', (_, playlistName: string, newPlaylist: config.Playlist) => {
+  config.editPlaylist(playlistName, newPlaylist)
 })
