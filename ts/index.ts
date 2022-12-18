@@ -75,7 +75,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge("https://www.youtube.com/watch?v=jfvB3DPJ4FU&list=PLD9LTsJMicOm57VcwHvUcgs3galm9Tht2&index=53", "Favorite-1", true)
+  // hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOnsNh4BglyGww1tE5icaKmZ", "Yunomix", true)
 }) // end of app on ready
 
 async function hoge(url: string, name: string, op: boolean) {
@@ -123,14 +123,6 @@ ipcMain.handle('minimize-player', () => {
 
 ipcMain.handle('player-start-playing', () => {
   mainWindow.webContents.send('player-start-playing')
-})
-
-ipcMain.handle('update-playlist', async (_, newPlaylist: config.Playlist) => {
-  const currentPlaylist = config.getPlaylist(newPlaylist.name)
-  const newVideos = await config.createVideoListFromDiff(currentPlaylist.videos, newPlaylist.videos)
-  currentPlaylist.isShuffle = newPlaylist.isShuffle
-  currentPlaylist.videos = newVideos
-  config.setPlaylist(currentPlaylist)
 })
 
 
@@ -203,5 +195,5 @@ ipcMain.handle('open-external', (_, youtubeUrl: string) => {
 })
 
 ipcMain.handle('edit-playlist', (_, playlistName: string, newPlaylist: config.Playlist) => {
-  config.editPlaylist(playlistName, newPlaylist)
+  return config.editPlaylist(playlistName, newPlaylist)
 })

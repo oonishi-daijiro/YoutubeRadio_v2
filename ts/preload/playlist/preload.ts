@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import * as config from "../../lib/config/main";
-import { parse } from "url";
+import { parse, Url } from "url";
 import * as youtube from "../../lib/youtube/main";
 
 
@@ -21,7 +21,7 @@ export interface YoutubeRadioPreload {
   getYoutubeTitle(url: string): Promise<string>
   openExternal(url: string): void
   editPlaylist(playlsitName: string, playlist: config.Playlist): Promise<void>
-  getPlaylistIDFromURL(youtubeURL: string): string
+  parse(urlString: string, parseQueryString: boolean, slashesDenoteHost?: boolean): Url
 }
 
 const api: YoutubeRadioPreload = {
@@ -55,8 +55,8 @@ const api: YoutubeRadioPreload = {
   openExternal(url: string): void {
     ipcRenderer.invoke('open-external', url)
   },
-  getPlaylistIDFromURL(youtubeURL: string): string {
-    return parse(youtubeURL, true).query.list as string
+  parse(urlString, parseQueryString, slashesDenoteHost?): Url {
+    return parse(urlString, parseQueryString, slashesDenoteHost)
   },
 
 }

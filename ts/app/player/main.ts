@@ -124,7 +124,7 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
         })
       })
     )
-    window.YoutubeRadio.updatePlaylist(appliedPlaylist.name, appliedPlaylist)
+    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist)
   } else {
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videos) {
       return

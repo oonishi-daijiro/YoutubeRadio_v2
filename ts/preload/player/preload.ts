@@ -22,7 +22,7 @@ export default interface YoutubeRadioPreload {
   getVolume(): Promise<number>
   emitWindowGetReady(): void
   onReqNavigation(callback: (playlistNavigation: playlistNavigation) => void): void
-  updatePlaylist(playlistName: string, playlist: Playlist)
+  editPlaylist(name: string, newPlaylist: config.Playlist): Promise<void>
 }
 
 
@@ -63,9 +63,6 @@ const api: YoutubeRadioPreload = {
       callback(arg)
     })
   },
-  updatePlaylist(playlistName: string, playlist: Playlist) {
-    ipcRenderer.invoke('update-playlist', playlist)
-  },
   async createYoutubeVideo(info): Promise<config.YoutubeVideo> {
     return ipcRenderer.invoke('create-youtube-video', info)
   },
@@ -96,6 +93,9 @@ const api: YoutubeRadioPreload = {
       callback(navigation)
     });
   },
+  editPlaylist(name: string, newPLaylist: config.Playlist): Promise<void> {
+    return ipcRenderer.invoke('edit-playlist', name, newPLaylist)
+  }
 }
 
 contextBridge.exposeInMainWorld("YoutubeRadio", api)

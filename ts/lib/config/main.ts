@@ -40,7 +40,6 @@ export interface Playlist {
   videos: YoutubeVideo[]
   isShuffle: boolean
   playlistID?: string
-  thumbnail?: string
 }
 
 export class YoutubePlaylist implements Playlist {
@@ -87,9 +86,13 @@ export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], 
       }
     } else if (diffOperation.removed) {
       diffOperation.value.forEach(() => {
+        console.log("remove");
+
         currentVideoList.splice(index, 1)
       })
     } else {
+      console.log("noop");
+
       diffOperation.value.forEach(() => {
         index++
       })
@@ -199,16 +202,22 @@ export function deletePlaylist(name: string) {
   }
 }
 
-export function editPlaylist(playlistName: string, newPlaylist: Playlist) {
+export async function editPlaylist(playlistName: string, newPlaylist: Playlist) {
   const playlists = getPlaylists()
-  if (isAlreadyExistPlaylist(playlistName)) {
-    playlists.forEach((playlist, index) => {
-      if (playlist.name === playlistName) {
-        console.log("sus");
-        
-        playlists[index] = newPlaylist
+  await Promise.all(playlists.map(async (playlist, index) => {
+    if (playlist.name === playlistName) {
+      playlist.name = newPlaylist.name
+      playlist.isShuffle = newPlaylist.isShuffle
+
+      if (playlist.playlistID && playlist.playlistID !== newPlaylist.playlistID) {
+        playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
+        playlist.playlistID = newPlaylist.playlistID
+      } else {
+        playlist.videos = await createVideoListFromDiff(playlist.videos, newPlaylist.videos)
       }
-    })
-  }
+
+      playlists[index] = playlist
+    }
+  }))
   configFile.set('playlists', playlists)
 }

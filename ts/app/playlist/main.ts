@@ -12,9 +12,7 @@ declare const window: preload
 
 window.addEventListener('load', async () => {
   const playlists = await window.YoutubeRadio.getPlaylists()
-  playlists.forEach((pl, index) => {
-    new PlaylistDisplay(pl)
-  })
+  new PlaylistDisplay(playlists)
   new ButtonCreatePlaylist()
   window.YoutubeRadio.emitWindowGetReady()
 })
@@ -31,6 +29,14 @@ function createChild<K extends keyof HTMLElementTagNameMap>(parentDom: HTMLEleme
   return child
 }
 
+function removeAllChildes(...doms: HTMLElement[]) {
+  doms.forEach(dom => {
+    while (dom.firstChild) {
+      dom.removeChild(dom.firstChild)
+    }
+  })
+}
+
 function htmlspecialchars(str: string) {
   return (str + '').replace(/&amp;/g, "&")
     .replace(/&quot;/g, '\"')
@@ -40,8 +46,15 @@ function htmlspecialchars(str: string) {
 }
 
 
-async function animate(dom: HTMLElement, animationName: string): Promise<void> {
+interface AnimationNames {
+  'fade-out-to-right',
+  'fade-out-to-left',
+  'fade-in-from-left',
+  'fade-in-from-right',
+  'fade-away'
+}
 
+function animate(dom: HTMLElement, animationName: keyof AnimationNames): Promise<void> {
   const animationNames = [
     'fade-out-to-right',
     'fade-out-to-left',
@@ -49,22 +62,57 @@ async function animate(dom: HTMLElement, animationName: string): Promise<void> {
     'fade-in-from-right',
     'fade-away'
   ]
-
-  animationNames.forEach(e => {
-    dom.classList.remove(e)
+  animationNames.forEach(name => {
+    dom.classList.remove(name)
   })
   dom.classList.add(animationName)
   return new Promise((resolve, reject) => {
 
-    dom.addEventListener('animationend', AnimationEndCallback)
+    dom.addEventListener('animationend', animationEndCallback)
 
-    function AnimationEndCallback(): void {
-      dom.removeEventListener('animationend', AnimationEndCallback)
+    function animationEndCallback(): void {
+      dom.removeEventListener('animationend', animationEndCallback)
       resolve()
     }
+
   })
 }
 
+function isValidYoutubePlaylistUrl(url: string): boolean {
+  const conditions: Array<boolean> = []
+  const p = window.YoutubeRadio.parse(url, true)
+  conditions.push(p.hostname === 'www.youtube.com')
+  if ((p.query as any).list === undefined) {
+    return false
+  }
+  conditions.push((p.query as any).list.length === 34)
+
+  return conditions.reduce((before, current) => before && current)
+}
+
+async function isValidPlaylistName(name: string, currentPlaylistName: string): Promise<boolean> {
+  const conditions: Array<boolean> = []
+  const currentPlaylists = await window.YoutubeRadio.getPlaylists()
+  conditions.push(name !== "")
+  conditions.push(name.length !== 0)
+  if (currentPlaylistName !== name) {
+    conditions.push(!currentPlaylists.map(e => e.name).includes(name))
+  }
+  return conditions.reduce((before, current) => before && current)
+}
+
+function isValidYoutubeURL(url: string): boolean {
+  const conditions: Array<boolean> = []
+  const pu = window.YoutubeRadio.parse(url, true)
+  conditions.push(pu.hostname === 'youtube.com')
+  if ((pu.query as any).v === undefined) {
+    return false
+  }
+  conditions.push((pu.query as any).v.length === 11)
+
+  return conditions.reduce((b, c) => b && c)
+
+}
 
 
 class ButtonCreatePlaylist {
@@ -89,43 +137,44 @@ class ButtonCreatePlaylist {
 const playlistDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
 class PlaylistDisplay {
-  constructor(playlist: Playlist) {
-    const display = document.createElement('div')
-    display.className = 'playlist-display'
-    const thumbnail = new Image()
+  constructor(playlists: Playlist[]) {
+    playlists.forEach(playlist => {
+      const display = document.createElement('div')
+      display.className = 'playlist-display'
+      const thumbnail = new Image()
 
-    const thumbnailURL = `https://img.youtube.com/vi/${playlist.videos[0].id}/sddefault.jpg`
-    thumbnail.src = thumbnailURL
-    thumbnail.className = "thumbnail"
+      const thumbnailURL = `https://img.youtube.com/vi/${playlist.videos[0].id}/sddefault.jpg`
+      thumbnail.src = thumbnailURL
+      thumbnail.className = "thumbnail"
 
-    const playlistTitleDisplay = document.createElement('div')
-    playlistTitleDisplay.textContent = playlist.name
-    playlistTitleDisplay.className = 'playlist-title-display'
+      const playlistTitleDisplay = document.createElement('div')
+      playlistTitleDisplay.textContent = playlist.name
+      playlistTitleDisplay.className = 'playlist-title-display'
 
-    playlistTitleDisplay.addEventListener('click', async () => {
-      animate(playlistDisplayWrapper, 'fade-out-to-left')
-      new PlaylistDetailDisplay(playlist)
-      animate(playlistDetailDisplayWrapper, 'fade-in-from-right')
-    })
-
-    const playButton = document.createElement('i')
-    playButton.className = 'fas fa-play play-button'
-
-    playButton.addEventListener('click', () => {
-      window.YoutubeRadio.navigatePlaylist({
-        name: playlist.name,
-        index: 0,
-        shuffle: playlist.isShuffle
+      playlistTitleDisplay.addEventListener('click', async () => {
+        animate(playlistDisplayWrapper, 'fade-out-to-left')
+        new PlaylistDetailDisplay(playlist)
+        animate(playlistDetailDisplayWrapper, 'fade-in-from-right')
       })
-      window.YoutubeRadio.close()
+
+      const playButton = document.createElement('i')
+      playButton.className = 'fas fa-play play-button'
+
+      playButton.addEventListener('click', () => {
+        window.YoutubeRadio.navigatePlaylist({
+          name: playlist.name,
+          index: 0,
+          shuffle: playlist.isShuffle
+        })
+        window.YoutubeRadio.close()
+      })
+
+      display.appendChild(thumbnail)
+      display.appendChild(playlistTitleDisplay)
+      display.appendChild(playButton)
+      playlistDisplayWrapper.appendChild(display)
     })
-
-    display.appendChild(thumbnail)
-    display.appendChild(playlistTitleDisplay)
-    display.appendChild(playButton)
-    playlistDisplayWrapper.appendChild(display)
   }
-
 }
 
 
@@ -326,34 +375,66 @@ class PlaylistEditor {
     playlistNameEditor.type = 'text'
     playlistNameEditor.id = 'playlist-name-editor'
     playlistNameEditor.value = playlist.name
+    playlistNameEditor.placeholder = 'Playlist Name'
     playlistNameEditorWrapper.appendChild(playlistNameEditor)
 
     playlistNameEditorWrapper.addEventListener('click', event => {
       playlistNameEditor.focus()
     })
 
+
+
     const videoContentDisplay = document.createElement('div')
     videoContentDisplay.id = 'editor-video-content-display'
+
 
     const buttonSavePlaylist = document.createElement('i')
     buttonSavePlaylist.id = 'button-save-playlist'
     buttonSavePlaylist.className = 'fa-solid fa-floppy-disk'
 
     if (playlist.playlistID) {
+
       const playlistURLDisplay = document.createElement('input')
+      playlistURLDisplay.placeholder = 'Playlist URL'
+
+      videoContentDisplay.addEventListener('click', () => {
+        playlistURLDisplay.select()
+      })
+
+      async function changeSaveButtonColorToValidOrNot() {
+        buttonSavePlaylist.style.color = (await isValidPlaylistName(playlistNameEditor.value, playlist.name)) && isValidYoutubePlaylistUrl(playlistURLDisplay.value) ? '#353535' : '#a7a7a7'
+      }
+
+      playlistURLDisplay.addEventListener('input', () => {
+        changeSaveButtonColorToValidOrNot()
+      })
+      playlistNameEditor.addEventListener('input', async () => {
+        changeSaveButtonColorToValidOrNot()
+      })
+
+      playlistURLDisplay.className = 'playlist-url-input'
       playlistURLDisplay.type = 'text'
-      playlistURLDisplay.value = `www.youtube.com/playlist?list=${playlist.playlistID}`
+      playlistURLDisplay.value = `https://www.youtube.com/playlist?list=${playlist.playlistID}`
 
       buttonSavePlaylist.addEventListener('click', async () => {
         const currentPlaylistName = playlist.name
         playlist.name = playlistNameEditor.value
-        playlist.playlistID = window.YoutubeRadio.getPlaylistIDFromURL(playlistURLDisplay.value)
-        await window.YoutubeRadio.editPlaylist(currentPlaylistName, playlist)
-        console.log(currentPlaylistName);
-        console.log(playlist.name);
+        playlist.playlistID = (window.YoutubeRadio.parse(playlistURLDisplay.value, true).query as any).list
 
-        await window.YoutubeRadio.loadPlaylist(playlist.name)
-        // window.YoutubeRadio.close()
+        if (isValidYoutubePlaylistUrl(playlistURLDisplay.value) && await isValidPlaylistName(playlist.name, currentPlaylistName)) {
+          await window.YoutubeRadio.editPlaylist(currentPlaylistName, playlist)
+        }
+
+        const playlists = await window.YoutubeRadio.getPlaylists()
+        removeAllChildes(playlistDisplayWrapper)
+        new PlaylistDisplay(playlists)
+        new ButtonCreatePlaylist()
+        await Promise.all([
+          animate(playlistEditorWrapper, 'fade-out-to-right'),
+          animate(playlistDisplayWrapper, 'fade-in-from-left')
+        ])
+        removeAllChildes(playlistDetailDisplayWrapper, playlistEditorWrapper)
+
       })
 
       videoContentDisplay.appendChild(playlistURLDisplay)
@@ -389,6 +470,18 @@ class PlaylistEditor {
         videoDisplay.appendChild(buttonRemoveVideo)
         videoDisplay.appendChild(displayTitleAndURL.title)
         videoDisplay.appendChild(displayTitleAndURL.url)
+
+        buttonSavePlaylist.addEventListener('click', async () => {
+          const playlists = await window.YoutubeRadio.getPlaylists()
+          removeAllChildes(playlistDisplayWrapper)
+          new PlaylistDisplay(playlists)
+          new ButtonCreatePlaylist()
+          await Promise.all([
+            animate(playlistEditorWrapper, 'fade-out-to-right'),
+            animate(playlistDisplayWrapper, 'fade-in-from-left')
+          ])
+          removeAllChildes(playlistDetailDisplayWrapper, playlistEditorWrapper)
+        })
 
         videoContentDisplay.appendChild(videoDisplay)
       })
@@ -456,7 +549,7 @@ class PlaylistEditor {
       const videoUrlDisplay = document.createElement('input')
       videoUrlDisplay.className = 'charter-display'
       videoUrlDisplay.type = 'text'
-      videoUrlDisplay.value = id != "" ? `www.youtube.com/watch?v=${htmlspecialchars(id)}` : ""
+      videoUrlDisplay.value = id != "" ? `www.youtube.com / watch ? v = ${htmlspecialchars(id)}` : ""
       videoUrlDisplay.style.display = 'none'
       videoUrlDisplay.readOnly = title == "" ? false : true
 
