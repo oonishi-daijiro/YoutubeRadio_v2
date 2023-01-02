@@ -4,7 +4,16 @@ import { getapikey } from "../youtube_api_key/main";
 import { ParsedUrlQueryInput, stringify } from "querystring";
 import { Playlist, YoutubeVideo } from "../config/main";
 
-async function getHTML(url: string): Promise<string> {
+interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
+  key: string
+  playlistId?: string
+  maxResults?: number
+  part?: string
+  pageToken?: string
+  id?: string
+}
+
+async function httpGet(url: string): Promise<string> {
   return await new Promise((resolve, reject) => {
     https.get(url, response => {
       let data = ''
@@ -28,12 +37,14 @@ export function getID(youtubeURL: string): string {
   return id as string
 }
 
-async function getHTMLtitle(url: string): Promise<string> {
-  const titleParser = new RegExp('(?<=<title.*>).*(?=</title>)')
-  const html = await getHTML(url)
-  const rawTitle = Array.from(titleParser.exec(html)[0])
-  const title = rawTitle.splice(0, rawTitle.length - 10).join('')
-  return title
+async function getYoutubeTitleFromDataAPI(ID: string): Promise<string> {
+  const query: YoutubeDataApiQuery = {
+    key: getapikey(),
+    part: "snippet",
+    id: ID
+  }
+  const response = await httpGet(`https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`)
+  return JSON.parse(response).items[0].snippet.title
 }
 
 export async function getTitle(ID: string = ""): Promise<string> {
@@ -41,7 +52,7 @@ export async function getTitle(ID: string = ""): Promise<string> {
     return ""
   }
   try {
-    const title = await getHTMLtitle(`https://www.youtube.com/watch?v=${ID}`)
+    const title = await getYoutubeTitleFromDataAPI(ID)
     return title
 
   } catch (err) {
@@ -59,13 +70,7 @@ export async function getAllVideoFromYoutubePlaylistID(id: string): Promise<Yout
   if (id.length !== 34) {
     return []
   }
-  interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
-    key: string
-    playlistId: string
-    maxResults: number
-    part: string
-    pageToken?: string
-  }
+
   const query: YoutubeDataApiQuery = {
     key: getapikey(),
     playlistId: id,

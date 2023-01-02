@@ -4,6 +4,7 @@ import * as diff from "diff";
 
 import * as youtube from "../youtube/main";
 
+type playlistTypes = 'youtube' | 'youtube_radio';
 
 export const configFile = new electronStore({
   cwd: app.getPath('userData')
@@ -15,11 +16,11 @@ export interface youtubeVideoInfo {
 }
 
 export interface playlistInfo {
+  type: playlistTypes
   name: string
   isShuffle: boolean
   videoList?: YoutubeVideo[]
   ID?: string
-  thumbnail?: string
 }
 
 
@@ -36,6 +37,7 @@ export class YoutubeVideo {
 }
 
 export interface Playlist {
+  type: playlistTypes
   name: string
   videos: YoutubeVideo[]
   isShuffle: boolean
@@ -48,11 +50,13 @@ export class YoutubePlaylist implements Playlist {
   playlistID: string
   thumbnail: string
   isShuffle = false
+  type: playlistTypes
+
   constructor(playlistInfo: playlistInfo) {
     this.playlistID = playlistInfo.ID ? playlistInfo.ID : ""
     this.name = playlistInfo.name ? playlistInfo.name : ""
-    this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
     this.isShuffle = playlistInfo.isShuffle
+    this.type = 'youtube'
   }
 }
 
@@ -61,20 +65,24 @@ export class YoutubeRadioPlaylist implements Playlist {
   videos: YoutubeVideo[]
   thumbnail: string
   isShuffle = false
+  type: playlistTypes
   constructor(playlistInfo: playlistInfo) {
     this.videos = playlistInfo.videoList ? playlistInfo.videoList : defaultPlaylist.videos
     this.name = playlistInfo.name ? playlistInfo.name : ""
-    this.thumbnail = playlistInfo.thumbnail ? playlistInfo.thumbnail : ""
     this.isShuffle = playlistInfo.isShuffle
+    this.type = "youtube_radio"
   }
 }
+
+
 
 export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], newVideoList: YoutubeVideo[]): Promise<YoutubeVideo[]> {
   const currentVideoListID = currentVideoList.map(e => e.id)
   const newVideoListID = newVideoList.map(e => e.id)
   const difference = diff.diffArrays(currentVideoListID, newVideoListID)
-
   let index = 0
+  console.log("called");
+
 
   for (const diffOperation of difference) {
     if (diffOperation.added) {
@@ -91,8 +99,8 @@ export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], 
         currentVideoList.splice(index, 1)
       })
     } else {
-      console.log("noop");
 
+      console.log("noop");
       diffOperation.value.forEach(() => {
         index++
       })
@@ -106,8 +114,8 @@ const defaultPlaylist: Playlist = new YoutubeRadioPlaylist(
   {
     name: "",
     videoList: [defaultVideo],
-    thumbnail: "",
-    isShuffle: false
+    isShuffle: false,
+    type: "youtube_radio"
   })
 const defaultPlaylists: Playlist[] = []
 
@@ -127,11 +135,12 @@ export async function createPlaylist(info: playlistInfo): Promise<Playlist> {
 export function getPlaylists(): Playlist[] {
   const rawConfig = configFile.get("playlists", defaultPlaylists) as Array<Playlist>
   const playlists = rawConfig.map(e => {
-    if (e.playlistID) {
+    if (e.type === "youtube") {
       const pl = new YoutubePlaylist({
         name: e.name,
         ID: e.playlistID,
-        isShuffle: e.isShuffle
+        isShuffle: e.isShuffle,
+        type: "youtube"
       })
       pl.videos = e.videos
       return pl
@@ -139,7 +148,8 @@ export function getPlaylists(): Playlist[] {
       return new YoutubeRadioPlaylist({
         name: e.name,
         videoList: e.videos,
-        isShuffle: e.isShuffle
+        isShuffle: e.isShuffle,
+        type: "youtube_radio"
       })
     }
   })
@@ -205,14 +215,19 @@ export function deletePlaylist(name: string) {
 export async function editPlaylist(playlistName: string, newPlaylist: Playlist) {
   const playlists = getPlaylists()
   await Promise.all(playlists.map(async (playlist, index) => {
+
     if (playlist.name === playlistName) {
       playlist.name = newPlaylist.name
       playlist.isShuffle = newPlaylist.isShuffle
 
-      if (playlist.playlistID && playlist.playlistID !== newPlaylist.playlistID) {
-        playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
-        playlist.playlistID = newPlaylist.playlistID
-      } else {
+      if (playlist.type === "youtube") {
+        if (playlist.playlistID !== newPlaylist.playlistID) {
+          playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
+          playlist.playlistID = newPlaylist.playlistID
+        } else {
+          playlist.videos = await createVideoListFromDiff(playlist.videos, newPlaylist.videos)
+        }
+      } else if (playlist.type === "youtube_radio") {
         playlist.videos = await createVideoListFromDiff(playlist.videos, newPlaylist.videos)
       }
 

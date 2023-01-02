@@ -17,7 +17,7 @@ export interface YoutubeRadioPreload {
   loadPlaylist(name: string): void
   openEditPlaylist(playlistName: string): void
   navigatePlaylist(navigation: playlistNavigation): void
-  deletePlaylist(name: string): void
+  deletePlaylist(name: string): Promise<void>
   getYoutubeTitle(url: string): Promise<string>
   openExternal(url: string): void
   editPlaylist(playlsitName: string, playlist: config.Playlist): Promise<void>
@@ -40,8 +40,8 @@ const api: YoutubeRadioPreload = {
   navigatePlaylist(navigation: playlistNavigation) {
     ipcRenderer.invoke('navigate-playlist', navigation)
   },
-  deletePlaylist(name: string) {
-    ipcRenderer.invoke('delete-playlist', name)
+  deletePlaylist(name: string): Promise<void> {
+    return ipcRenderer.invoke('delete-playlist', name)
   },
   emitWindowGetReady(): void {
     ipcRenderer.invoke('ready-to-show-playlist-window')

@@ -9,7 +9,12 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 document.getElementById('pause').className = 'fas fa-play'
 let player: YT.Player//youtube iframe api instance will be here;
 
-// let currentPlaylistName: string = ""
+const currentState = {
+  id: "",
+  playlistName: "",
+  index: 0,
+  playlistID: ""
+}
 
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -54,6 +59,9 @@ function onYouTubeIframeAPIReady() { // when youtube iframe api get ready, this 
       },
       onReady: playerOnReady,
       onError: (err) => {
+        setTimeout(() => {
+          player.nextVideo()
+        }, 7000);
         console.error("Error:", err)
       }
     }
@@ -69,20 +77,8 @@ window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation) => {
   const playlist = (await getPlaylists()).find(e => {
     return e.name === navigation.name
   })
-
-  if (playlist.playlistID) {
-    await loadPlaylist(playlist)
-    player.setShuffle(false)
-    if (navigation.index >= 0) {
-      player.playVideoAt(navigation.index)
-    }
-    player.setShuffle(playlist.isShuffle)
-  } else {
-    await loadPlaylist(playlist, navigation.index)
-    player.setShuffle(playlist.isShuffle)
-  }
-
-
+  playlist.isShuffle = navigation.shuffle
+  loadPlaylist(playlist, navigation.index)
 })
 
 window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
@@ -103,29 +99,42 @@ interface loadPlaylistParm {
 
 async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
 
+
+
   if (!appliedPlaylist || !appliedPlaylist.name) {
     return
   }
 
+  const conditions: Array<boolean> = [
+    currentState.id === appliedPlaylist.videos[index].id,
+    currentState.index === index,
+    currentState.playlistName === appliedPlaylist.name,
+    appliedPlaylist.playlistID ? currentState.playlistID === appliedPlaylist.playlistID : true
+  ]
+
+  if (conditions.reduce((p, c) => p && c)) return
+
   player.stopVideo()
 
-  if (appliedPlaylist.playlistID) {
+  if (appliedPlaylist.type === "youtube") {
+
     player.loadPlaylist({
       listType: "playlist",
       list: appliedPlaylist.playlistID,
-      index: 0,
+      index: index,
       startSeconds: 0
     })
     await window.YoutubeRadio.onPlayerStartPlaying()
-    await Promise.all(player.getPlaylist().map(
-      async (e, index: number) => {
-        appliedPlaylist.videos[index] = await window.YoutubeRadio.createYoutubeVideo({
-          id: e
-        })
+    const videos = player.getPlaylist().map(
+      id => {
+        return {
+          id: id,
+          title: ""
+        }
       })
-    )
+    appliedPlaylist.videos = videos
     window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist)
-  } else {
+  } else if (appliedPlaylist.type === "youtube_radio") {
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videos) {
       return
     }
@@ -140,6 +149,11 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
     })
   }
   player.setLoop(true)
+
+  currentState.id = appliedPlaylist.videos[index].id;
+  currentState.index = index
+  currentState.playlistID = appliedPlaylist.playlistID ?? ""
+  currentState.playlistName = appliedPlaylist.name
 }
 
 async function playerOnReady() {
@@ -264,7 +278,6 @@ function setVolumeBar(volume: number) {
   field.fillStyle = '#444444';
   field.clearRect(0, 0, canvas.width, relativeVolume + 50)
   field.fillRect(0, canvas.height, canvas.width, (-relativeVolume) * canvas.height);
-
   if (volume === 0) {
     buttonVolume.className = 'fas fa-volume-mute'
   } else if (0 < volume && volume < 50) {

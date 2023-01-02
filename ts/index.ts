@@ -75,15 +75,16 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  // hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOnsNh4BglyGww1tE5icaKmZ", "Yunomix", true)
+  hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOnsNh4BglyGww1tE5icaKmZ", "youtube", true)
+
 }) // end of app on ready
 
 async function hoge(url: string, name: string, op: boolean) {
-
   const pl = await config.createPlaylist({
     name: name,
     ID: youtube.getPlaylistID(url),
-    isShuffle: false
+    isShuffle: false,
+    type: "youtube"
   })
 
   if (op) {
@@ -94,7 +95,8 @@ async function hoge(url: string, name: string, op: boolean) {
   const ytrPl = await config.createPlaylist({
     name: name,
     videoList: pl.videos,
-    isShuffle: false
+    isShuffle: false,
+    type: "youtube_radio"
   })
   config.setPlaylist(ytrPl)
 }
