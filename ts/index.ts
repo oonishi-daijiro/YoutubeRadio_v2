@@ -48,12 +48,12 @@ app.on('ready', () => {
   const buttonsVideoPlaying = [
     buttons.previousVideo,
     buttons.pause,
-    buttons.nextVideo
+    buttons.nextVideo,
   ]
   const buttonsVideoPaused = [
     buttons.previousVideo,
     buttons.play,
-    buttons.nextVideo
+    buttons.nextVideo,
   ]
 
 
@@ -142,6 +142,8 @@ ipcMain.handle('save-volume', (_, volume: number = 50) => {
 ipcMain.handle('get-volume', () => {
   return config.getVolume()
 })
+
+
 
 ipcMain.on('open-playlist-window', () => {
   playlistWindow = new BrowserWindow(

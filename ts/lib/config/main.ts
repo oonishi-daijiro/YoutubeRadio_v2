@@ -212,27 +212,40 @@ export function deletePlaylist(name: string) {
   }
 }
 
+async function updatePlaylist(oldPlaylist: Playlist, newPlaylist: Playlist): Promise<Playlist> {
+  oldPlaylist.name = newPlaylist.name
+  oldPlaylist.isShuffle = newPlaylist.isShuffle
+  if (oldPlaylist.type === "youtube") {
+    if (oldPlaylist.playlistID !== newPlaylist.playlistID) {
+      oldPlaylist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
+      oldPlaylist.playlistID = newPlaylist.playlistID
+    } else {
+      oldPlaylist.videos = await createVideoListFromDiff(oldPlaylist.videos, newPlaylist.videos)
+    }
+  } else if (oldPlaylist.type === "youtube_radio") {
+    oldPlaylist.videos = await createVideoListFromDiff(oldPlaylist.videos, newPlaylist.videos)
+  }
+  return oldPlaylist
+}
+
 export async function editPlaylist(playlistName: string, newPlaylist: Playlist) {
   const playlists = getPlaylists()
+  let isUnique = false
   await Promise.all(playlists.map(async (playlist, index) => {
-
     if (playlist.name === playlistName) {
-      playlist.name = newPlaylist.name
-      playlist.isShuffle = newPlaylist.isShuffle
 
-      if (playlist.type === "youtube") {
-        if (playlist.playlistID !== newPlaylist.playlistID) {
-          playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
-          playlist.playlistID = newPlaylist.playlistID
-        } else {
-          playlist.videos = await createVideoListFromDiff(playlist.videos, newPlaylist.videos)
-        }
-      } else if (playlist.type === "youtube_radio") {
-        playlist.videos = await createVideoListFromDiff(playlist.videos, newPlaylist.videos)
-      }
-
-      playlists[index] = playlist
+      isUnique = true
+      playlists[index] = await updatePlaylist(playlist, newPlaylist)
     }
   }))
+  if (!isUnique) {
+    playlists.push(await createPlaylist({
+      name: newPlaylist.name,
+      videoList: [],
+      ID: newPlaylist.playlistID,
+      isShuffle: false,
+      type: "youtube"
+    }))
+  }
   configFile.set('playlists', playlists)
 }

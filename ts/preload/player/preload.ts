@@ -95,7 +95,8 @@ const api: YoutubeRadioPreload = {
   },
   editPlaylist(name: string, newPLaylist: config.Playlist): Promise<void> {
     return ipcRenderer.invoke('edit-playlist', name, newPLaylist)
-  }
+  },
+
 }
 
 contextBridge.exposeInMainWorld("YoutubeRadio", api)

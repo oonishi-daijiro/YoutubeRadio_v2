@@ -12,7 +12,6 @@ let player: YT.Player//youtube iframe api instance will be here;
 const currentState = {
   id: "",
   playlistName: "",
-  index: 0,
   playlistID: ""
 }
 
@@ -61,10 +60,11 @@ function onYouTubeIframeAPIReady() { // when youtube iframe api get ready, this 
       onError: (err) => {
         setTimeout(() => {
           player.nextVideo()
-        }, 7000);
+        }, 2500);
         console.error("Error:", err)
       }
-    }
+    },
+    host: 'https://www.youtube-nocookie.com'
   })
 }
 
@@ -99,22 +99,28 @@ interface loadPlaylistParm {
 
 async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
 
-
-
   if (!appliedPlaylist || !appliedPlaylist.name) {
     return
   }
 
   const conditions: Array<boolean> = [
     currentState.id === appliedPlaylist.videos[index].id,
-    currentState.index === index,
     currentState.playlistName === appliedPlaylist.name,
     appliedPlaylist.playlistID ? currentState.playlistID === appliedPlaylist.playlistID : true
   ]
 
+  conditions.forEach((tf, index) => {
+    console.log(`${index}${tf}`);
+
+  })
+  player.setShuffle(false)
+
+
   if (conditions.reduce((p, c) => p && c)) return
 
   player.stopVideo()
+
+
 
   if (appliedPlaylist.type === "youtube") {
 
@@ -151,9 +157,10 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
   player.setLoop(true)
 
   currentState.id = appliedPlaylist.videos[index].id;
-  currentState.index = index
   currentState.playlistID = appliedPlaylist.playlistID ?? ""
   currentState.playlistName = appliedPlaylist.name
+
+  player.setShuffle(appliedPlaylist.isShuffle)
 }
 
 async function playerOnReady() {

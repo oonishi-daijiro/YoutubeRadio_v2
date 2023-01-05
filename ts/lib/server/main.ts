@@ -10,7 +10,6 @@ const playerStylesheet = readFileSync(__dirname + "../../../app/player/style.css
 export function launchServer() {
   const server = http.createServer((req, res) => {
     const parm = url.parse(req.url as string, true)
-    // res.setHeader("Access-Control-Allow-Origin", "*")
     if (parm.query.loaded === "true") {
       server.close()
     }

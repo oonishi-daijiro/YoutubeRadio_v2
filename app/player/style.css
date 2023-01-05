@@ -85,6 +85,7 @@ body {
   margin: 2px;
   display: inline-block;
   text-align: center;
+  cursor: pointer;
 }
 
 #bar1 {
