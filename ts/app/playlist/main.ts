@@ -236,7 +236,22 @@ class PlaylistDisplay {
     buttonCloseWindow.addEventListener('click', () => {
       window.YoutubeRadio.close()
     })
+
+    const buttonPinPlayer = document.createElement('i')
+    buttonPinPlayer.className = 'fas fa-thumbtack'
+    buttonPinPlayer.id = 'button-pin-player'
+    window.YoutubeRadio.isPinned().then(tf => {
+      buttonPinPlayer.style.color = tf ? "#353535" : "#909090"
+    })
+
+    buttonPinPlayer.addEventListener('click', async () => {
+      const isPinned = await window.YoutubeRadio.pinPlayer()
+      buttonPinPlayer.style.color = isPinned ? "#353535" : "#909090"
+    })
+
+
     playlistsDisplayWrapper.appendChild(buttonCloseWindow)
+    playlistsDisplayWrapper.appendChild(buttonPinPlayer)
     playlistsDisplayWrapper.append(playlistsDisplay)
   }
 }

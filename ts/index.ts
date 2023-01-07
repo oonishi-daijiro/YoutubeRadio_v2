@@ -75,7 +75,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOnsNh4BglyGww1tE5icaKmZ", "youtube", true)
+  // hoge("https://www.youtube.com/playlist?list=PLD9LTsJMicOnsNh4BglyGww1tE5icaKmZ", "youtube", true)
 
 }) // end of app on ready
 
@@ -143,6 +143,14 @@ ipcMain.handle('get-volume', () => {
   return config.getVolume()
 })
 
+ipcMain.handle('is-pinned', () => {
+  return mainWindow.isAlwaysOnTop()
+})
+
+ipcMain.handle('pin-player', () => {
+  mainWindow.setAlwaysOnTop(!mainWindow.isAlwaysOnTop())
+  return mainWindow.isAlwaysOnTop()
+})
 
 
 ipcMain.on('open-playlist-window', () => {

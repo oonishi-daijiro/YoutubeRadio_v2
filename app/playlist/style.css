@@ -513,11 +513,11 @@ img {
 
 #playlist-name-editor {
   background: #ffffffff;
-  width: 78vw;
+  width: 74vw;
   border-radius: 14px;
   height: 18vh;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 26px;
   font-size: 170%;
   color: #353535;
   font-family: "Noto Sans JP";
@@ -537,22 +537,11 @@ img {
   flex-wrap: nowrap;
 }
 
-#editor-video-content-display {
-  display: flex;
-  width: 92%;
-  height: 43vh;
-  cursor: pointer;
-  align-content: center;
-  align-items: center;
-  margin-top: 20px;
-  white-space: pre-wrap;
-  flex-direction: column;
-  overflow: scroll;
-}
+#editor-video-content-display {display: flex;width: 75%;height: 43vh;margin-bottom: 15px;cursor: pointer;align-content: center;align-items: center;justify-content: flex-start;flex-direction: column;overflow: scroll;}
 
 .editor-video-display {
   opacity: 1;
-  width: 80%;
+  width: 90%;
   display: flex;
   background: #ffffffff;
   margin-bottom: 17px;
@@ -576,13 +565,12 @@ img {
 
 #palylist-name-editor-wrapper {
   display: flex;
-  width: 69%;
   height: 12vh;
-  margin-bottom: 15px;
   cursor: pointer;
   align-content: center;
   align-items: center;
   justify-content: center;
+  margin-bottom: 34px;
 }
 
 #button-add-video {
@@ -609,11 +597,11 @@ img {
 
 .playlist-url-input {
   background: #ffffffff;
-  width: 85vw;
+  width: 74vw;
   border-radius: 14px;
   height: 18vh;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 20px;
   font-size: 98%;
   color: #353535;
   font-family: "Noto Sans JP";
@@ -629,7 +617,7 @@ img {
 
 #close-window {
   position: fixed;
-  left: 24px;
+  right: 24px;
   top: 17px;
   color: #353535;
   z-index: 100;
@@ -640,7 +628,7 @@ img {
   display: flex;
   position: absolute;
   height: 77vh;
-  margin-top: 10vh;
+  margin-top: 13vh;
   width: 91vw;
   -webkit-app-region: no-drag;
   flex-direction: column;
@@ -653,4 +641,13 @@ img {
   left: 50%;
   transform: translateX(-50%);
   align-items: center;
+}
+
+#button-pin-player{
+    position: fixed;
+    right: 49px;
+    top: 18px;
+    color: #909090;
+    z-index: 100;
+    cursor: pointer;
 }
