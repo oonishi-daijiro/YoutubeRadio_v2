@@ -4,7 +4,7 @@ import * as diff from "diff";
 
 import * as youtube from "../youtube/main";
 
-type playlistTypes = 'youtube' | 'youtube_radio';
+export type playlistTypes = 'youtube' | 'youtube_radio';
 
 export const configFile = new electronStore({
   cwd: app.getPath('userData')
@@ -13,6 +13,11 @@ export const configFile = new electronStore({
 export interface youtubeVideoInfo {
   id: string
   title?: string | undefined
+}
+
+export interface YoutubeVideo {
+  id: string
+  title: string
 }
 
 export interface playlistInfo {
@@ -24,7 +29,7 @@ export interface playlistInfo {
 }
 
 
-export class YoutubeVideo {
+export class YoutubeVideo implements YoutubeVideo {
   id: string
   title: string
   constructor(videoInfo: youtubeVideoInfo = {

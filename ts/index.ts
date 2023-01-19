@@ -178,7 +178,7 @@ ipcMain.on('open-playlist-window', () => {
     playlistWindow.show()
   })
   playlistWindow.loadFile(__dirname + "/app/playlist/index.html")
-  playlistWindow.webContents.openDevTools()
+  // playlistWindow.webContents.openDevTools()
 })
 
 
@@ -209,7 +209,3 @@ ipcMain.handle('open-external', (_, youtubeUrl: string) => {
 ipcMain.handle('edit-playlist', (_, playlistName: string, newPlaylist: config.Playlist) => {
   return config.editPlaylist(playlistName, newPlaylist)
 })
-
-ipcMain.handle('save-playlists', (_, playlists: config.Playlist[]) => {
-  return config.setPlaylists(playlists)
-});
