@@ -95,7 +95,6 @@ export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], 
     } else if (diffOperation.removed) {
       diffOperation.value.forEach(() => {
         console.log("remove");
-
         currentVideoList.splice(index, 1)
       })
     } else {
@@ -247,5 +246,9 @@ export async function editPlaylist(playlistName: string, newPlaylist: Playlist) 
       type: "youtube"
     }))
   }
+  configFile.set('playlists', playlists)
+}
+
+export function setPlaylists(playlists: Playlist[]) {
   configFile.set('playlists', playlists)
 }

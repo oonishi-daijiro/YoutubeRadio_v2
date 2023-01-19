@@ -24,6 +24,7 @@ export interface YoutubeRadioPreload {
   parse(urlString: string, parseQueryString: boolean, slashesDenoteHost?: boolean): Url
   pinPlayer(): Promise<boolean>
   isPinned(): Promise<boolean>
+  savePlaylists(playlists: config.Playlist[]): Promise<void>
 }
 
 const api: YoutubeRadioPreload = {
@@ -65,7 +66,9 @@ const api: YoutubeRadioPreload = {
   },
   isPinned(): Promise<boolean> {
     return ipcRenderer.invoke('is-pinned')
+  },
+  savePlaylists(playlists: config.Playlist[]): Promise<void> {
+    return ipcRenderer.invoke('save-playlists', playlists)
   }
-
 }
 contextBridge.exposeInMainWorld('YoutubeRadio', api)

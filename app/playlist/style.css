@@ -376,9 +376,11 @@ span {
   height: 16px;
 }
 
-.button-close-window {}
+.button-close-window {
+}
 
-#name-display-and-navigator {}
+#name-display-and-navigator {
+}
 
 .yt-playlist-url-display {
   height: 100%;
@@ -432,7 +434,7 @@ span {
   cursor: pointer;
 }
 
-#playlist-title-display:hover~.icon-edit {
+#playlist-title-display:hover ~ .icon-edit {
   opacity: 1;
 }
 
@@ -457,7 +459,7 @@ span {
   cursor: pointer;
 }
 
-.yt-playlist-url-display:hover~#button-edit-playlist-url {
+.yt-playlist-url-display:hover ~ #button-edit-playlist-url {
   opacity: 1;
 }
 
@@ -537,7 +539,18 @@ img {
   flex-wrap: nowrap;
 }
 
-#editor-video-content-display {display: flex;width: 75%;height: 43vh;margin-bottom: 15px;cursor: pointer;align-content: center;align-items: center;justify-content: flex-start;flex-direction: column;overflow: scroll;}
+#editor-video-content-display {
+  display: flex;
+  width: 75%;
+  height: 43vh;
+  margin-bottom: 15px;
+  cursor: pointer;
+  align-content: center;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  overflow: scroll;
+}
 
 .editor-video-display {
   opacity: 1;
@@ -643,11 +656,19 @@ img {
   align-items: center;
 }
 
-#button-pin-player{
-    position: fixed;
-    right: 49px;
-    top: 18px;
-    color: #909090;
-    z-index: 100;
-    cursor: pointer;
+#button-pin-player {
+  position: fixed;
+  right: 49px;
+  top: 18px;
+  color: #909090;
+  z-index: 100;
+  cursor: pointer;
+}
+.button-sort-playlist {
+  position: fixed;
+  right: 70px;
+  top: 17px;
+  color: #353535;
+  z-index: 100;
+  cursor: pointer;
 }

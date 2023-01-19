@@ -209,3 +209,7 @@ ipcMain.handle('open-external', (_, youtubeUrl: string) => {
 ipcMain.handle('edit-playlist', (_, playlistName: string, newPlaylist: config.Playlist) => {
   return config.editPlaylist(playlistName, newPlaylist)
 })
+
+ipcMain.handle('save-playlists', (_, playlists: config.Playlist[]) => {
+  return config.setPlaylists(playlists)
+});
