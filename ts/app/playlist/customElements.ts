@@ -5,24 +5,23 @@ interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
 
-interface HTMLCustomElementTanName extends HTMLElementTagNameMap {
-  "thmubnail": thumbnail;
+interface HTMLCustomElementTagName extends HTMLElementTagNameMap {
+  "thumbnail": HTMLImageElement
 }
 
-function createChild<K extends keyof HTMLCustomElementTanName>(parent: HTMLElement, tagName: K): HTMLCustomElementTanName[K] {
+function createChild<K extends keyof HTMLCustomElementTagName>(parent: HTMLElement, tagName: K): HTMLCustomElementTagName[K] {
   const child: any = document.createElement(tagName)
   parent.appendChild(child)
   return child
 }
-
 
 class PlaylistDisplay extends HTMLElement {
   constructor(playlist: Playlist) {
     super()
     Object.assign(this, playlist)
     this.className = 'playlist-display'
+    this.thmubNail = createChild(this, 'thumbnail')
 
-    this.thmubNail = createChild(this, 'thmubnail')
     this.nameDisplay = createChild(this, 'div')
   }
   set name(name: string) {
@@ -30,21 +29,12 @@ class PlaylistDisplay extends HTMLElement {
   }
 
   private nameDisplay: HTMLElement
-  private thmubNail: thumbnail
+  private thmubNail: HTMLImageElement
   private playButton: Button
 }
 
 window.customElements.define('playlist-display', PlaylistDisplay)
 
-class thumbnail extends HTMLImageElement {
-  constructor(src: string) {
-    super()
-    this.src = src
-    this.className = 'thumbnail'
-  }
-}
-
-window.customElements.define('thumbnail', thumbnail)
 
 class PlaylistDetailDisplay extends HTMLElement implements Playlist {
   constructor(pl: Playlist) {

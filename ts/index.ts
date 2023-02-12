@@ -178,7 +178,7 @@ ipcMain.on('open-playlist-window', () => {
     playlistWindow.show()
   })
   playlistWindow.loadFile(__dirname + "/app/playlist/index.html")
-  // playlistWindow.webContents.openDevTools()
+  playlistWindow.webContents.openDevTools()
 })
 
 
