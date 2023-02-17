@@ -1,1 +1,1 @@
-var exports = {}
+var exports = {};

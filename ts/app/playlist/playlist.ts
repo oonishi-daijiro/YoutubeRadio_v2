@@ -1,6 +1,7 @@
 import { Playlist, playlistInfo, YoutubeVideo, youtubeVideoInfo } from "../../lib/config/main";
 import { YoutubeRadioPreload } from "../../preload/playlist/preload";
 
+
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
@@ -149,21 +150,16 @@ function parseVideoURLs(videoURLs: HTMLInputElement[]): YoutubeVideo[] {
   })
 }
 
-function swap(nodeA: Node, nodeB: Node) {
-  const parentA = nodeA.parentNode;
-  const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
-
-  nodeB.parentNode.insertBefore(nodeA, nodeB);
-
-  parentA.insertBefore(nodeB, siblingA);
-};
+interface editOption {
+  currentPlaylistName: string
+  newPlaylist: Playlist
+}
 
 
 const playlistsDisplayWrapper = document.getElementById('playlist-display-wrapper')
 
 class PlaylistDisplay {
   constructor(readonly playlists: Playlist[]) {
-    const playlistDisplays: HTMLDivElement[] = []
 
     const playlistsDisplay = document.createElement('div')
     playlistsDisplay.id = 'playlists-display'
@@ -198,14 +194,11 @@ class PlaylistDisplay {
         })
         window.YoutubeRadio.close()
       })
-      playlistDisplay.draggable = false
 
       playlistDisplay.appendChild(thumbnail)
       playlistDisplay.appendChild(playlistTitleDisplay)
       playlistDisplay.appendChild(playButton)
       playlistsDisplay.appendChild(playlistDisplay)
-
-      playlistDisplays.push(playlistDisplay)
     })
 
     const buttonCreatePlaylist = document.createElement('div')
@@ -220,7 +213,6 @@ class PlaylistDisplay {
     buttonCreatePlaylist.appendChild(plusIcon)
     buttonCreatePlaylist.appendChild(buttonTextValue)
     playlistsDisplay.appendChild(buttonCreatePlaylist)
-
     buttonCreatePlaylist.addEventListener('click', () => {
       animate(playlistsDisplayWrapper, 'fade-out-to-left')
       new PlaylistEditor({
@@ -257,41 +249,10 @@ class PlaylistDisplay {
       buttonPinPlayer.style.color = isPinned ? "#353535" : "#909090"
     })
 
-    const buttonSortPlaylists = document.createElement('i')
-    buttonSortPlaylists.className = 'fas fa-exchange-alt button-sort-playlist'
 
     playlistsDisplayWrapper.appendChild(buttonCloseWindow)
     playlistsDisplayWrapper.appendChild(buttonPinPlayer)
-    playlistsDisplayWrapper.appendChild(buttonSortPlaylists)
-    playlistsDisplayWrapper.appendChild(playlistsDisplay)
-
-
-    buttonSortPlaylists.addEventListener('click', () => {
-
-      let currentDraged: HTMLDivElement
-
-      playlistDisplays.forEach((e, index) => {
-        function setDragInfo() {
-          currentDraged = e
-        }
-
-        function swapDOM() {
-          swap(currentDraged, e[0])
-        }
-
-        function saveSortedPlaylist() {
-
-        }
-
-        e.draggable = true
-
-        e.addEventListener('dragstart', setDragInfo)
-
-        e.addEventListener('dragover', swapDOM)
-
-        e.addEventListener('dragend', saveSortedPlaylist)
-      })
-    })
+    playlistsDisplayWrapper.append(playlistsDisplay)
   }
 }
 
