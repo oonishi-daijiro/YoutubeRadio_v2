@@ -1,28 +1,53 @@
 {
-  "name": "youtuberadio_v2",
+  "name": "youtube_radio",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@types/youtube": "^0.0.47",
-    "diff": "^5.1.0",
-    "electron-store": "^8.1.0"
+  "build": {
+    "appId": "YoutubeRadio",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "./apikey.enc",
+      "./icon/icon.ico",
+      "./dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": ".",
+        "to": ".",
+        "filter": [
+          "./apikey.enc"
+        ]
+      }
+    ],
+    "icon": "./icon/icon.ico"
   },
   "devDependencies": {
-    "@types/diff": "^5.0.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "electron": "^22.2.0",
-    "electron-builder": "^22.10.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "webpack": "^5.75.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^24.0.0",
+    "electron-builder": "^24.0.0",
+    "glob": "^9.3.0",
+    "ignore-loader": "^0.1.2",
+    "ts-loader": "^9.4.2",
+    "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
+  },
+  "dependencies": {
+    "diff": "^5.1.0",
+    "electron-store": "^8.1.0",
+    "loose-envify": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

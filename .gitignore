@@ -1,4 +1,9 @@
 /node_modules
 /enc_api_key
+/dist
+/build
+/assets
+*.enc
 *.js
+!webpack.config.js
 !exports.js
