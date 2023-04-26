@@ -68,7 +68,9 @@ export interface ReducerActions {
   }
   'edit-target-playlist': {
     type: 'edit-target-playlist',
-    props: Playlist
+    props: {
+      playlist: Playlist,
+    }
   }
   'close-window': {
     type: 'close-window'
@@ -84,6 +86,9 @@ export interface ReducerActions {
   'animation-end': {
     type: 'animation-end'
   }
+  'animation-start': {
+    type: 'animation-start'
+  }
   'load-playlists': {
     type: 'load-playlists',
     props: Playlist[]
@@ -94,7 +99,7 @@ export interface ReducerActions {
   'reload': {
     type: 'reload'
   }
-  
+
 }
 
 
@@ -138,12 +143,12 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       }
 
     case 'edit-target-playlist':
-      window.YoutubeRadio.editPlaylist(currentAppState.targetPlaylist.name, action.props)
-      currentAppState.playlists[currentAppState.playlists.findIndex(pl => pl.name === action.props.name)] = action.props
+      currentAppState.playlists[currentAppState.playlists.findIndex(pl => pl.name === action.props.playlist.name)] = action.props.playlist
+
       return {
         ...currentAppState,
         playlists: [...currentAppState.playlists],
-        targetPlaylist: action.props,
+        targetPlaylist: action.props.playlist,
       }
 
     case 'navigate-playlist':
@@ -177,7 +182,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
           return {
             ...currentAppState,
             displays: ['playlists', currentAppState.displays[currentAppState.displays.length - 1]],
-            switchAnimationHook: ['fade-in-from-left', 'fade-out-to-right']
+            switchAnimationHook: ['fade-in-from-left', 'fade-out-to-right'],
+            isAnimating:true
           }
       }
 
@@ -189,6 +195,11 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         isAnimating: false
+      }
+    case 'animation-start':
+      return {
+        ...currentAppState,
+        isAnimating: true
       }
 
     case 'load-playlists':

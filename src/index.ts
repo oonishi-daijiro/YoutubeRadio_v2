@@ -37,6 +37,7 @@ app.on('ready', () => {
 
   // mainWindow.webContents.openDevTools()
 
+
   const port = launchServer()
 
   mainWindow.loadURL(`http://localhost:${port}`)
@@ -63,6 +64,7 @@ app.on('ready', () => {
 
   mainWindow.webContents.on('media-paused', () => {
     mainWindow.setThumbarButtons(buttonsVideoPaused)
+
     mainWindow.webContents.send('video-paused')
   })
 
@@ -74,7 +76,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  // createpl("https://www.youtube.com/playlist?list=PLD9LTsJMicOnQvC7GDgOtOo4Y0jQ0aVex", "YTRPL", false)
+  createpl("https://www.youtube.com/playlist?list=PLD9LTsJMicOnQvC7GDgOtOo4Y0jQ0aVex", "YTRPL", false)
 
 
 })
@@ -175,7 +177,7 @@ ipcMain.on('open-playlist-window', () => {
       },
     }
   )
-  // playlistWindow.webContents.openDevTools()
+  //playlistWindow.webContents.openDevTools()
 
   ipcMain.handleOnce('ready-to-show-playlist-window', () => {
     playlistWindow.show()

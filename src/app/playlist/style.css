@@ -279,7 +279,7 @@ span {
 }
 
 .playlist-thumbnail {
-  clip-path: circle(38px at center);
+  clip-path: circle(37px at center);
   width: 100px;
   height: 100px;
   -webkit-user-drag: none;
@@ -476,7 +476,7 @@ span {
   width: 120px;
   height: 111px;
   object-fit: cover;
-  clip-path: circle(44px at center);
+  clip-path: circle(41px at center);
   -webkit-app-region: drag;
   z-index: 100;
 }

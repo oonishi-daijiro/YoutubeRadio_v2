@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Playlist, YoutubeVideo } from "../../lib/config";
 import { YoutubeRadioPreload } from "../../preload/playlist";
-import { ContextAppState, ContextDispatchAppState } from "./main";
+import { ContextAppState, ContextDispatchAppState, ContextSuspenderFunction } from "./main";
 import { ReducerActions } from "./reducer";
 
 
@@ -257,6 +257,7 @@ const Thumbnail: React.FC<{ src: string, className: string }> = (props) => {
 
 const ButtonShuffle: React.FC<{ playlist: Playlist }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
+  const appState = React.useContext(ContextAppState)
   return (
     <IconedButton
       iconName="shuffle"
@@ -264,10 +265,13 @@ const ButtonShuffle: React.FC<{ playlist: Playlist }> = (props) => {
         dispatch({
           type: 'edit-target-playlist',
           props: {
-            ...props.playlist,
-            isShuffle: !props.playlist.isShuffle
+            playlist: {
+              ...props.playlist,
+              isShuffle: !props.playlist.isShuffle
+            }
           }
         })
+        window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, appState.targetPlaylist)
       }}
       style={
         {
@@ -473,8 +477,11 @@ function logThrough<T>(p: T): T {
 }
 
 const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
+
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
+
+  const suspender = React.useContext(ContextSuspenderFunction)
 
   const isValidPlaylistName = new MultipileConditions()
   const isValidPlaylistURL = new MultipileConditions()
@@ -508,18 +515,24 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
     isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce()
   }
 
-
   return (
     <IconedButton iconName="save" id="button-save-playlist"
       style={{
         color: isValidEdit ? '#353535' : '#A6A6A6'
       }}
-      onClick={() => {
+      onClick={async () => {
         if (isValidEdit) {
           dispatch({
             type: 'edit-target-playlist',
-            props: props.playlist
+            props: {
+              playlist: props.playlist
+
+            }
           })
+          dispatch({
+            type: 'animation-end'
+          })
+          await window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, props.playlist)
           reloadPlaylistsWithAnimation(dispatch)
         }
       }} />
@@ -602,10 +615,9 @@ async function reloadPlaylistsWithAnimation(dispatch: (ReducerAction: ReducerAct
   dispatch({
     type: 'reload-playlists'
   })
-
 }
 
-function getRandomInt(min, max) {
+function getRandomInt(min: number, max: number) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
@@ -629,15 +641,6 @@ function sleep(time: number): Promise<void> {
       resolve()
     }, time);
   });
-}
-
-
-function htmlspecialchars(str: string) {
-  return (str + '').replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '\"')
-    .replace(/&#39;/g, '\'')
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
 }
 
 class MultipileConditions {

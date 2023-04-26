@@ -85,13 +85,15 @@ AppRoot.render(<App />)
 
 
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
+export const ContextSuspenderFunction = React.createContext<(promise: Promise<void>) => void>(() => new Promise((() => { })))
 
 const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
-
   const appState = React.useContext(ContextAppState)
+  const suspender = (promise: Promise<void>): void => {
+    throw promise
+  }
 
-  
   if (!appState.isPlaylistsLoaded) {
     const playlists = sPlaylists.read()
     dispatch({
@@ -101,9 +103,8 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   }
 
   return (
-    <>
+    <ContextSuspenderFunction.Provider value={suspender}>
       {...props.children}
-
-    </>
+    </ContextSuspenderFunction.Provider>
   )
 }

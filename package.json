@@ -1,15 +1,16 @@
 {
   "name": "youtube_radio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Play youtube video on simple window.",
   "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Oonishi_Daijiro",
   "license": "ISC",
   "build": {
+    "productName": "YoutubeRadio",
     "appId": "YoutubeRadio",
     "directories": {
       "output": "build"
