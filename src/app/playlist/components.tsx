@@ -1,8 +1,9 @@
 import * as React from "react";
-import { Playlist, YoutubeVideo } from "../../lib/config";
+import { Playlist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
 import { YoutubeRadioPreload } from "../../preload/playlist";
-import { ContextAppState, ContextDispatchAppState, ContextSuspenderFunction } from "./main";
+import { ContextAppState, ContextDispatchAppState } from "./main";
 import { ReducerActions } from "./reducer";
+import { ForwardedRef } from "react";
 
 
 interface preload extends Window {
@@ -22,8 +23,13 @@ const Icons = {
   save: "fa-solid fa-floppy-disk",
   close: "fas fa-times-circle",
   cross: "fas fa-times",
-  plusCircle: "fas fa-plus-circle"
+  plusCircle: "fas fa-plus-circle",
+  iconYoutube: "fa-brands fa-youtube"
+}
 
+const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playlist-detail-display-wrapper' | 'playlist-editor-wrapper' | 'playlist-type-selection-wrapper', index: number, children: React.ReactNode[] | React.ReactNode }> = (props) => {
+  const appState = React.useContext(ContextAppState)
+  return <div id={props.wrapTarget} className={`${appState.switchAnimationHook[props.index]}`} style={{ pointerEvents: appState.isAnimating ? 'none' : 'auto' }}>{props.children}</div>
 }
 
 export const PlaylistDisplay: React.FC<{ playlist: Playlist, index: number }> = (props) => {
@@ -67,9 +73,7 @@ export const PlaylistsDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
   return (
-    <div id="playlist-display-wrapper" className={appState.switchAnimationHook[props.index]} style={{
-      pointerEvents: appState.isAnimating ? 'none' : 'auto'
-    }}>
+    <Wrapper wrapTarget='playlist-display-wrapper' index={props.index}>
       <div id="playlists-display">
         {appState.playlists.map(playlist => <PlaylistDisplay playlist={playlist} index={props.index} />)}
         <ButtonCreatePlaylist />
@@ -78,10 +82,12 @@ export const PlaylistsDisplay: React.FC<{ index: number }> = (props) => {
         iconName="close"
         id="close-window"
         onClick={() => {
-          window.YoutubeRadio.close()
+          dispatch({
+            type: 'close-window'
+          })
         }} />
       <ButtonPinPlayer />
-    </div>
+    </Wrapper>
   )
 }
 
@@ -89,40 +95,45 @@ export const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
   return (
-    <div id="playlist-detail-display-wrapper" className={appState.switchAnimationHook[props.index]} style={{
-      pointerEvents: appState.isAnimating ? 'none' : 'auto'
-    }}>
+    <Wrapper wrapTarget='playlist-detail-display-wrapper' index={props.index}>
       <div className="playlist-detail-display">
         <IconedButton
           iconName="arrowLeft"
-          id="button-back-to-playlist-display"
+          className="button-back"
           onClick={() => {
             popDisplayWithAnimation(dispatch)
           }} />
         <PlaylistInformationDisplay playlist={appState.targetPlaylist} />
         <VideoListDisplay playlist={appState.targetPlaylist} />
       </div>
-    </div>
+    </Wrapper>
   )
 }
 
 
-export const PlaylistEditorDisplay: React.FC<{ index: number }> = (prop) => {
+export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
 
   const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist)
-
   const refNameInput = React.useRef<HTMLInputElement>()
   const refURLInput = React.useRef<HTMLInputElement>()
 
-  let videoEditor: string | number | boolean | JSX.Element | React.ReactFragment;
+
+  let videoEditor: string | number | boolean | JSX.Element | React.ReactFragment
 
   if (playlistEdit.type === 'youtube') {
-    videoEditor = <EditableTextInput
-      value={`www.youtube.com/playlist?list=${playlistEdit.playlistID}`}
+    const playlistURL = playlistEdit.playlistID ? `www.youtube.com/playlist?list=${playlistEdit.playlistID} ` : ''
+    videoEditor = <input
+      type="text"
+      placeholder="Youtube Playlist URL"
+      defaultValue={playlistURL}
       className='playlist-url-input'
       spellCheck={false}
+      ref={refURLInput}
+      onClick={() => {
+        refURLInput.current.select()
+      }}
       onChange={(event) => {
         setPlaylistEdit({
           ...playlistEdit,
@@ -133,37 +144,46 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (prop) => {
   } else if (playlistEdit.type === 'youtube_radio') {
     videoEditor = <>
       {playlistEdit.videos.map((video, index) => (
-        <EditableVideoDisplay video={video} index={index} onDelete={(_, index) => {
-          playlistEdit.videos.splice(index, 1)
-          setPlaylistEdit({
-            ...playlistEdit
-          })
-        }} />
+        <EditableVideoDisplay video={video} index={index}
+          setEditedVideo={(video: YoutubeVideo | 'delete') => {
+            if (video === 'delete') {
+              playlistEdit.videos.splice(index, 1)
+              setPlaylistEdit({
+                ...playlistEdit
+              })
+            } else {
+              playlistEdit.videos[index] = video
+              setPlaylistEdit({
+                ...playlistEdit
+              })
+            }
+          }}
+        />
+
       ))}
-      {<IconedButton iconName="plusCircle" id="button-add-video" onClick={() => {
+      {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={() => {
         setPlaylistEdit({
           ...playlistEdit,
           videos: [...playlistEdit.videos, { id: "", title: "" }]
         })
-      }} />}
+      }} /> : <></>}
     </>
   }
 
   return (
-    <div id="playlist-editor-wrapper" className={appState.switchAnimationHook[prop.index]} style={{
-      pointerEvents: appState.isAnimating ? 'none' : 'auto'
-    }}>
+    <Wrapper wrapTarget="playlist-editor-wrapper" index={props.index}>
       <div id="playlist-editor">
-        <IconedButton iconName="arrowLeft" id="button-back-to-playlist-detail" onClick={() => {
+        <IconedButton iconName="arrowLeft" className="button-back" onClick={() => {
           popDisplayWithAnimation(dispatch)
         }} />
-        <img src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)} className="thumbnail-playlist-editor"></img>
+        <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)} className="thumbnail-playlist-editor" style={{ background: "aqua" }} />
         <div id="palylist-name-editor-wrapper">
-          <EditableTextInput
+          <input
+            type="text"
             spellCheck={false}
             id='playlist-name-editor'
             placeholder="Playlist Name"
-            value={appState.targetPlaylist.name}
+            defaultValue={appState.targetPlaylist.name}
             onChange={event => {
               setPlaylistEdit({
                 ...playlistEdit,
@@ -178,7 +198,7 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (prop) => {
         </div>
         <ButtonSavePlaylist playlist={playlistEdit} />
       </div>
-    </div >
+    </Wrapper>
   )
 }
 
@@ -198,21 +218,54 @@ export const FallBack: React.FC = () => {
   )
 }
 
+export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
+  const dispatch = React.useContext(ContextDispatchAppState)
+  const appState = React.useContext(ContextAppState)
+
+  function pushEditorWithAnimation(plType: YoutubePlaylist['type']) {
+    const videos: YoutubePlaylist['videos'] = plType === 'youtube' ? [] : [{ id: "", title: "" }]
+    dispatch({
+      type: 'set-target-playlist',
+      props: {
+        name: '',
+        type: plType,
+        videos: videos,
+        isShuffle: false
+      }
+    })
+    pushDisplayWithAnimation(dispatch, 'playlist-editor')
+  }
+
+  return (
+    <Wrapper wrapTarget="playlist-type-selection-wrapper" index={props.index}>
+      <div id="selection-and-description">
+        <div id="label-selection-description">タイプを選択</div>
+        <div id="selections">
+          <div className="selection" onClick={() => {
+          pushEditorWithAnimation('youtube_radio')
+          }}>
+            <img src="../../../icon/youtube radio.svg" id="icon-youtube-radio"></img>
+          </div>
+          <div className="selection" onClick={() => {
+            pushEditorWithAnimation('youtube')
+          }}>
+            <IconedButton iconName="iconYoutube" id="iconYoutube" />
+          </div>
+        </div>
+      </div>
+      <IconedButton iconName="arrowLeft" className="button-back" onClick={() => {
+        popDisplayWithAnimation(dispatch)
+      }} />
+    </Wrapper>
+  )
+}
+
 const ButtonCreatePlaylist: React.FC = () => {
   const dispatch = React.useContext(ContextDispatchAppState)
 
   return (
     <div className='button-create-playlist' onClick={() => {
-      dispatch({
-        type: 'set-target-playlist',
-        props: {
-          name: '',
-          videos: [],
-          type: 'youtube',
-          isShuffle: false
-        }
-      })
-      pushDisplayWithAnimation(dispatch, 'playlist-editor')
+      pushDisplayWithAnimation(dispatch, 'playlist-type-selection')
     }}>
       <i className='fas fa-plus plus-icon'></i>
       <div id="new-playlist-text">Create Playlist</div>
@@ -221,7 +274,7 @@ const ButtonCreatePlaylist: React.FC = () => {
 }
 
 const IconedButton: React.FC<{ iconName: keyof typeof Icons } & React.HtmlHTMLAttributes<HTMLElement>> = (props) => {
-  const className = props.className + ` ${Icons[props.iconName]}`
+  const className = props.className + ` ${Icons[props.iconName]} `
   return <i  {...props} className={className}></i >
 }
 
@@ -250,8 +303,10 @@ const ButtonPinPlayer: React.FC = () => {
   )
 }
 
-const Thumbnail: React.FC<{ src: string, className: string }> = (props) => {
-  return <img src={props.src} className={props.className}></img>
+const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
+  return <img {...props} style={{
+    background: "#FFFFFF"
+  }}></img>
 }
 
 
@@ -329,7 +384,7 @@ const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
   </div>
   return (
     <div id="playlist-navigator">
-      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (props.playlist.type === 'youtube' ? playlistURLDisplay : null)]}
+      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (props.playlist.type === 'youtube' ? playlistURLDisplay : <></>)]}
     </div>
   )
 }
@@ -354,7 +409,7 @@ const NameDisplayAndNavigator: React.FC<{ playlist: Playlist }> = (props) => {
 const PlaylistInformationDisplay: React.FC<{ playlist: Playlist }> = (props) => {
   return (
     <div id="playlist-info-display">
-      <img src={getYoutubeThumbnailURLFromID(props.playlist.videos[0].id)} className="playlist-thumbnail"></img>
+      <Thumbnail src={getYoutubeThumbnailURLFromID(props.playlist.videos[0].id)} className="playlist-thumbnail" />
       <NameDisplayAndNavigator playlist={props.playlist} />
     </div>
   )
@@ -406,23 +461,9 @@ const CharterDisplay: React.FC<{ value: string }> = (props) => {
   )
 }
 
-const EditableTextInput: React.FC<Omit<React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, 'type'>> = (props) => {
+type EditableVideoDisplayPropType = { video: YoutubeVideo, index: number, setEditedVideo: (option: YoutubeVideo | 'delete') => void }
 
-  const [stateValue, setStateValue] = React.useState(props.value)
-  const handler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if ((typeof props.onChange) === "function" && props.onChange) {
-
-      props.onChange(event)
-    }
-    setStateValue(event.target.value)
-  }
-  return <input {...props} type="text" value={stateValue} onChange={handler}></input>
-}
-
-
-
-
-const EditableVideoDisplay: React.FC<{ video: YoutubeVideo, index: number, onDelete?: (video: YoutubeVideo, index: number) => void }> = (props) => {
+const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => {
   const [currentDisplay, setCurrentDisplay] = React.useState<'title' | 'url'>('title')
   const isDefault = props.video.id === ''
   if (isDefault && currentDisplay === 'title') {
@@ -431,39 +472,41 @@ const EditableVideoDisplay: React.FC<{ video: YoutubeVideo, index: number, onDel
 
   const [isDeleted, setIsDeleted] = React.useState<boolean>(false)
   const [animationHook, setAnimationHook] = React.useState<'' | 'fade-away'>('')
-  const [title, setTitle] = React.useState(props.video.title)
-  const [id, setID] = React.useState(props.video.id)
-
-  const refInputURL = React.useRef<HTMLInputElement>()
-  const url = isDefault ? '' : `youtube.com/watch?v=${id}`
-  React.useEffect(() => {
-    refInputURL.current.focus()
-  }, [currentDisplay])
+  const url = isDefault ? '' : `youtube.com/watch?v=${props.video.id} `
 
   if (isDeleted) {
     return <></>
   }
 
   return (
-    <div className={`editor-video-display ${animationHook}`} >
+    <div className={`editor-video-display ${animationHook} `} >
       <IconedButton iconName="cross" className='button-remove-video' onClick={async () => {
         setAnimationHook('fade-away')
         await sleep(300)
         setIsDeleted(true)
-        typeof props.onDelete === 'function' ? props.onDelete(props.video, props.index) : {}
+        props.setEditedVideo('delete')
+
       }} />
-      <input type='text' value={title} className='charter-display' readOnly={true}
+      <input type='text' value={props.video.title} className='charter-display' readOnly={true}
         onClick={() => {
-          refInputURL.current.focus()
           setCurrentDisplay('url')
         }}
         style={{
           display: currentDisplay === 'title' ? 'flex' : 'none'
         }} />
-      <input type='text' placeholder="Youtube URL" defaultValue={url} className='charter-display' ref={refInputURL} readOnly={!isDefault}
-        onBlur={() => {
-          setCurrentDisplay('title')
+      <input autoFocus={!
+        (props.index === 0 && props.video.id === "")} type='text' placeholder="Youtube URL" defaultValue={url} className='charter-display' readOnly={!isDefault}
+        onBlur={(e) => {
+          window.YoutubeRadio.getYoutubeTitleFromID(parseYoutubeVideoURL(e.target.value).id)
+            .then(title => {
+              props.setEditedVideo({
+                id: parseYoutubeVideoURL(e.target.value).id,
+                title: title
+              })
+              setCurrentDisplay('title')
+            })
         }}
+
         style={{
           display: currentDisplay === 'url' ? 'flex' : 'none'
         }} />
@@ -480,8 +523,6 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
 
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
-
-  const suspender = React.useContext(ContextSuspenderFunction)
 
   const isValidPlaylistName = new MultipileConditions()
   const isValidPlaylistURL = new MultipileConditions()
@@ -500,12 +541,13 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
     .add(parsedPlaylistURL.protocol === 'https:')
 
 
-  isValidVideos.
-    add(props.playlist.videos
+  isValidVideos
+    .add(props.playlist.videos
       .map(v => parseYoutubeVideoURL(getYoutubeURLFromID(v.id)))
       .map(p => (p.host === 'www.youtube.com' && p.id.length === 11 && p.protocol === 'https:'))
       .reduce((c, p) => c && p, true)
     )
+    .add(props.playlist.videos.length > 0)
 
   let isValidEdit = false;
 
@@ -546,7 +588,9 @@ type VideoURL = {
   host: string
 }
 
-function parseYoutubeVideoURL(url: string): VideoURL {
+export function parseYoutubeVideoURL(url: string): VideoURL {
+  const reIncludesHttps = /^https:\/\//;
+  url = reIncludesHttps.test(url) ? url : `https://${url}`
   const parsedURL = window.YoutubeRadio.parse(url, true)
   return {
     protocol: parsedURL.protocol ?? '',
@@ -624,7 +668,7 @@ function getRandomInt(min: number, max: number) {
 }
 
 function getYoutubeThumbnailURLFromID(videoID: string): string {
-  return `https://img.youtube.com/vi/${videoID ?? ''}/sddefault.jpg`
+  return videoID.length === 11 ? `https://img.youtube.com/vi/${videoID ?? ''}/sddefault.jpg` : ''
 }
 
 function getPlaylistURLFromPlaylistID(id: string): string {
@@ -634,6 +678,7 @@ function getPlaylistURLFromPlaylistID(id: string): string {
 function getYoutubeURLFromID(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`
 }
+
 
 function sleep(time: number): Promise<void> {
   return new Promise((resolve, reject) => {

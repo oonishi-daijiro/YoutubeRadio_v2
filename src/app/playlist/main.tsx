@@ -90,9 +90,6 @@ export const ContextSuspenderFunction = React.createContext<(promise: Promise<vo
 const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
-  const suspender = (promise: Promise<void>): void => {
-    throw promise
-  }
 
   if (!appState.isPlaylistsLoaded) {
     const playlists = sPlaylists.read()
@@ -102,9 +99,7 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
     })
   }
 
-  return (
-    <ContextSuspenderFunction.Provider value={suspender}>
-      {...props.children}
-    </ContextSuspenderFunction.Provider>
-  )
+  return (<>
+    {...props.children}
+  </>)
 }

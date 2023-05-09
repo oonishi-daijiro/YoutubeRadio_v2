@@ -656,7 +656,7 @@ class PlaylistEditor {
 
       videoUrlDisplay.addEventListener('focusout', async () => {
         if (videoTitleDisplay.value === "") {
-          const title = await window.YoutubeRadio.getYoutubeTitle(videoUrlDisplay.value)
+          const title = await window.YoutubeRadio.getYoutubeTitleFromID(videoUrlDisplay.value)
           videoUrlDisplay.readOnly = title === "" ? false : true
           if (title !== "") {
             videoTitleDisplay.value = title

@@ -204,6 +204,7 @@ export function deletePlaylist(name: string) {
 async function updatePlaylist(oldPlaylist: Playlist, newPlaylist: Playlist): Promise<Playlist> {
   oldPlaylist.name = newPlaylist.name
   oldPlaylist.isShuffle = newPlaylist.isShuffle
+
   if (oldPlaylist.type === "youtube") {
     if (oldPlaylist.playlistID !== newPlaylist.playlistID) {
       oldPlaylist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
@@ -222,19 +223,12 @@ export async function editPlaylist(playlistName: string, newPlaylist: Playlist) 
   let isUnique = false
   await Promise.all(playlists.map(async (playlist, index) => {
     if (playlist.name === playlistName) {
-
       isUnique = true
       playlists[index] = await updatePlaylist(playlist, newPlaylist)
     }
   }))
   if (!isUnique) {
-    playlists.push(await createPlaylist({
-      name: newPlaylist.name,
-      videos: [],
-      playlistID: newPlaylist.playlistID,
-      isShuffle: false,
-      type: "youtube"
-    }))
+    playlists.push(await createPlaylist(newPlaylist))
   }
   configFile.set('playlists', playlists)
 }

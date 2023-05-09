@@ -114,11 +114,6 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
     currentState.playlistName === appliedPlaylist.name,
     appliedPlaylist.playlistID ? currentState.playlistID === appliedPlaylist.playlistID : true
   ]
-
-  conditions.forEach((tf, index) => {
-    console.log(`${index}${tf}`);
-
-  })
   player.setShuffle(false)
 
 
@@ -145,12 +140,12 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
         }
       })
     appliedPlaylist.videos = videos
-    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist)
+    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist) // For update playlist without using less api
   } else if (appliedPlaylist.type === "youtube_radio") {
+
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videos) {
       return
     }
-    
     const idList: string[] = appliedPlaylist.videos.map(e => {
       return e.id
     })
@@ -176,7 +171,6 @@ async function playerOnReady() {
   loadPlaylist(playlist)
   setVolume(volume)
 }
-
 
 window.YoutubeRadio.onVideoPlayed(() => {
   pauseButton.className = "fas fa-pause"

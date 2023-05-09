@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Playlist, YoutubePlaylist } from "../../lib/config";
 import { playlistNavigation, YoutubeRadioPreload } from "../../preload/playlist";
-import { PlaylistDetailDisplay, PlaylistEditorDisplay, PlaylistsDisplay } from "./components"
+import { PlaylistDetailDisplay, PlaylistEditorDisplay, PlaylistTypeSelection, PlaylistsDisplay } from "./components"
 import { sPlaylists } from "./main";
 
 interface preload extends Window {
@@ -13,7 +13,8 @@ export declare const window: preload
 export const Displays = {
   'playlists': (index: number) => <PlaylistsDisplay index={index} />,
   'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
-  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />
+  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
+  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />
 } as const
 
 
@@ -109,6 +110,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
     return DefaultAppState
   }
 
+
   switch (action.type) {
 
     case 'push-display':
@@ -183,7 +185,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
             ...currentAppState,
             displays: ['playlists', currentAppState.displays[currentAppState.displays.length - 1]],
             switchAnimationHook: ['fade-in-from-left', 'fade-out-to-right'],
-            isAnimating:true
+            isAnimating: true
           }
       }
 

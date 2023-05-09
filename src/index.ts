@@ -76,7 +76,7 @@ app.on('ready', () => {
   mainWindow.on('close', () => {
     mainWindow.webContents.removeAllListeners()
   })
-  createpl("https://www.youtube.com/playlist?list=PLD9LTsJMicOnQvC7GDgOtOo4Y0jQ0aVex", "YTRPL", false)
+  // createpl("https://www.youtube.com/playlist?list=PLD9LTsJMicOnQvC7GDgOtOo4Y0jQ0aVex", "YTRPL", false)
 
 
 })
@@ -177,7 +177,7 @@ ipcMain.on('open-playlist-window', () => {
       },
     }
   )
-  //playlistWindow.webContents.openDevTools()
+  // playlistWindow.webContents.openDevTools()
 
   ipcMain.handleOnce('ready-to-show-playlist-window', () => {
     playlistWindow.show()
@@ -200,15 +200,16 @@ ipcMain.handle('delete-playlist', (_, name: string) => {
   config.deletePlaylist(name)
 })
 
-ipcMain.handle('get-youtube-title', async (_, url: string) => {
-  return await youtube.getTitle(youtube.getID(url))
+ipcMain.handle('get-youtube-title', (_, id: string) => {
+  return youtube.getTitle(id)
 })
 
 ipcMain.handle('open-external', (_, youtubeUrl: string) => {
   console.log(youtubeUrl);
 
   const parsedUrl = url.parse(youtubeUrl)
-  if (parsedUrl.host === 'youtube.com' && parsedUrl.protocol === 'https:') {
+
+  if (parsedUrl.host === 'www.youtube.com' && parsedUrl.protocol === 'https:') {
     shell.openExternal(youtubeUrl)
   }
 })
