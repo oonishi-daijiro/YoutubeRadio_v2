@@ -244,7 +244,7 @@ export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
           <div className="selection" onClick={() => {
           pushEditorWithAnimation('youtube_radio')
           }}>
-            <img src="../../../icon/youtube radio.svg" id="icon-youtube-radio"></img>
+            <img src="./youtube_radio.svg" id="icon-youtube-radio"></img>
           </div>
           <div className="selection" onClick={() => {
             pushEditorWithAnimation('youtube')

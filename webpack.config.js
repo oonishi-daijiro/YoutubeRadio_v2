@@ -31,11 +31,11 @@ const base = {
     }),
     new CopyFilePlugin({
       patterns: [{
-        from: './*.svg',
+        from: './**/**/*.svg',
         globOptions: {
           ignore: ['**/node_modules/']
         },
-        context: './icon'
+        context: './src'
       }]
     })
   ],
