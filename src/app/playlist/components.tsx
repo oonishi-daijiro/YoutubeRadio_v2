@@ -310,27 +310,31 @@ const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
 }
 
 
-const ButtonShuffle: React.FC<{ playlist: Playlist }> = (props) => {
+const ButtonShuffle: React.FC = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
+
   return (
     <IconedButton
-      iconName="shuffle"
-      onClick={() => {
+    iconName="shuffle"
+    onClick={() => {
         dispatch({
-          type: 'edit-target-playlist',
-          props: {
-            playlist: {
-              ...props.playlist,
-              isShuffle: !props.playlist.isShuffle
-            }
+        type: 'edit-target-playlist',
+        props: {
+          playlist: {
+            ...appState.targetPlaylist,
+            isShuffle: !appState.targetPlaylist.isShuffle
           }
+        }
         })
-        window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, appState.targetPlaylist)
+        window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name,  {
+            ...appState.targetPlaylist,
+            isShuffle: !appState.targetPlaylist.isShuffle
+        })
       }}
       style={
         {
-          color: props.playlist.isShuffle ? '#353535' : '#A6A6A6'
+          color: appState.targetPlaylist.isShuffle ? '#353535' : '#A6A6A6'
         }
       }
       className="button-shuffle navigator"
@@ -356,7 +360,7 @@ const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
         window.YoutubeRadio.close()
       }}
     />
-  const buttonSuffle = <ButtonShuffle playlist={props.playlist} />
+  const buttonSuffle = <ButtonShuffle />
   const buttonDelete =
     <IconedButton
       iconName="trashBin"
@@ -512,11 +516,6 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
         }} />
     </div >
   )
-}
-
-function logThrough<T>(p: T): T {
-  console.log(p)
-  return p
 }
 
 const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {

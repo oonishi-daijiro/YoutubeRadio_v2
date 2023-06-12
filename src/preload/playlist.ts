@@ -27,17 +27,8 @@ export interface YoutubeRadioPreload {
   savePlaylists(playlists: config.Playlist[]): Promise<void>
 }
 
-async function sleep(duration: number) {
-  return await new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve({})
-    }, duration);
-  })
-}
-
 const api: YoutubeRadioPreload = {
   async getPlaylists(): Promise<config.Playlist[]> {
-    // await sleep(3000)
     return ipcRenderer.invoke('get-playlists')
   },
   close(): void {
@@ -63,7 +54,7 @@ const api: YoutubeRadioPreload = {
   },
   getYoutubeTitleFromID(id: string): Promise<string> {
     console.log(id);
-    
+
     return ipcRenderer.invoke('get-youtube-title', id)
   },
   openExternal(url: string): void {

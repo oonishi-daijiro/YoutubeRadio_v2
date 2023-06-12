@@ -9,12 +9,6 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 document.getElementById('pause').className = 'fas fa-play'
 let player: YT.Player//youtube iframe api instance will be here;
 
-const currentState = {
-  id: "",
-  playlistName: "",
-  playlistID: ""
-}
-
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
   onYouTubeIframeAPIReady: () => void
@@ -32,10 +26,7 @@ declare global {
 
 window.addEventListener('load', () => {
   stopServer()
-
-
   window.YoutubeRadio.emitWindowGetReady()
-
 })
 
 function stopServer(): void {
@@ -49,8 +40,6 @@ function stopServer(): void {
 }
 
 window.onYouTubeIframeAPIReady = function () { // when youtube iframe api get ready, this function will call
-  console.log("sus");
-
   player = new YT.Player('player', {
     height: '300',
     width: '288',
@@ -67,7 +56,7 @@ window.onYouTubeIframeAPIReady = function () { // when youtube iframe api get re
         setTimeout(() => {
           player.nextVideo()
         }, 2500);
-        console.error("Error:", err)
+        console.error("iframe api Error:", err)
       }
     },
     host: 'https://www.youtube-nocookie.com'
@@ -109,19 +98,8 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
     return
   }
 
-  const conditions: Array<boolean> = [
-    currentState.id === appliedPlaylist.videos[index].id,
-    currentState.playlistName === appliedPlaylist.name,
-    appliedPlaylist.playlistID ? currentState.playlistID === appliedPlaylist.playlistID : true
-  ]
   player.setShuffle(false)
-
-
-  if (conditions.reduce((p, c) => p && c)) return
-
   player.stopVideo()
-
-
 
   if (appliedPlaylist.type === "youtube") {
 
@@ -139,8 +117,11 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
           title: ""
         }
       })
+
+    if (videos.length === 0) return;
+
     appliedPlaylist.videos = videos
-    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist) // For update playlist without using less api
+    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist) // For update playlist without using api key
   } else if (appliedPlaylist.type === "youtube_radio") {
 
     if (!appliedPlaylist || !appliedPlaylist.name || !appliedPlaylist.videos) {
@@ -157,11 +138,6 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
     })
   }
   player.setLoop(true)
-
-  currentState.id = appliedPlaylist.videos[index].id;
-  currentState.playlistID = appliedPlaylist.playlistID ?? ""
-  currentState.playlistName = appliedPlaylist.name
-
   player.setShuffle(appliedPlaylist.isShuffle)
 }
 

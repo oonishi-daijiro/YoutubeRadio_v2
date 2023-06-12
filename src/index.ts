@@ -36,8 +36,6 @@ app.on('ready', () => {
   )
 
   // mainWindow.webContents.openDevTools()
-
-
   const port = launchServer()
 
   mainWindow.loadURL(`http://localhost:${port}`)
@@ -77,8 +75,6 @@ app.on('ready', () => {
     mainWindow.webContents.removeAllListeners()
   })
   // createpl("https://www.youtube.com/playlist?list=PLD9LTsJMicOnQvC7GDgOtOo4Y0jQ0aVex", "YTRPL", false)
-
-
 })
 
 async function createpl(url: string, name: string, op: boolean) {

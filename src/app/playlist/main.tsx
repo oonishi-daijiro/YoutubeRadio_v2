@@ -24,8 +24,6 @@ class SuspenseResource<T> {
     this.setFetcher()
   }
   read(): T {
-    console.log(this.stat);
-
     switch (this.stat) {
       case 'pending':
         throw this.promise
@@ -82,10 +80,7 @@ const App: React.FC = () => {
 
 AppRoot.render(<App />)
 
-
-
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
-export const ContextSuspenderFunction = React.createContext<(promise: Promise<void>) => void>(() => new Promise((() => { })))
 
 const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)

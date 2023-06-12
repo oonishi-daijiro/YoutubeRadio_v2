@@ -79,8 +79,6 @@ export async function getAllVideoFromYoutubePlaylistID(id: string): Promise<Yout
   }
 
   async function getVideos(videos: YoutubeVideo[] = [], nextPageToken: string = undefined): Promise<YoutubeVideo[]> {
-
-
     if (nextPageToken !== undefined) {
       query.pageToken = nextPageToken
     }
