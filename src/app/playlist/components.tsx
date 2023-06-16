@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Playlist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
-import { YoutubeRadioPreload } from "../../preload/playlist";
+import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist";
 import { ContextAppState, ContextDispatchAppState } from "./main";
 import { ReducerActions } from "./reducer";
 import { ForwardedRef } from "react";
@@ -53,16 +53,9 @@ export const PlaylistDisplay: React.FC<{ playlist: Playlist, index: number }> = 
         iconName="play"
         className="play-button"
         onClick={() => {
-          dispatch({
-            type: 'load-playlist',
-            props: props.playlist.name
-          })
-          dispatch({
-            type: 'navigate-playlist',
-            props: {
-              index: 0,
-              shuffle: props.playlist.isShuffle
-            }
+          loadPlaylist(props.playlist.name)
+          navigatePlaylist({
+            shuffle: props.playlist.isShuffle
           })
           dispatch({
             type: 'close-window'
@@ -199,7 +192,7 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
         <div id="editor-video-content-display">
           {videoEditor}
         </div>
-        <ButtonSavePlaylist playlist={playlistEdit} />
+        <ButtonSavePlaylist playlistEdited={playlistEdit} />
       </div>
     </Wrapper>
   )
@@ -312,7 +305,7 @@ const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
 }
 
 
-const ButtonShuffle: React.FC = (props) => {
+const ButtonShuffle: React.FC = () => {
   const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
 
@@ -333,12 +326,9 @@ const ButtonShuffle: React.FC = (props) => {
           ...appState.targetPlaylist,
           isShuffle: !appState.targetPlaylist.isShuffle
         })
+        navigatePlaylist({
+          shuffle: !appState.targetPlaylist.isShuffle
 
-        dispatch({
-          type: 'navigate-playlist',
-          props: {
-            shuffle: !appState.targetPlaylist.isShuffle
-          }
         })
       }}
       style={
@@ -351,24 +341,18 @@ const ButtonShuffle: React.FC = (props) => {
   )
 }
 
-const PlaylistNavigator: React.FC<{ playlistEdited: Playlist }> = (props) => {
+const PlaylistNavigator: React.FC = () => {
   const dispatch = React.useContext(ContextDispatchAppState)
+  const appState = React.useContext(ContextAppState)
 
   const buttonPlay =
     <IconedButton
       iconName="play"
       className="button-play navigator"
       onClick={() => {
-        dispatch({
-          type: 'load-playlist',
-          props: props.playlistEdited.name
-        })
-        dispatch({
-          type: 'navigate-playlist',
-          props: {
-            shuffle: props.playlistEdited.isShuffle,
-            index: props.playlistEdited.isShuffle ? getRandomInt(0, props.playlistEdited.videos.length) : 0
-          }
+        loadPlaylist(appState.targetPlaylist.name)
+        navigatePlaylist({
+          shuffle: appState.targetPlaylist.isShuffle,
         })
         window.YoutubeRadio.close()
       }}
@@ -381,7 +365,7 @@ const PlaylistNavigator: React.FC<{ playlistEdited: Playlist }> = (props) => {
       onClick={() => {
         dispatch({
           type: 'delete-playlist',
-          props: props.playlistEdited.name
+          props: appState.targetPlaylist.name
         })
         popDisplayWithAnimation(dispatch)
       }}
@@ -395,13 +379,13 @@ const PlaylistNavigator: React.FC<{ playlistEdited: Playlist }> = (props) => {
   />
   const playlistURLDisplay = <div spellCheck={false} className="yt-playlist-url-display"
     onClick={() => {
-      window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(props.playlistEdited.playlistID))
+      window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(appState.targetPlaylist.playlistID))
     }}>
-    {`www.youtube.com/playlist?list=${props.playlistEdited.playlistID}`}
+    {`www.youtube.com/playlist?list=${appState.targetPlaylist.playlistID}`}
   </div>
   return (
     <div id="playlist-navigator">
-      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (props.playlistEdited.type === 'youtube' ? playlistURLDisplay : <></>)]}
+      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (appState.targetPlaylist.type === 'youtube' ? playlistURLDisplay : <></>)]}
     </div>
   )
 }
@@ -419,7 +403,7 @@ const NameDisplayAndNavigator: React.FC = () => {
   return (
     <div id="name-display-and-navigator">
       <PlaylistNameDisplay name={appState.targetPlaylist.name} />
-      <PlaylistNavigator playlistEdited={appState.targetPlaylist} />
+      <PlaylistNavigator />
     </div>
   )
 }
@@ -439,24 +423,15 @@ const VideoDisplay: React.FC<{
   videoIndex: number,
   playlist: Playlist
 }> = (props) => {
-  const dispatch = React.useContext(ContextDispatchAppState)
   const appstate = React.useContext(ContextAppState)
   return (
     <div className="video-display">
       <IconedButton iconName="note" className="icon-music" />
       <CharterDisplay value={props.video.title} />
       <IconedButton iconName="play" className="button-playvideo" onClick={() => {
-        dispatch({
-          type: 'load-playlist',
-          props: appstate.targetPlaylist.name
-        })
-
-        dispatch({
-          type: 'navigate-playlist',
-          props: {
-            index: props.videoIndex,
-            shuffle: appstate.targetPlaylist.isShuffle
-          }
+        loadPlaylist(appstate.targetPlaylist.name, props.videoIndex)
+        navigatePlaylist({
+          shuffle: appstate.targetPlaylist.isShuffle
         })
         window.YoutubeRadio.close()
       }} />
@@ -465,10 +440,11 @@ const VideoDisplay: React.FC<{
 }
 
 const VideoListDisplay: React.FC<{ playlist: Playlist }> = (props) => {
+  const appState = React.useContext(ContextAppState)
   return (
     <div className="videolist-display">
       {
-        props.playlist.videos.map((video, index) => (<VideoDisplay video={video} videoIndex={index} playlist={props.playlist} />))
+        appState.targetPlaylist.videos.map((video, index) => (<VideoDisplay video={video} videoIndex={index} playlist={props.playlist} />))
       }
     </div>
   )
@@ -542,7 +518,7 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   )
 }
 
-const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
+const ButtonSavePlaylist: React.FC<{ playlistEdited: Playlist }> = (props) => {
 
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
@@ -551,11 +527,11 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
   const isValidPlaylistURL = new MultipileConditions()
   const isValidVideos = new MultipileConditions()
 
-  const parsedPlaylistURL = parsePlaylistURL(getPlaylistURLFromPlaylistID(props.playlist.playlistID))
+  const parsedPlaylistURL = parsePlaylistURL(getPlaylistURLFromPlaylistID(props.playlistEdited.playlistID))
 
   isValidPlaylistName
-    .add(props.playlist.name.length > 0)
-    .add(!appState.playlists.map(pl => pl.name).includes(props.playlist.name), props.playlist.name !== appState.targetPlaylist.name)
+    .add(props.playlistEdited.name.length > 0)
+    .add(!appState.playlists.map(pl => pl.name).includes(props.playlistEdited.name), props.playlistEdited.name !== appState.targetPlaylist.name)
 
 
   isValidPlaylistURL
@@ -565,18 +541,18 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
 
 
   isValidVideos
-    .add(props.playlist.videos
+    .add(props.playlistEdited.videos
       .map(v => parseYoutubeVideoURL(getYoutubeURLFromID(v.id)))
       .map(p => (p.host === 'www.youtube.com' && p.id.length === 11 && p.protocol === 'https:'))
       .reduce((c, p) => c && p, true)
     )
-    .add(props.playlist.videos.length > 0)
+    .add(props.playlistEdited.videos.length > 0)
 
   let isValidEdit = false;
 
-  if (props.playlist.type === 'youtube') {
+  if (props.playlistEdited.type === 'youtube') {
     isValidEdit = isValidPlaylistName.reduce() && isValidPlaylistURL.reduce()
-  } else if (props.playlist.type === 'youtube_radio') {
+  } else if (props.playlistEdited.type === 'youtube_radio') {
     isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce()
   }
 
@@ -590,19 +566,27 @@ const ButtonSavePlaylist: React.FC<{ playlist: Playlist }> = (props) => {
           dispatch({
             type: 'edit-target-playlist',
             props: {
-              playlist: props.playlist
+              playlist: props.playlistEdited
 
             }
           })
           dispatch({
             type: 'animation-end'
           })
-          await window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, props.playlist)
+          await window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, props.playlistEdited)
           reloadPlaylistsWithAnimation(dispatch)
         }
       }} />
 
   )
+}
+
+function loadPlaylist(name: string, index: number = 0) {
+  window.YoutubeRadio.loadPlaylist(name, index)
+}
+
+function navigatePlaylist(navigation: playlistNavigation) {
+  window.YoutubeRadio.navigatePlaylist(navigation)
 }
 
 type VideoURL = {

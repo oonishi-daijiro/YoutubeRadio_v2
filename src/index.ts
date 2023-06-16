@@ -35,7 +35,7 @@ app.on('ready', () => {
     }
   )
 
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
   const port = launchServer()
 
   mainWindow.loadURL(`http://localhost:${port}`)
@@ -188,8 +188,8 @@ ipcMain.handle('close-playlist-window', () => {
   playlistWindow = null as unknown as BrowserWindow;
 })
 
-ipcMain.handle('load-playlist', (_, name: string) => {
-  mainWindow.webContents.send('load-playlist', name)
+ipcMain.handle('load-playlist', (_, arg: { name: string, index: number }) => {
+  mainWindow.webContents.send('load-playlist', arg)
 })
 
 ipcMain.handle('delete-playlist', (_, name: string) => {

@@ -5,7 +5,6 @@ import { parseYoutubeVideoURL } from "../app/playlist/components";
 
 
 export interface playlistNavigation {
-  index?: number
   shuffle: boolean
 }
 
@@ -13,7 +12,7 @@ export interface YoutubeRadioPreload {
   emitWindowGetReady(): void
   getPlaylists(): Promise<config.Playlist[]>
   close(): void
-  loadPlaylist(name: string): void
+  loadPlaylist(name: string, index: number): void
   openEditPlaylist(playlistName: string): void
   navigatePlaylist(navigation: playlistNavigation): void
   deletePlaylist(name: string): Promise<void>
@@ -33,8 +32,11 @@ const api: YoutubeRadioPreload = {
   close(): void {
     ipcRenderer.invoke('close-playlist-window')
   },
-  loadPlaylist(index: string): void {
-    ipcRenderer.invoke('load-playlist', index)
+  loadPlaylist(name: string, index: number): void {
+    ipcRenderer.invoke('load-playlist', {
+      name: name,
+      index: index
+    })
   },
   openEditPlaylist(playlistName: string): void {
     ipcRenderer.send('open-edit-playlist', playlistName)

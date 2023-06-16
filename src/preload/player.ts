@@ -13,7 +13,7 @@ export default interface YoutubeRadioPreload {
   onReqPauseVideo(callback: () => void): void
   openSelectPlaylistWindow(): void
   onReqPreviousVideo(callback: () => void): void
-  onLoadPlaylist(callback: (playlistName: string) => Promise<void>): void
+  onLoadPlaylist(callback: (arg: { name: string, index: number }) => Promise<void>): void
   createYoutubeVideo(info: config.youtubeVideoInfo): Promise<config.YoutubeVideo>
   emitPlayerStartPlaying(): void
   onPlayerStartPlaying(): Promise<any>
@@ -58,7 +58,7 @@ const api: YoutubeRadioPreload = {
   openSelectPlaylistWindow: () => {
     ipcRenderer.send('open-playlist-window')
   },
-  onLoadPlaylist(callback: (playlistName: string) => Promise<void>) {
+  onLoadPlaylist(callback: (arg: { name: string, index: number }) => Promise<void>) {
     ipcRenderer.on('load-playlist', (_, arg) => {
       callback(arg)
     })

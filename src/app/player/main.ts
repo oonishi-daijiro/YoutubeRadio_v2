@@ -69,16 +69,13 @@ async function getPlaylists(): Promise<Playlist[]> {
 
 window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation = {
   shuffle: false,
-  index: -1,
 }) => {
-  player.setShuffle(false)
-  navigation.index > 0 ? player.playVideoAt(navigation.index) : {}
   player.setShuffle(navigation.shuffle)
 })
 
-window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
-  const playlist = (await getPlaylists()).find(e => e.name === playlistName)
-  loadPlaylist(playlist)
+window.YoutubeRadio.onLoadPlaylist(async (arg: { name: string, index: number }) => {
+  const playlist = (await getPlaylists()).find(e => e.name === arg.name)
+  loadPlaylist(playlist, arg.index)
 })
 
 interface loadPlaylistParm {
@@ -90,12 +87,11 @@ interface loadPlaylistParm {
   suggestedQuality?: string
 }
 
-async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
+async function loadPlaylist(appliedPlaylist: Playlist, index: number) {
 
   if (!appliedPlaylist || !appliedPlaylist.name) {
     return
   }
-
   player.setShuffle(false)
   player.stopVideo()
 
@@ -142,7 +138,7 @@ async function loadPlaylist(appliedPlaylist: Playlist, index: number = 0) {
 async function playerOnReady() {
   const volume = await window.YoutubeRadio.getVolume()
   const [playlist] = await getPlaylists()
-  loadPlaylist(playlist)
+  loadPlaylist(playlist, 0)
   setVolume(volume)
 }
 
