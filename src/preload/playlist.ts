@@ -5,7 +5,6 @@ import { parseYoutubeVideoURL } from "../app/playlist/components";
 
 
 export interface playlistNavigation {
-  name: string
   index?: number
   shuffle: boolean
 }

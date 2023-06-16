@@ -67,19 +67,17 @@ async function getPlaylists(): Promise<Playlist[]> {
   return await window.YoutubeRadio.getPlaylists()
 }
 
-window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation) => {
-
-  const playlist = (await getPlaylists()).find(e => {
-    return e.name === navigation.name
-  })
-  playlist.isShuffle = navigation.shuffle
-  loadPlaylist(playlist, navigation.index)
+window.YoutubeRadio.onReqNavigation(async (navigation: playlistNavigation = {
+  shuffle: false,
+  index: -1,
+}) => {
+  player.setShuffle(false)
+  navigation.index > 0 ? player.playVideoAt(navigation.index) : {}
+  player.setShuffle(navigation.shuffle)
 })
 
 window.YoutubeRadio.onLoadPlaylist(async (playlistName: string) => {
-  const playlist = (await getPlaylists()).find(e => {
-    return e.name === playlistName
-  })
+  const playlist = (await getPlaylists()).find(e => e.name === playlistName)
   loadPlaylist(playlist)
 })
 

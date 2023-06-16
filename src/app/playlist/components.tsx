@@ -54,9 +54,12 @@ export const PlaylistDisplay: React.FC<{ playlist: Playlist, index: number }> = 
         className="play-button"
         onClick={() => {
           dispatch({
+            type: 'load-playlist',
+            props: props.playlist.name
+          })
+          dispatch({
             type: 'navigate-playlist',
             props: {
-              name: props.playlist.name,
               index: 0,
               shuffle: props.playlist.isShuffle
             }
@@ -220,7 +223,6 @@ export const FallBack: React.FC = () => {
 
 export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
-  const appState = React.useContext(ContextAppState)
 
   function pushEditorWithAnimation(plType: YoutubePlaylist['type']) {
     const videos: YoutubePlaylist['videos'] = plType === 'youtube' ? [] : [{ id: "", title: "" }]
@@ -242,7 +244,7 @@ export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
         <div id="label-selection-description">タイプを選択</div>
         <div id="selections">
           <div className="selection" onClick={() => {
-          pushEditorWithAnimation('youtube_radio')
+            pushEditorWithAnimation('youtube_radio')
           }}>
             <img src="./youtube_radio.svg" id="icon-youtube-radio"></img>
           </div>
@@ -316,20 +318,27 @@ const ButtonShuffle: React.FC = (props) => {
 
   return (
     <IconedButton
-    iconName="shuffle"
-    onClick={() => {
+      iconName="shuffle"
+      onClick={() => {
         dispatch({
-        type: 'edit-target-playlist',
-        props: {
-          playlist: {
-            ...appState.targetPlaylist,
-            isShuffle: !appState.targetPlaylist.isShuffle
+          type: 'edit-target-playlist',
+          props: {
+            playlist: {
+              ...appState.targetPlaylist,
+              isShuffle: !appState.targetPlaylist.isShuffle
+            }
           }
-        }
         })
-        window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name,  {
-            ...appState.targetPlaylist,
-            isShuffle: !appState.targetPlaylist.isShuffle
+        window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, {
+          ...appState.targetPlaylist,
+          isShuffle: !appState.targetPlaylist.isShuffle
+        })
+
+        dispatch({
+          type: 'navigate-playlist',
+          props: {
+            shuffle: !appState.targetPlaylist.isShuffle
+          }
         })
       }}
       style={
@@ -342,9 +351,7 @@ const ButtonShuffle: React.FC = (props) => {
   )
 }
 
-
-
-const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
+const PlaylistNavigator: React.FC<{ playlistEdited: Playlist }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
 
   const buttonPlay =
@@ -352,10 +359,16 @@ const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
       iconName="play"
       className="button-play navigator"
       onClick={() => {
-        window.YoutubeRadio.navigatePlaylist({
-          name: props.playlist.name,
-          shuffle: props.playlist.isShuffle,
-          index: props.playlist.isShuffle ? getRandomInt(0, props.playlist.videos.length) : 0
+        dispatch({
+          type: 'load-playlist',
+          props: props.playlistEdited.name
+        })
+        dispatch({
+          type: 'navigate-playlist',
+          props: {
+            shuffle: props.playlistEdited.isShuffle,
+            index: props.playlistEdited.isShuffle ? getRandomInt(0, props.playlistEdited.videos.length) : 0
+          }
         })
         window.YoutubeRadio.close()
       }}
@@ -368,7 +381,7 @@ const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
       onClick={() => {
         dispatch({
           type: 'delete-playlist',
-          props: props.playlist.name
+          props: props.playlistEdited.name
         })
         popDisplayWithAnimation(dispatch)
       }}
@@ -382,13 +395,13 @@ const PlaylistNavigator: React.FC<{ playlist: Playlist }> = (props) => {
   />
   const playlistURLDisplay = <div spellCheck={false} className="yt-playlist-url-display"
     onClick={() => {
-      window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(props.playlist.playlistID))
+      window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(props.playlistEdited.playlistID))
     }}>
-    {`www.youtube.com/playlist?list=${props.playlist.playlistID}`}
+    {`www.youtube.com/playlist?list=${props.playlistEdited.playlistID}`}
   </div>
   return (
     <div id="playlist-navigator">
-      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (props.playlist.type === 'youtube' ? playlistURLDisplay : <></>)]}
+      {[buttonPlay, buttonSuffle, buttonDelete, buttonEdit, (props.playlistEdited.type === 'youtube' ? playlistURLDisplay : <></>)]}
     </div>
   )
 }
@@ -401,20 +414,22 @@ const PlaylistNameDisplay: React.FC<{ name: string }> = (props) => {
   )
 }
 
-const NameDisplayAndNavigator: React.FC<{ playlist: Playlist }> = (props) => {
+const NameDisplayAndNavigator: React.FC = () => {
+  const appState = React.useContext(ContextAppState)
   return (
     <div id="name-display-and-navigator">
-      <PlaylistNameDisplay name={props.playlist.name} />
-      <PlaylistNavigator playlist={props.playlist} />
+      <PlaylistNameDisplay name={appState.targetPlaylist.name} />
+      <PlaylistNavigator playlistEdited={appState.targetPlaylist} />
     </div>
   )
 }
 
 const PlaylistInformationDisplay: React.FC<{ playlist: Playlist }> = (props) => {
+  const appState = React.useContext(ContextAppState)
   return (
     <div id="playlist-info-display">
-      <Thumbnail src={getYoutubeThumbnailURLFromID(props.playlist.videos[0].id)} className="playlist-thumbnail" />
-      <NameDisplayAndNavigator playlist={props.playlist} />
+      <Thumbnail src={getYoutubeThumbnailURLFromID(appState.targetPlaylist.videos[0].id)} className="playlist-thumbnail" />
+      <NameDisplayAndNavigator />
     </div>
   )
 }
@@ -424,15 +439,24 @@ const VideoDisplay: React.FC<{
   videoIndex: number,
   playlist: Playlist
 }> = (props) => {
+  const dispatch = React.useContext(ContextDispatchAppState)
+  const appstate = React.useContext(ContextAppState)
   return (
     <div className="video-display">
       <IconedButton iconName="note" className="icon-music" />
       <CharterDisplay value={props.video.title} />
       <IconedButton iconName="play" className="button-playvideo" onClick={() => {
-        window.YoutubeRadio.navigatePlaylist({
-          name: props.playlist.name,
-          index: props.videoIndex,
-          shuffle: props.playlist.isShuffle
+        dispatch({
+          type: 'load-playlist',
+          props: appstate.targetPlaylist.name
+        })
+
+        dispatch({
+          type: 'navigate-playlist',
+          props: {
+            index: props.videoIndex,
+            shuffle: appstate.targetPlaylist.isShuffle
+          }
         })
         window.YoutubeRadio.close()
       }} />

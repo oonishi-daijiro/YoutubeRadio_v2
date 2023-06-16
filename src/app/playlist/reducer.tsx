@@ -100,7 +100,10 @@ export interface ReducerActions {
   'reload': {
     type: 'reload'
   }
-
+  'load-playlist': {
+    type: 'load-playlist',
+    props: string
+  }
 }
 
 
@@ -218,6 +221,11 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         isPlaylistsLoaded: false,
         displays: ['playlists'],
         switchAnimationHook: ['']
+      }
+    case 'load-playlist':
+      window.YoutubeRadio.loadPlaylist(action.props)
+      return {
+        ...currentAppState
       }
   }
 }
