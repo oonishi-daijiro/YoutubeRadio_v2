@@ -35,7 +35,7 @@ app.on('ready', () => {
     }
   )
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   const port = launchServer()
 
   mainWindow.loadURL(`http://localhost:${port}`)
