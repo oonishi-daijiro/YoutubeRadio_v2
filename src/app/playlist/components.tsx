@@ -679,7 +679,7 @@ function getYoutubeThumbnailURLFromID(videoID: string): string {
 }
 
 function getPlaylistURLFromPlaylistID(id: string): string {
-  return `https://www.youtube.com/watch?list=${id}`
+  return `https://www.youtube.com/playlist?list=${id}`
 }
 
 function getYoutubeURLFromID(id: string): string {
