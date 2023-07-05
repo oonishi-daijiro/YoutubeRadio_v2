@@ -9,7 +9,6 @@ export interface playlistNavigation {
 }
 
 export interface YoutubeRadioPreload {
-  emitWindowGetReady(): void
   getPlaylists(): Promise<config.Playlist[]>
   close(): void
   loadPlaylist(name: string, index: number): void
@@ -46,9 +45,6 @@ const api: YoutubeRadioPreload = {
   },
   deletePlaylist(name: string): Promise<void> {
     return ipcRenderer.invoke('delete-playlist', name)
-  },
-  emitWindowGetReady(): void {
-    ipcRenderer.invoke('ready-to-show-playlist-window')
   },
   editPlaylist(playlsitName: string, playlist: config.Playlist): Promise<void> {
     return ipcRenderer.invoke('edit-playlist', playlsitName, playlist)

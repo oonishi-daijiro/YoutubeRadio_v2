@@ -152,7 +152,8 @@ ipcMain.handle('pin-player', () => {
 })
 
 
-ipcMain.on('open-playlist-window', () => {
+ipcMain.handle('open-playlist-window', () => {
+
   playlistWindow = new BrowserWindow(
     {
       frame: false,
@@ -173,14 +174,13 @@ ipcMain.on('open-playlist-window', () => {
       },
     }
   )
-  // playlistWindow.webContents.openDevTools()
+  playlistWindow.loadFile(path.resolve(__dirname, './app/playlist/playlist.html'))
 
-  ipcMain.handleOnce('ready-to-show-playlist-window', () => {
+  playlistWindow.once('ready-to-show', () => {
     playlistWindow.show()
   })
-
-  playlistWindow.loadFile(path.resolve(__dirname, './app/playlist/playlist.html'))
 })
+
 
 
 ipcMain.handle('close-playlist-window', () => {

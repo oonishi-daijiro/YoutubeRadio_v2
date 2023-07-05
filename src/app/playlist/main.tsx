@@ -9,10 +9,6 @@ interface preload extends Window {
 }
 export declare const window: preload
 
-window.addEventListener('load', async () => {
-  window.YoutubeRadio.emitWindowGetReady()
-})
-
 class SuspenseResource<T> {
   constructor(resourceFetcher: () => Promise<T>, defaultData: T) {
     this.resouseFetcher = resourceFetcher

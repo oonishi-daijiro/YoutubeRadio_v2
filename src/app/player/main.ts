@@ -199,8 +199,8 @@ function playVideo() {
 
 const buttonOpenSelectPlaylist = document.getElementById('getUrl')
 
-buttonOpenSelectPlaylist.addEventListener('click', () => {
-  window.YoutubeRadio.openSelectPlaylistWindow()
+buttonOpenSelectPlaylist.addEventListener('click', async (event) => {
+  await window.YoutubeRadio.openSelectPlaylistWindow()
 })
 
 
