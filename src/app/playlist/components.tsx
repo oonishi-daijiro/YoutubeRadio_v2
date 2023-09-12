@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Playlist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
+import { Playlist, PrimitivePlaylist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
 import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist";
 import { ContextAppState, ContextDispatchAppState } from "./main";
 import { ReducerActions } from "./reducer";
@@ -32,7 +32,7 @@ const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playlist-det
   return <div id={props.wrapTarget} className={`${appState.switchAnimationHook[props.index]}`} style={{ pointerEvents: appState.isAnimating ? 'none' : 'auto' }}>{props.children}</div>
 }
 
-export const PlaylistDisplay: React.FC<{ playlist: Playlist, index: number }> = (props) => {
+export const PlaylistDisplay: React.FC<{ playlist: PrimitivePlaylist, index: number }> = (props) => {
   const playlistThumbnailSrc = getYoutubeThumbnailURLFromID((props.playlist.videos[0] ?? { id: '' }).id)
   const dispatch = React.useContext(ContextDispatchAppState)
   return (
@@ -408,7 +408,7 @@ const NameDisplayAndNavigator: React.FC = () => {
   )
 }
 
-const PlaylistInformationDisplay: React.FC<{ playlist: Playlist }> = (props) => {
+const PlaylistInformationDisplay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
   const appState = React.useContext(ContextAppState)
   return (
     <div id="playlist-info-display">
@@ -421,7 +421,7 @@ const PlaylistInformationDisplay: React.FC<{ playlist: Playlist }> = (props) => 
 const VideoDisplay: React.FC<{
   video: YoutubeVideo,
   videoIndex: number,
-  playlist: Playlist
+  playlist: PrimitivePlaylist
 }> = (props) => {
   const appstate = React.useContext(ContextAppState)
   return (
@@ -439,7 +439,7 @@ const VideoDisplay: React.FC<{
   )
 }
 
-const VideoListDisplay: React.FC<{ playlist: Playlist }> = (props) => {
+const VideoListDisplay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
   const appState = React.useContext(ContextAppState)
   return (
     <div className="videolist-display">
@@ -518,7 +518,7 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   )
 }
 
-const ButtonSavePlaylist: React.FC<{ playlistEdited: Playlist }> = (props) => {
+const ButtonSavePlaylist: React.FC<{ playlistEdited: PrimitivePlaylist }> = (props) => {
 
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
@@ -554,6 +554,8 @@ const ButtonSavePlaylist: React.FC<{ playlistEdited: Playlist }> = (props) => {
     isValidEdit = isValidPlaylistName.reduce() && isValidPlaylistURL.reduce()
   } else if (props.playlistEdited.type === 'youtube_radio') {
     isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce()
+  } else if (props.playlistEdited.type === "single_video") {
+    isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce()
   }
 
   return (
@@ -567,7 +569,6 @@ const ButtonSavePlaylist: React.FC<{ playlistEdited: Playlist }> = (props) => {
             type: 'edit-target-playlist',
             props: {
               playlist: props.playlistEdited
-
             }
           })
           dispatch({

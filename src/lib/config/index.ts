@@ -1,239 +1,226 @@
 import { app } from "electron";
-import * as electronStore from "electron-store"
+import * as electronStore from "electron-store";
 import * as diff from "diff";
 
 import * as youtube from "../youtube";
 
-export type playlistTypes = 'youtube' | 'youtube_radio';
+interface _playlistTypes {
+  youtube: YoutubePlaylist;
+  youtube_radio: YoutubeRadioPlaylist;
+  single_video: SingleVideoPlaylist;
+}
+export type playlistTypes = keyof _playlistTypes;
 
 export const configFile = new electronStore({
-  cwd: app.getPath('userData')
-})
+  cwd: app.getPath("userData"),
+});
 
-export interface youtubeVideoInfo {
-  id: string
-  title?: string | undefined
-}
+const defaultPlaylist: PrimitivePlaylist = {
+  name: "",
+  videos: [{ id: "", title: "" }],
+  isShuffle: false,
+  type: "youtube_radio",
+};
 
-export interface YoutubeVideo {
-  id: string
-  title: string
-}
+export const YoutubeRadioConfig = {
+  getAllPlaylists(): PrimitivePlaylist[] {
+    const rawConfig = configFile.get(
+      "playlists",
+      []
+    ) as Array<PrimitivePlaylist>;
 
-export class YoutubeVideo implements YoutubeVideo {
-  id: string
-  title: string
-  constructor(videoInfo: youtubeVideoInfo = {
-    id: "",
-    title: undefined
-  }) {
-    this.title = videoInfo.title
-    this.id = videoInfo.id
-  }
-}
-
-export interface Playlist {
-  type: playlistTypes
-  name: string
-  videos: YoutubeVideo[]
-  isShuffle: boolean
-  playlistID?: string
-}
-
-export class YoutubePlaylist implements Playlist {
-  name: string
-  videos: YoutubeVideo[]
-  playlistID: string
-  isShuffle
-  type: playlistTypes
-
-  constructor(playlistInfo: Playlist) {
-    this.videos = playlistInfo.videos.length === 0 ? [] : playlistInfo.videos
-    this.playlistID = playlistInfo.playlistID ? playlistInfo.playlistID : ""
-    this.name = playlistInfo.name ? playlistInfo.name : ""
-    this.isShuffle = playlistInfo.isShuffle
-    this.type = "youtube"
-  }
-}
-
-export class YoutubeRadioPlaylist implements Playlist {
-  name: string
-  videos: YoutubeVideo[]
-  isShuffle = false
-  type: playlistTypes
-  constructor(playlistInfo: Playlist) {
-    this.videos = playlistInfo.videos ? playlistInfo.videos : defaultPlaylist.videos
-    this.name = playlistInfo.name ? playlistInfo.name : ""
-    this.isShuffle = playlistInfo.isShuffle
-    this.type = "youtube_radio"
-  }
-}
-
-
-
-export async function createVideoListFromDiff(currentVideoList: YoutubeVideo[], newVideoList: YoutubeVideo[]): Promise<YoutubeVideo[]> {
-  const currentVideoListID = currentVideoList.map(e => e.id)
-  const newVideoListID = newVideoList.map(e => e.id)
-  const difference = diff.diffArrays(currentVideoListID, newVideoListID)
-  let index = 0
-  console.log("called");
-
-
-  for (const diffOperation of difference) {
-    if (diffOperation.added) {
-      for (const _ of diffOperation.value) {
-        newVideoList[index].title = await youtube.getTitle(newVideoList[index].id)
-        console.log("add")
-        currentVideoList.splice(index, 0, newVideoList[index])
-        index++
-      }
-    } else if (diffOperation.removed) {
-      diffOperation.value.forEach(() => {
-        console.log("remove");
-        currentVideoList.splice(index, 1)
-      })
+    const playlists = rawConfig.filter((pl) => {
+      return [
+        pl.videos.length > 0,
+        pl.name.length > 0,
+        pl.type === "youtube" ? pl.playlistID.length > 0 : true,
+      ].reduce((previous, current) => previous && current);
+    });
+    return playlists;
+  },
+  getPlaylist(name: string): PrimitivePlaylist {
+    return YoutubeRadioConfig.getAllPlaylists().find((e) => e.name === name);
+  },
+  setAllPlaylists(playlists: PrimitivePlaylist[]) {
+    configFile.set("playlists", playlists);
+  },
+  setPlaylist(playlist: PrimitivePlaylist) {
+    if (!playlist.name.length || !playlist.videos.length) {
+      return;
+    }
+    const playlists = YoutubeRadioConfig.getAllPlaylists();
+    if (YoutubeRadioConfig.isAlreadyExistPlaylist(playlist.name)) {
+      playlists[playlists.findIndex((e) => e.name === playlist.name)] =
+        playlist;
     } else {
+      playlists.push(playlist);
+    }
 
-      console.log("noop");
-      diffOperation.value.forEach(() => {
-        index++
-      })
+    configFile.set("playlists", playlists);
+  },
+  isAlreadyExistPlaylist(name: string): boolean {
+    return YoutubeRadioConfig.getAllPlaylists()
+      .map((e) => e.name)
+      .includes(name);
+  },
+  deletePlaylist(name: string) {
+    const playlists = YoutubeRadioConfig.getAllPlaylists();
+    playlists.splice(playlists.findIndex((e) => e.name === name, 1));
+    configFile.set("playlists", playlists);
+  },
+  getVolume(): number {
+    const volume = configFile.get("volume", 50) as number;
+    return volume;
+  },
+  setVolume(volume: number) {
+    configFile.set("volume", volume);
+  },
+  async editPlaylistAndSave(
+    playlistName: string,
+    newPlaylist: PrimitivePlaylist
+  ) {
+    const playlists = YoutubeRadioConfig.getAllPlaylists();
+    const bufferPlaylist = Playlist.toPlaylist(
+      newPlaylist.type,
+      playlists.find((e) => e.name === playlistName) ??
+        ((defaultPlaylist.type = newPlaylist.type), defaultPlaylist)
+    );
+    await bufferPlaylist.applyPlaylist(newPlaylist);
+    if (YoutubeRadioConfig.isAlreadyExistPlaylist(playlistName)) {
+      playlists[playlists.findIndex((e) => e.name === playlistName)] =
+        bufferPlaylist;
+    } else {
+      playlists.push(bufferPlaylist);
+    }
+
+    YoutubeRadioConfig.setAllPlaylists(playlists);
+  },
+};
+
+export type PrimitivePlaylist = {
+  type: playlistTypes;
+  name: string;
+  videos: YoutubeVideo[];
+  isShuffle: boolean;
+  playlistID?: string;
+};
+
+export type YoutubeVideo = {
+  id: string;
+  title: string;
+};
+
+export class Playlist implements PrimitivePlaylist {
+  type: playlistTypes;
+  videos: YoutubeVideo[];
+  isShuffle: boolean;
+  name: string;
+
+  static toPlaylist<KEY extends keyof _playlistTypes>(
+    type: KEY,
+    pl: PrimitivePlaylist
+  ): _playlistTypes[KEY] {
+    if (type === "youtube") {
+      return new YoutubePlaylist(pl) as _playlistTypes[KEY];
+    } else if (type === "youtube_radio") {
+      return new YoutubeRadioPlaylist(pl) as _playlistTypes[KEY];
+    } else if (type === "single_video") {
+      return new SingleVideoPlaylist(pl) as _playlistTypes[KEY];
     }
   }
-  return currentVideoList
-}
 
-const defaultVideo = new YoutubeVideo()
-const defaultPlaylist: Playlist = new YoutubeRadioPlaylist(
-  {
-    name: "",
-    videos: [defaultVideo],
-    isShuffle: false,
-    type: "youtube_radio"
-  })
-const defaultPlaylists: Playlist[] = []
-
-export async function createPlaylist(info: Playlist): Promise<Playlist> {
-  if (info.type === 'youtube') {
-    const playlist = new YoutubePlaylist(info)
-    playlist.videos = await youtube.getAllVideoFromYoutubePlaylistID(playlist.playlistID)
-    return playlist
-  } else if (info.type === 'youtube_radio') {
-    const currentPlaylist = getPlaylist(info.name)
-    const playlist = new YoutubeRadioPlaylist(info)
-    playlist.videos = await createVideoListFromDiff(currentPlaylist.videos, playlist.videos)
-    return playlist
+  constructor(prmPlaylist: PrimitivePlaylist) {
+    this.name = prmPlaylist.name;
+    this.isShuffle = prmPlaylist.isShuffle;
+    this.videos = prmPlaylist.videos;
+    this.type = prmPlaylist.type;
   }
-}
 
-export function getPlaylists(): Playlist[] {
-  const rawConfig = configFile.get("playlists", defaultPlaylists) as Array<Playlist>
-  const playlists = rawConfig
-    .filter(pl => {
-      return pl.videos.length > 0
-    }).map(pl => {
-      if (pl.type === 'youtube') {
-        return new YoutubePlaylist({ ...pl })
-      } else if (pl.type === 'youtube_radio') {
-        return new YoutubeRadioPlaylist({ ...pl })
+  applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
+    this.name = pl.name;
+    this.isShuffle = pl.isShuffle;
+    return this.updateVideos(pl.videos);
+  }
+
+  protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
+    const currentVideoListID = this.videos.map((e) => e.id);
+    const newVideoListID = newVideoList.map((e) => e.id);
+    const difference = diff.diffArrays(currentVideoListID, newVideoListID);
+    let index = 0;
+
+    for (const diffOperation of difference) {
+      if (diffOperation.added) {
+        for (const _ of diffOperation.value) {
+          newVideoList[index].title = await youtube.getTitle(
+            newVideoList[index].id
+          );
+          this.videos.splice(index, 0, newVideoList[index]);
+          index++;
+        }
+      } else if (diffOperation.removed) {
+        diffOperation.value.forEach(() => {
+          this.videos.splice(index, 1);
+        });
       } else {
-        return defaultPlaylist
+        diffOperation.value.forEach(() => {
+          index++;
+        });
       }
-    })
-  return playlists
-}
-
-export function getPlaylist(playlistName: string) {
-  let playlist = defaultPlaylist
-  getPlaylists().forEach(e => {
-    if (e.name === playlistName) {
-      playlist = e
     }
-  })
-  return playlist
-}
-
-
-export async function setPlaylist(playlist: Playlist = defaultPlaylist) {
-  if (!playlist.name.length || !playlist.videos.length) {
-    return
-  }
-  const playlists = getPlaylists()
-  let isUnique = false
-  playlists.forEach((e, index) => {
-    if (e.name === playlist.name) {
-      playlists[index] = playlist
-      isUnique = true
-    }
-  })
-  if (!isUnique) {
-    playlists.push(playlist)
   }
 
-
-  configFile.set('playlists', playlists)
-}
-
-export function isAlreadyExistPlaylist(name: string): boolean {
-  return getPlaylists().map(e => e.name).includes(name)
-}
-
-export function getVolume(): number {
-  const volume = configFile.get('volume', 50) as number
-  return volume
-}
-
-export function setVolume(volume: number) {
-  configFile.set('volume', volume)
-}
-
-export function deletePlaylist(name: string) {
-  let index = -1
-  const playlists = getPlaylists()
-  playlists.forEach((playlist: Playlist, i: number) => {
-    if (playlist.name === name) {
-      index = i
-    }
-  })
-  if (index != -1) {
-    playlists.splice(index, 1)
-    configFile.set('playlists', playlists)
+  toPrimitivePlaylist(): PrimitivePlaylist {
+    return {
+      ...this,
+    };
   }
 }
 
-async function updatePlaylist(oldPlaylist: Playlist, newPlaylist: Playlist): Promise<Playlist> {
-  oldPlaylist.name = newPlaylist.name
-  oldPlaylist.isShuffle = newPlaylist.isShuffle
+export class YoutubePlaylist extends Playlist {
+  type: playlistTypes = "youtube";
+  playlistID: string;
 
-  if (oldPlaylist.type === "youtube") {
-    if (oldPlaylist.playlistID !== newPlaylist.playlistID) {
-      oldPlaylist.videos = await youtube.getAllVideoFromYoutubePlaylistID(newPlaylist.playlistID)
-      oldPlaylist.playlistID = newPlaylist.playlistID
+  constructor(prmPlaylist: PrimitivePlaylist) {
+    super(prmPlaylist);
+    this.playlistID = prmPlaylist.playlistID;
+  }
+
+  async applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
+
+    if (this.playlistID !== pl.playlistID) {
+      console.log("change playlist id");
+      this.name = pl.name;
+      this.isShuffle = pl.isShuffle;
+      await this.updatePlaylistID(pl.playlistID);
     } else {
-      oldPlaylist.videos = await createVideoListFromDiff(oldPlaylist.videos, newPlaylist.videos)
+      console.log("change video list");
+      await super.applyPlaylist(pl);
     }
-  } else if (oldPlaylist.type === "youtube_radio") {
-    oldPlaylist.videos = await createVideoListFromDiff(oldPlaylist.videos, newPlaylist.videos)
   }
-  return oldPlaylist
+  private async updatePlaylistID(ID: string) {
+    this.videos = await youtube.getAllVideoFromYoutubePlaylistID(ID);
+    this.playlistID = ID;
+  }
 }
 
-export async function editPlaylist(playlistName: string, newPlaylist: Playlist) {
-  const playlists = getPlaylists()
-  let isUnique = false
-  await Promise.all(playlists.map(async (playlist, index) => {
-    if (playlist.name === playlistName) {
-      isUnique = true
-      playlists[index] = await updatePlaylist(playlist, newPlaylist)
-    }
-  }))
-  if (!isUnique) {
-    playlists.push(await createPlaylist(newPlaylist))
+export class YoutubeRadioPlaylist extends Playlist {
+  type: playlistTypes = "youtube_radio";
+  constructor(prmPlaylist: PrimitivePlaylist) {
+    super(prmPlaylist);
   }
-  configFile.set('playlists', playlists)
+  protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
+    return super.updateVideos(newVideoList);
+  }
 }
 
-
-export function setPlaylists(playlists: Playlist[]) {
-  configFile.set('playlists', playlists)
+export class SingleVideoPlaylist extends Playlist {
+  type: playlistTypes = "single_video";
+  constructor(prmPlaylist: PrimitivePlaylist) {
+    super(prmPlaylist);
+    this.name = this.videos[0].title;
+  }
+  protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
+    await super.updateVideos(newVideoList);
+    this.name = this.videos[0].title;
+  }
 }

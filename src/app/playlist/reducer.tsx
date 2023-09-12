@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Playlist, YoutubePlaylist } from "../../lib/config";
+import { Playlist, PrimitivePlaylist, YoutubePlaylist } from "../../lib/config";
 import { playlistNavigation, YoutubeRadioPreload } from "../../preload/playlist";
 import { PlaylistDetailDisplay, PlaylistEditorDisplay, PlaylistTypeSelection, PlaylistsDisplay } from "./components"
 import { sPlaylists } from "./main";
@@ -29,9 +29,9 @@ export const animationNames = [
 
 export interface AppState {
   isPlaylistsLoaded: boolean
-  playlists: Playlist[]
+  playlists: PrimitivePlaylist[]
   displays: (keyof typeof Displays)[]
-  targetPlaylist: Playlist
+  targetPlaylist: PrimitivePlaylist
   switchAnimationHook: typeof animationNames[number][]
   isAnimating: boolean
 }
@@ -54,7 +54,7 @@ export const DefaultAppState: AppState = {
 export interface ReducerActions {
   'set-target-playlist': {
     type: 'set-target-playlist',
-    props: Playlist
+    props: PrimitivePlaylist
   }
   'push-display': {
     type: 'push-display',
@@ -70,7 +70,7 @@ export interface ReducerActions {
   'edit-target-playlist': {
     type: 'edit-target-playlist',
     props: {
-      playlist: Playlist,
+      playlist: PrimitivePlaylist,
     }
   }
   'close-window': {
@@ -88,7 +88,7 @@ export interface ReducerActions {
   }
   'load-playlists': {
     type: 'load-playlists',
-    props: Playlist[]
+    props: PrimitivePlaylist[]
   }
   'reload-playlists': {
     type: 'reload-playlists',
