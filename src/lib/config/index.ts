@@ -65,7 +65,10 @@ export const YoutubeRadioConfig = {
   },
   deletePlaylist(name: string) {
     const playlists = YoutubeRadioConfig.getAllPlaylists();
-    playlists.splice(playlists.findIndex((e) => e.name === name, 1));
+    playlists.splice(
+      playlists.findIndex((e) => e.name === name, 1),
+      1
+    );
     configFile.set("playlists", playlists);
   },
   getVolume(): number {
