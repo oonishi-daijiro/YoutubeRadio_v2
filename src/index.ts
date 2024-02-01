@@ -1,4 +1,4 @@
-import { ipcMain, app, BrowserWindow, shell } from "electron";
+import { ipcMain, app, BrowserWindow, shell, session } from "electron";
 import { launchServer } from "./lib/server";
 import * as config from "./lib/config";
 import { YoutubeRadioThumbarButtons } from "./lib/thumbnail-toolber-buttons";
@@ -11,6 +11,8 @@ import * as path from "path";
 
 let mainWindow: BrowserWindow = null as unknown as BrowserWindow;
 let playlistWindow: BrowserWindow = null as unknown as BrowserWindow;
+
+const port = launchServer();
 
 app.on("ready", () => {
   mainWindow = new BrowserWindow({
@@ -30,8 +32,7 @@ app.on("ready", () => {
     },
   });
 
-  // mainWindow.webContents.openDevTools();
-  const port = launchServer();
+  mainWindow.webContents.openDevTools();
 
   mainWindow.loadURL(`http://localhost:${port}`);
   mainWindow.setIcon(path.resolve(__dirname, "../icon/icon.ico"));
@@ -51,8 +52,8 @@ app.on("ready", () => {
 
   ipcMain.handle("ready-to-show-player", () => {
     mainWindow.show();
-    mainWindow.setThumbarButtons(buttonsVideoPlaying);
   });
+  mainWindow.setThumbarButtons(buttonsVideoPlaying);
 
   mainWindow.webContents.on("media-paused", () => {
     mainWindow.setThumbarButtons(buttonsVideoPaused);
@@ -121,8 +122,7 @@ ipcMain.handle("pin-player", () => {
   return mainWindow.isAlwaysOnTop();
 });
 
-ipcMain.handle("open-playlist-window", () => {
-  console.time("open-playlist-window");
+ipcMain.handle("open-playlist-window", async () => {
   playlistWindow = new BrowserWindow({
     frame: false,
     width: 520,
@@ -132,7 +132,6 @@ ipcMain.handle("open-playlist-window", () => {
     resizable: false,
     useContentSize: true,
     modal: true,
-    // show: false,
     parent: mainWindow,
     webPreferences: {
       contextIsolation: true,
@@ -141,20 +140,16 @@ ipcMain.handle("open-playlist-window", () => {
       sandbox: true,
     },
   });
-
-  // playlistWindow.webContents.openDevTools();
+  playlistWindow.webContents.openDevTools();
 
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
-  console.timeEnd("open-playlist-window");
-
-  // playlistWindow.once("ready-to-show", () => {
-  //   playlistWindow.show();
-  // });
 });
 
 ipcMain.handle("close-playlist-window", () => {
+  // playlistWindow.reload();
+
   playlistWindow.close();
   playlistWindow = null as unknown as BrowserWindow;
 });

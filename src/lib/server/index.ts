@@ -16,7 +16,7 @@ export function launchServer() {
   const server = http.createServer((req, res) => {
     const parm = url.parse(req.url as string, true)
     if (parm.query.loaded === "true") {
-      server.close()
+      // server.close()
     }
     const pathname = url.parse(req.url as string).pathname
     switch (pathname) {

@@ -49,6 +49,10 @@ class SuspenseResource<T> {
 
 }
 
+const printRenderLog = (...logs) => {
+  console.log(...logs);
+  return "";
+}
 
 
 const domAppRoot = document.getElementById('root')
@@ -59,9 +63,11 @@ export const ContextAppState = React.createContext<AppState>(DefaultAppState)
 
 const App: React.FC = () => {
   const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultAppState)
+
   return (
     <ContextAppState.Provider value={appState}>
       <ContextDispatchAppState.Provider value={dispatchAppState}>
+        {printRenderLog("render context")}
         <React.Suspense fallback={<></>}>
           <Suspenser>
             {appState.displays.map((displayName, index) => Displays[displayName](index))}

@@ -4,7 +4,6 @@ import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist"
 import { ContextAppState, ContextDispatchAppState } from "./main";
 import { ReducerActions } from "./reducer";
 
-
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
@@ -115,7 +114,7 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const refURLInput = React.useRef<HTMLInputElement>()
 
 
-  let videoEditor: string | number | boolean | JSX.Element | React.ReactFragment
+  let videoEditor: string | number | boolean | JSX.Element
 
   if (playlistEdit.type === 'youtube') {
     const playlistURL = playlistEdit.playlistID ? `www.youtube.com/playlist?list=${playlistEdit.playlistID} ` : ''
