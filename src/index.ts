@@ -75,7 +75,8 @@ ipcMain.handle("navigate-playlist", (_, navigation: playlistNavigation) => {
 });
 
 ipcMain.handle("get-playlists", () => {
-  return config.YoutubeRadioConfig.getAllPlaylists();
+  const pl = config.YoutubeRadioConfig.getAllPlaylists();
+  return pl;
 });
 
 ipcMain.on("close-player", () => {
@@ -121,6 +122,7 @@ ipcMain.handle("pin-player", () => {
 });
 
 ipcMain.handle("open-playlist-window", () => {
+  console.time("open-playlist-window");
   playlistWindow = new BrowserWindow({
     frame: false,
     width: 520,
@@ -130,7 +132,7 @@ ipcMain.handle("open-playlist-window", () => {
     resizable: false,
     useContentSize: true,
     modal: true,
-    show: false,
+    // show: false,
     parent: mainWindow,
     webPreferences: {
       contextIsolation: true,
@@ -139,13 +141,17 @@ ipcMain.handle("open-playlist-window", () => {
       sandbox: true,
     },
   });
+
+  // playlistWindow.webContents.openDevTools();
+
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
+  console.timeEnd("open-playlist-window");
 
-  playlistWindow.once("ready-to-show", () => {
-    playlistWindow.show();
-  });
+  // playlistWindow.once("ready-to-show", () => {
+  //   playlistWindow.show();
+  // });
 });
 
 ipcMain.handle("close-playlist-window", () => {
@@ -166,7 +172,6 @@ ipcMain.handle("get-youtube-title", (_, id: string) => {
 });
 
 ipcMain.handle("open-external", (_, youtubeUrl: string) => {
-
   const parsedUrl = url.parse(youtubeUrl);
 
   if (parsedUrl.host === "www.youtube.com" && parsedUrl.protocol === "https:") {

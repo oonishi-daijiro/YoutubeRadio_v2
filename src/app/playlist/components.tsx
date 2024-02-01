@@ -1,9 +1,8 @@
 import * as React from "react";
-import { Playlist, PrimitivePlaylist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
+import { PrimitivePlaylist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
 import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist";
 import { ContextAppState, ContextDispatchAppState } from "./main";
 import { ReducerActions } from "./reducer";
-import { ForwardedRef } from "react";
 
 
 interface preload extends Window {
@@ -263,7 +262,7 @@ const ButtonCreatePlaylist: React.FC = () => {
       pushDisplayWithAnimation(dispatch, 'playlist-type-selection')
     }}>
       <i className='fas fa-plus plus-icon'></i>
-      <div id="new-playlist-text">Create Playlist</div>
+      <div id="new-playlist-text">プレイリストを作成</div>
     </div>
   )
 }

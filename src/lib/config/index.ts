@@ -186,7 +186,6 @@ export class YoutubePlaylist extends Playlist {
   }
 
   async applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
-
     if (this.playlistID !== pl.playlistID) {
       console.log("change playlist id");
       this.name = pl.name;

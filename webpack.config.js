@@ -53,7 +53,7 @@ const main = {
 
 const renderer = {
   ...base,
-  target: 'web',
+  target: 'electron-renderer',
   entry: {
     'app/player/main.js': './src/app/player/main.ts',
     'app/playlist/main.js': './src/app/playlist/main.tsx',

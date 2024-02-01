@@ -2,10 +2,10 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "ESNext",
-    "module":"ESNext",
-    "jsx":"react",
+    "module": "ESNext",
+    "jsx": "react",
     "sourceMap": true
   },
   "include": ["./"],
-  "exclude":["./node_modules","./dist"]
+  "exclude": ["./node_modules", "./dist"]
 }

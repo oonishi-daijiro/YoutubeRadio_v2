@@ -4,6 +4,8 @@ import { ReducerActions, Reducer, AppState, DefaultAppState, Displays } from "./
 import { YoutubeRadioPreload } from "../../preload/playlist";
 import { Playlist } from "../../lib/config";
 
+console.time('playlist-window-load')
+
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
@@ -71,7 +73,7 @@ const App: React.FC = () => {
 }
 
 AppRoot.render(<App />)
-
+console.timeEnd('playlist-window-load')
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
 
 const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
