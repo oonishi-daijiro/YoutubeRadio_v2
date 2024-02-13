@@ -11,7 +11,6 @@ export interface YoutubeRadioPreload {
   getPlaylists(): Promise<config.Playlist[]>;
   close(): void;
   loadPlaylist(name: string, index: number): void;
-  // openEditPlaylist(playlistName: string): void;
   navigatePlaylist(navigation: playlistNavigation): void;
   deletePlaylist(name: string): Promise<void>;
   getYoutubeTitleFromID(url: string): Promise<string>;

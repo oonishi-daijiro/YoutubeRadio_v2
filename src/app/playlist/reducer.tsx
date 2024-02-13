@@ -104,7 +104,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
   if (currentAppState === null) {
     return DefaultAppState
   }
-
+  console.log(action.type);
+  
 
   switch (action.type) {
 
@@ -198,11 +199,11 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         isPlaylistsLoaded: true,
-        playlists: [...action.props]
+        playlists: action.props
       }
 
     case 'reload-playlists':
-      sPlaylists.reLoad()
+
       return {
         ...currentAppState,
         isPlaylistsLoaded: false,

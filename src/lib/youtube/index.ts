@@ -10,7 +10,7 @@ interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
   maxResults?: number;
   part?: string;
   pageToken?: string;
-  id?: string;
+  id?: string | string[];
 }
 
 async function httpGet(url: string): Promise<string> {
@@ -60,6 +60,24 @@ export async function getTitle(ID: string = ""): Promise<string> {
     return title;
   } catch (err) {
     return "";
+  }
+}
+
+export async function getTitles(titles: string[]) {
+  const query: YoutubeDataApiQuery = {
+    key: getapikey(),
+    part: "snippet",
+    id: titles,
+  };
+  try {
+    const response = await httpGet(
+      `https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`
+    );
+    console.log(response);
+    
+    return JSON.parse(response).itmes;
+  } catch (err) {
+    console.log(err);
   }
 }
 

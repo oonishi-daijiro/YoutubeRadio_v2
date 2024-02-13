@@ -10,7 +10,6 @@ interface _playlistTypes {
   single_video: SingleVideoPlaylist;
 }
 export type playlistTypes = keyof _playlistTypes;
-
 export const configFile = new electronStore({
   cwd: app.getPath("userData"),
 });
@@ -28,7 +27,6 @@ export const YoutubeRadioConfig = {
       "playlists",
       []
     ) as Array<PrimitivePlaylist>;
-
     const playlists = rawConfig.filter((pl) => {
       return [
         pl.videos.length > 0,
@@ -150,13 +148,25 @@ export class Playlist implements PrimitivePlaylist {
     const newVideoListID = newVideoList.map((e) => e.id);
     const difference = diff.diffArrays(currentVideoListID, newVideoListID);
     let index = 0;
+    const titlesBuffer: Array<{
+      id: string;
+      index: number;
+      title: string;
+    }> = [];
 
     for (const diffOperation of difference) {
       if (diffOperation.added) {
         for (const _ of diffOperation.value) {
-          newVideoList[index].title = await youtube.getTitle(
-            newVideoList[index].id
-          );
+          titlesBuffer.push({
+            id: newVideoList[index].id,
+            index: index,
+            title: "",
+          });
+          newVideoList[index] = {
+            id: newVideoList[index].id,
+            title: "",
+          };
+          // To reduce api call, insert empty video object tempolaly. We can get youtube titles of array.
           this.videos.splice(index, 0, newVideoList[index]);
           index++;
         }
@@ -170,6 +180,9 @@ export class Playlist implements PrimitivePlaylist {
         });
       }
     }
+    const ids = titlesBuffer.map((video) => video.id);
+    const acquiredTitles = await youtube.getTitles(ids);
+    console.log(acquiredTitles);
   }
 
   toPrimitivePlaylist(): PrimitivePlaylist {

@@ -32,7 +32,7 @@ app.on("ready", () => {
     },
   });
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.loadURL(`http://localhost:${port}`);
   mainWindow.setIcon(path.resolve(__dirname, "../icon/icon.ico"));
@@ -122,7 +122,8 @@ ipcMain.handle("pin-player", () => {
   return mainWindow.isAlwaysOnTop();
 });
 
-ipcMain.handle("open-playlist-window", async () => {
+ipcMain.handle("open-playlist-window",  () => {
+
   playlistWindow = new BrowserWindow({
     frame: false,
     width: 520,
@@ -132,6 +133,7 @@ ipcMain.handle("open-playlist-window", async () => {
     resizable: false,
     useContentSize: true,
     modal: true,
+    show: false,
     parent: mainWindow,
     webPreferences: {
       contextIsolation: true,
@@ -141,10 +143,12 @@ ipcMain.handle("open-playlist-window", async () => {
     },
   });
   playlistWindow.webContents.openDevTools();
-
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
+  playlistWindow.once("ready-to-show", () => {
+    playlistWindow.show();
+  });
 });
 
 ipcMain.handle("close-playlist-window", () => {

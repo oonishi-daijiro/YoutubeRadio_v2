@@ -40,7 +40,7 @@ const base = {
     })
   ],
   mode: "production",
-  // devtool: "inline-source-map"
+  devtool: "inline-source-map"
 }
 
 const main = {

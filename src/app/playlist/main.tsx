@@ -4,8 +4,6 @@ import { ReducerActions, Reducer, AppState, DefaultAppState, Displays } from "./
 import { YoutubeRadioPreload } from "../../preload/playlist";
 import { Playlist } from "../../lib/config";
 
-console.time('playlist-window-load')
-
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
@@ -28,7 +26,7 @@ class SuspenseResource<T> {
     }
   }
 
-  reLoad(): void {
+  reload(): void {
     this.stat = 'pending'
     this.setFetcher()
   }
@@ -48,17 +46,13 @@ class SuspenseResource<T> {
   private promise: Promise<void>
 
 }
-
-const printRenderLog = (...logs) => {
-  console.log(...logs);
-  return "";
-}
-
-
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot)
 export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => console.log("reducer is not ready"))
+
 export const ContextAppState = React.createContext<AppState>(DefaultAppState)
+export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
+
 
 
 const App: React.FC = () => {
@@ -67,8 +61,7 @@ const App: React.FC = () => {
   return (
     <ContextAppState.Provider value={appState}>
       <ContextDispatchAppState.Provider value={dispatchAppState}>
-        {printRenderLog("render context")}
-        <React.Suspense fallback={<></>}>
+        <React.Suspense fallback=<Fallback />>
           <Suspenser>
             {appState.displays.map((displayName, index) => Displays[displayName](index))}
           </Suspenser>
@@ -79,8 +72,9 @@ const App: React.FC = () => {
 }
 
 AppRoot.render(<App />)
-console.timeEnd('playlist-window-load')
-export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
+const Fallback: React.FC = () => {
+  return <>fallback</>
+}
 
 const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)

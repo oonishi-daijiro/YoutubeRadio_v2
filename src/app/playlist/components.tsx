@@ -1,8 +1,9 @@
 import * as React from "react";
 import { PrimitivePlaylist, YoutubePlaylist, YoutubeVideo } from "../../lib/config";
 import { YoutubeRadioPreload, playlistNavigation } from "../../preload/playlist";
-import { ContextAppState, ContextDispatchAppState } from "./main";
+import { ContextAppState, ContextDispatchAppState, sPlaylists } from "./main";
 import { ReducerActions } from "./reducer";
+import { app } from "electron";
 
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -69,7 +70,7 @@ export const PlaylistsDisplay: React.FC<{ index: number }> = (props) => {
   return (
     <Wrapper wrapTarget='playlist-display-wrapper' index={props.index}>
       <div id="playlists-display">
-        {appState.playlists.map(playlist => <PlaylistDisplay playlist={playlist} index={props.index} />)}
+        {appState.playlists.map(playlist => <PlaylistDisplay playlist={playlist} index={props.index} key={playlist.name} />)}
         <ButtonCreatePlaylist />
       </div>
       <IconedButton
@@ -107,12 +108,17 @@ export const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
 
 export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
-  const dispatch = React.useContext(ContextDispatchAppState)
+  const dispatch = React.useContext(ContextDispatchAppState);
 
-  const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist)
-  const refNameInput = React.useRef<HTMLInputElement>()
-  const refURLInput = React.useRef<HTMLInputElement>()
 
+
+  const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist);
+  const [videoKeys, setVideoKeys] = React.useState<number[]>(playlistEdit.videos.map((_, i) => i));
+
+  console.log("render playlist editor display");
+
+  const refNameInput = React.useRef<HTMLInputElement>();
+  const refURLInput = React.useRef<HTMLInputElement>();
 
   let videoEditor: string | number | boolean | JSX.Element
 
@@ -136,26 +142,31 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
       }}
     />
   } else if (playlistEdit.type === 'youtube_radio') {
-    videoEditor = <>
-      {playlistEdit.videos.map((video, index) => (
-        <EditableVideoDisplay video={video} index={index}
-          setEditedVideo={(video: YoutubeVideo | 'delete') => {
-            if (video === 'delete') {
-              playlistEdit.videos.splice(index, 1)
-              setPlaylistEdit({
-                ...playlistEdit
-              })
-            } else {
-              playlistEdit.videos[index] = video
-              setPlaylistEdit({
-                ...playlistEdit
-              })
-            }
-          }}
-        />
 
-      ))}
+    videoEditor = <>
+      {playlistEdit.videos.map((video, index) => {
+        return (
+          <EditableVideoDisplay key={videoKeys[index]} video={video} index={index}
+            setEditedVideo={(video) => {
+              if (video === "delete") {
+                setPlaylistEdit({
+                  ...playlistEdit,
+                  videos: playlistEdit.videos.filter((_, i) => index !== i)
+                });
+                setVideoKeys(videoKeys.filter((_, i) => i !== index));
+
+              } else {
+                playlistEdit.videos[index] = video;
+                setPlaylistEdit({
+                  ...playlistEdit
+                })
+              }
+            }} />)
+      }
+      )}
       {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={() => {
+        const newKey = videoKeys.reduce((p, c) => p > c ? p : c, -1) + 1;
+        setVideoKeys([...videoKeys, newKey]);
         setPlaylistEdit({
           ...playlistEdit,
           videos: [...playlistEdit.videos, { id: "", title: "" }]
@@ -252,6 +263,7 @@ export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
     </Wrapper>
   )
 }
+
 
 const ButtonCreatePlaylist: React.FC = () => {
   const dispatch = React.useContext(ContextDispatchAppState)
@@ -463,31 +475,35 @@ const CharterDisplay: React.FC<{ value: string }> = (props) => {
   )
 }
 
-type EditableVideoDisplayPropType = { video: YoutubeVideo, index: number, setEditedVideo: (option: YoutubeVideo | 'delete') => void }
+type EditableVideoDisplayPropType = { video: YoutubeVideo, setEditedVideo: (option: YoutubeVideo | 'delete') => void, index: number }
 
 const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => {
+
+
   const [currentDisplay, setCurrentDisplay] = React.useState<'title' | 'url'>('title')
+
   const isDefault = props.video.id === ''
   if (isDefault && currentDisplay === 'title') {
     setCurrentDisplay('url')
   }
 
-  const [isDeleted, setIsDeleted] = React.useState<boolean>(false)
+  const [isDeleted, setIsDeleted] = React.useState<boolean>(false);
+
+
   const [animationHook, setAnimationHook] = React.useState<'' | 'fade-away'>('')
-  const url = isDefault ? '' : `youtube.com/watch?v=${props.video.id} `
+  const url = isDefault ? '' : `youtube.com/watch?v=${props.video.id}`
 
   if (isDeleted) {
     return <></>
   }
 
   return (
-    <div className={`editor-video-display ${animationHook} `} >
+    <div className={`editor-video-display ${animationHook}`}>
       <IconedButton iconName="cross" className='button-remove-video' onClick={async () => {
-        setAnimationHook('fade-away')
-        await sleep(300)
-        setIsDeleted(true)
+        setAnimationHook('fade-away');
+        await sleep(400);
+        setIsDeleted(true);
         props.setEditedVideo('delete')
-
       }} />
       <input type='text' value={props.video.title} className='charter-display' readOnly={true}
         onClick={() => {
@@ -499,6 +515,7 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
       <input autoFocus={!
         (props.index === 0 && props.video.id === "")} type='text' placeholder="Youtube URL" defaultValue={url} className='charter-display' readOnly={!isDefault}
         onBlur={(e) => {
+
           window.YoutubeRadio.getYoutubeTitleFromID(parseYoutubeVideoURL(e.target.value).id)
             .then(title => {
               props.setEditedVideo({
@@ -625,17 +642,17 @@ function parsePlaylistURL(url: string): PlaylistURL {
 }
 
 async function popDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void) {
-  dispatch({
-    type: 'animate',
-    props: 'pop'
-  })
-  await sleep(700)
+  // dispatch({
+  //   type: 'animate',
+  //   props: 'pop'
+  // })
+  // await sleep(700)
   dispatch({
     type: 'pop-display'
   })
-  dispatch({
-    type: 'animation-end'
-  })
+  // dispatch({
+  //   type: 'animation-end'
+  // })
 }
 
 async function pushDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void, displayName: ReducerActions['push-display']['props']) {
@@ -643,14 +660,14 @@ async function pushDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions
     type: 'push-display',
     props: displayName
   })
-  dispatch({
-    type: 'animate',
-    props: 'push'
-  })
-  await sleep(700)
-  dispatch({
-    type: 'animation-end'
-  })
+  // dispatch({
+  //   type: 'animate',
+  //   props: 'push'
+  // })
+  // await sleep(700)
+  // dispatch({
+  //   type: 'animation-end'
+  // })
 }
 
 async function reloadPlaylistsWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void) {
@@ -662,6 +679,7 @@ async function reloadPlaylistsWithAnimation(dispatch: (ReducerAction: ReducerAct
   dispatch({
     type: 'animation-end'
   })
+  sPlaylists.reload();
   dispatch({
     type: 'reload-playlists'
   })
