@@ -182,7 +182,6 @@ export class Playlist implements PrimitivePlaylist {
     }
     const ids = titlesBuffer.map((video) => video.id);
     const acquiredTitles = await youtube.getTitles(ids);
-    console.log(acquiredTitles);
   }
 
   toPrimitivePlaylist(): PrimitivePlaylist {
@@ -203,12 +202,10 @@ export class YoutubePlaylist extends Playlist {
 
   async applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
     if (this.playlistID !== pl.playlistID) {
-      console.log("change playlist id");
       this.name = pl.name;
       this.isShuffle = pl.isShuffle;
       await this.updatePlaylistID(pl.playlistID);
     } else {
-      console.log("change video list");
       await super.applyPlaylist(pl);
     }
   }

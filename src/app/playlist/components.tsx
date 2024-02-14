@@ -115,8 +115,6 @@ export const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist);
   const [videoKeys, setVideoKeys] = React.useState<number[]>(playlistEdit.videos.map((_, i) => i));
 
-  console.log("render playlist editor display");
-
   const refNameInput = React.useRef<HTMLInputElement>();
   const refURLInput = React.useRef<HTMLInputElement>();
 

@@ -73,7 +73,6 @@ export async function getTitles(titles: string[]) {
     const response = await httpGet(
       `https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`
     );
-    console.log(response);
     
     return JSON.parse(response).itmes;
   } catch (err) {

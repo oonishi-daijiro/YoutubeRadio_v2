@@ -104,9 +104,6 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
   if (currentAppState === null) {
     return DefaultAppState
   }
-  console.log(action.type);
-  
-
   switch (action.type) {
 
     case 'push-display':
