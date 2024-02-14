@@ -14,8 +14,6 @@ interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
 }
 
 async function httpGet(url: string): Promise<string> {
-  console.log("api used");
-
   return await new Promise((resolve, reject) => {
     https.get(url, (response) => {
       let data = "";
@@ -63,21 +61,50 @@ export async function getTitle(ID: string = ""): Promise<string> {
   }
 }
 
-export async function getTitles(titles: string[]) {
-  const query: YoutubeDataApiQuery = {
-    key: getapikey(),
-    part: "snippet",
-    id: titles,
-  };
-  try {
-    const response = await httpGet(
-      `https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`
-    );
-    
-    return JSON.parse(response).itmes;
-  } catch (err) {
-    console.log(err);
+function splitArray<T>(array: Array<T>, divLength: number): Array<Array<T>> {
+  const splited: Array<Array<T>> = [];
+  const divideCount = (array.length - (array.length % divLength)) / divLength;
+  for (let i = 0; i < divideCount; i++) {
+    splited.push(array.slice(i * divLength, i * divLength + divLength));
   }
+  splited.push(
+    array.slice(
+      divideCount * divLength,
+      divideCount * divLength + (array.length % divLength)
+    )
+  );
+  return splited;
+}
+
+export async function getTitles(ids: string[]): Promise<string[]> {
+  const splited = splitArray(ids, 50);
+  // [ [id,id,id] [id,id,id] [id]] -> [[title,...] [title,...] [title]] -> [title...]
+  const allTitles: Array<string> = (
+    await Promise.all(
+      splited.map(async (splitedIds): Promise<string[]> => {
+        try {
+          const query: YoutubeDataApiQuery = {
+            key: "AIzaSyDIjQyl6lVNjnfUvYMSp9J7PZXjdxs0Qtg",
+            part: "snippet",
+            id: splitedIds,
+          };
+          const response = await httpGet(
+            `https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`
+          );
+          const titles = JSON.parse(response).items.map(
+            (item: any) => item.snippet.title
+          );
+          return titles;
+        } catch (err) {
+          let nullTitles = [];
+          for (let i = 0; i < splitedIds.length; i++) {
+            nullTitles.push("");
+          }
+        }
+      })
+    )
+  ).reduce((p, c) => p.concat(c), []);
+  return allTitles;
 }
 
 export function getPlaylistID(url: string): string {
