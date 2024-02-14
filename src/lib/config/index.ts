@@ -148,28 +148,21 @@ export class Playlist implements PrimitivePlaylist {
     const newVideoListID = newVideoList.map((e) => e.id);
     const difference = diff.diffArrays(currentVideoListID, newVideoListID);
     let index = 0;
-    const titlesBuffer: Array<{
+
+    const idWithIndex: Array<{
       id: string;
       index: number;
-      title: string;
     }> = [];
 
     for (const diffOperation of difference) {
       if (diffOperation.added) {
-        for (const _ of diffOperation.value) {
-          titlesBuffer.push({
-            id: newVideoList[index].id,
+        diffOperation.value.forEach((e: string) => {
+          idWithIndex.push({
+            id: e,
             index: index,
-            title: "",
           });
-          newVideoList[index] = {
-            id: newVideoList[index].id,
-            title: "",
-          };
-          // To reduce api call, insert empty video object tempolaly. We can get youtube titles of array.
-          this.videos.splice(index, 0, newVideoList[index]);
           index++;
-        }
+        });
       } else if (diffOperation.removed) {
         diffOperation.value.forEach(() => {
           this.videos.splice(index, 1);
@@ -180,9 +173,13 @@ export class Playlist implements PrimitivePlaylist {
         });
       }
     }
-    const ids = titlesBuffer.map((video) => video.id);
-    const acquiredTitles = await youtube.getTitles(ids);
-    console.log(acquiredTitles);
+    const titles = await youtube.getTitles(idWithIndex.map((e) => e.id));
+    idWithIndex.forEach((e, i) => {
+      this.videos.splice(e.index, 0, {
+        id: e.id,
+        title: titles[i] ?? "",
+      });
+    });
   }
 
   toPrimitivePlaylist(): PrimitivePlaylist {
