@@ -84,7 +84,7 @@ export async function getTitles(ids: string[]): Promise<string[]> {
       splited.map(async (splitedIds): Promise<string[]> => {
         try {
           const query: YoutubeDataApiQuery = {
-            key: "AIzaSyDIjQyl6lVNjnfUvYMSp9J7PZXjdxs0Qtg",
+            key: getapikey(),
             part: "snippet",
             id: splitedIds,
           };

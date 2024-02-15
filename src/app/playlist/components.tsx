@@ -476,8 +476,6 @@ const CharterDisplay: React.FC<{ value: string }> = (props) => {
 type EditableVideoDisplayPropType = { video: YoutubeVideo, setEditedVideo: (option: YoutubeVideo | 'delete') => void, index: number }
 
 const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => {
-
-
   const [currentDisplay, setCurrentDisplay] = React.useState<'title' | 'url'>('title')
 
   const isDefault = props.video.id === ''
@@ -486,8 +484,6 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   }
 
   const [isDeleted, setIsDeleted] = React.useState<boolean>(false);
-
-
   const [animationHook, setAnimationHook] = React.useState<'' | 'fade-away'>('')
   const url = isDefault ? '' : `youtube.com/watch?v=${props.video.id}`
 
@@ -512,16 +508,16 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
         }} />
       <input autoFocus={!
         (props.index === 0 && props.video.id === "")} type='text' placeholder="Youtube URL" defaultValue={url} className='charter-display' readOnly={!isDefault}
-        onBlur={(e) => {
-
-          window.YoutubeRadio.getYoutubeTitleFromID(parseYoutubeVideoURL(e.target.value).id)
-            .then(title => {
-              props.setEditedVideo({
-                id: parseYoutubeVideoURL(e.target.value).id,
-                title: title
-              })
-              setCurrentDisplay('title')
+        onBlur={async (e) => {
+          const id = parseYoutubeVideoURL(e.target.value).id
+          if (id !== props.video.id) {
+            const title = await window.YoutubeRadio.getYoutubeTitleFromID(parseYoutubeVideoURL(e.target.value).id)
+            props.setEditedVideo({
+              id: parseYoutubeVideoURL(e.target.value).id,
+              title: title
             })
+          }
+          setCurrentDisplay('title')
         }}
 
         style={{
