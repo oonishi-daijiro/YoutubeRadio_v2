@@ -14,6 +14,7 @@ interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
 }
 
 async function httpGet(url: string): Promise<string> {
+  console.log("api used");
   return await new Promise((resolve, reject) => {
     https.get(url, (response) => {
       let data = "";
@@ -67,17 +68,20 @@ function splitArray<T>(array: Array<T>, divLength: number): Array<Array<T>> {
   for (let i = 0; i < divideCount; i++) {
     splited.push(array.slice(i * divLength, i * divLength + divLength));
   }
-  splited.push(
-    array.slice(
-      divideCount * divLength,
-      divideCount * divLength + (array.length % divLength)
-    )
-  );
+  if (array.length > 0) {
+    splited.push(
+      array.slice(
+        divideCount * divLength,
+        divideCount * divLength + (array.length % divLength)
+      )
+    );
+  }
   return splited;
 }
 
 export async function getTitles(ids: string[]): Promise<string[]> {
   const splited = splitArray(ids, 50);
+  console.log(splited);
   // [ [id,id,id] [id,id,id] [id]] -> [[title,...] [title,...] [title]] -> [title...]
   const allTitles: Array<string> = (
     await Promise.all(
