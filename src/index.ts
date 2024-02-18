@@ -23,7 +23,6 @@ app.on("ready", () => {
     maximizable: false,
     resizable: false,
     useContentSize: true,
-    show: false,
     webPreferences: {
       contextIsolation: true,
       preload: `${__dirname}/preload/player.js`,
@@ -120,8 +119,7 @@ ipcMain.handle("pin-player", () => {
   return mainWindow.isAlwaysOnTop();
 });
 
-ipcMain.handle("open-playlist-window",  () => {
-
+ipcMain.handle("open-playlist-window", () => {
   playlistWindow = new BrowserWindow({
     frame: false,
     width: 520,
