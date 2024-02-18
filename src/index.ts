@@ -32,8 +32,6 @@ app.on("ready", () => {
     },
   });
 
-  // mainWindow.webContents.openDevTools();
-
   mainWindow.loadURL(`http://localhost:${port}`);
   mainWindow.setIcon(path.resolve(__dirname, "../icon/icon.ico"));
 
@@ -142,7 +140,6 @@ ipcMain.handle("open-playlist-window",  () => {
       sandbox: true,
     },
   });
-  playlistWindow.webContents.openDevTools();
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
