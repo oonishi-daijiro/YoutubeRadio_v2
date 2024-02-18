@@ -636,17 +636,17 @@ function parsePlaylistURL(url: string): PlaylistURL {
 }
 
 async function popDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void) {
-  // dispatch({
-  //   type: 'animate',
-  //   props: 'pop'
-  // })
-  // await sleep(700)
+  dispatch({
+    type: 'animate',
+    props: 'pop'
+  })
+  await sleep(700)
   dispatch({
     type: 'pop-display'
   })
-  // dispatch({
-  //   type: 'animation-end'
-  // })
+  dispatch({
+    type: 'animation-end'
+  })
 }
 
 async function pushDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void, displayName: ReducerActions['push-display']['props']) {
@@ -654,14 +654,14 @@ async function pushDisplayWithAnimation(dispatch: (ReducerAction: ReducerActions
     type: 'push-display',
     props: displayName
   })
-  // dispatch({
-  //   type: 'animate',
-  //   props: 'push'
-  // })
-  // await sleep(700)
-  // dispatch({
-  //   type: 'animation-end'
-  // })
+  dispatch({
+    type: 'animate',
+    props: 'push'
+  })
+  await sleep(700)
+  dispatch({
+    type: 'animation-end'
+  })
 }
 
 async function reloadPlaylistsWithAnimation(dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void) {
