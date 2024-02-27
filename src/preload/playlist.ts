@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import * as config from "../lib/config";
 import { parse, Url } from "url";
-import { parseYoutubeVideoURL } from "../app/playlist/components";
 
 export interface playlistNavigation {
   shuffle: boolean;

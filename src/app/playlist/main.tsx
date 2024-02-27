@@ -1,13 +1,16 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom/client";
-import { ReducerActions, Reducer, AppState, DefaultAppState, Displays } from "./reducer";
+import { ReducerActions, Reducer, AppState, DefaultAppState } from "./reducer";
 import { YoutubeRadioPreload } from "../../preload/playlist";
 import { Playlist } from "../../lib/config";
+import { Displays } from "./components";
 
-interface preload extends Window {
+
+export interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
-export declare const window: preload
+
+declare const window: preload
 
 class SuspenseResource<T> {
   constructor(resourceFetcher: () => Promise<T>, defaultData: T) {

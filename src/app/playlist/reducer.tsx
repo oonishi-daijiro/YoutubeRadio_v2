@@ -1,22 +1,12 @@
-import * as React from "react"
-import { Playlist, PrimitivePlaylist, YoutubePlaylist } from "../../lib/config";
-import { playlistNavigation, YoutubeRadioPreload } from "../../preload/playlist";
-import { PlaylistDetailDisplay, PlaylistEditorDisplay, PlaylistTypeSelection, PlaylistsDisplay } from "./components"
-import { sPlaylists } from "./main";
+import { PrimitivePlaylist } from "../../lib/config";
+import { YoutubeRadioPreload } from "../../preload/playlist";
+import { Displays } from "./components";
+
 
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
 export declare const window: preload
-
-
-export const Displays = {
-  'playlists': (index: number) => <PlaylistsDisplay index={index} />,
-  'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
-  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
-  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />
-} as const
-
 
 export const animationNames = [
   'fade-out-to-right',
