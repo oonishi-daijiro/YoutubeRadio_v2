@@ -1,22 +1,37 @@
+<<<<<<< Updated upstream
 import * as React from 'react'
 import { ContextDispatchAppState, type preload } from '../main'
 import { pushDisplayWithAnimation, popDisplayWithAnimation } from '../utils'
 import { IconedButton, Wrapper } from '.'
 import { type YoutubePlaylist } from '../../../lib/config'
+=======
+import * as React from 'react';
+import { ContextDispatchAppState } from "../main";
+import { pushDisplayWithAnimation, popDisplayWithAnimation } from '../utils';
+import { IconedButton, Wrapper } from '.';
+import { YoutubePlaylist } from "../../../lib/config";
+>>>>>>> Stashed changes
 
-declare const window: preload
 
 export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
 
   function pushEditorWithAnimation(plType: YoutubePlaylist['type']) {
+<<<<<<< Updated upstream
     const videos: YoutubePlaylist['videos'] = plType === 'youtube' ? [] : [{ id: '', title: '' }]
+=======
+    const videos: YoutubePlaylist['videos'] = plType === 'youtube' ? [] : [{ id: "", title: "" }]
+>>>>>>> Stashed changes
     dispatch({
       type: 'set-target-playlist',
       props: {
         name: '',
         type: plType,
+<<<<<<< Updated upstream
         videos,
+=======
+        videos: videos,
+>>>>>>> Stashed changes
         isShuffle: false
       }
     })

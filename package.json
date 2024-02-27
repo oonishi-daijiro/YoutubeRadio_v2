@@ -5,7 +5,11 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "npx webpack && npx electron-builder --win && \"./build/YoutubeRadio Setup 2.0.0.exe\"",
+<<<<<<< Updated upstream
     "lint": "npx eslint src/**/*.tsx src/**/*.ts --fix"
+=======
+    "lint": "npx eslint ./src/**/*.ts ./src/**/*.tsx"
+>>>>>>> Stashed changes
   },
   "keywords": [],
   "author": "Oonishi_Daijiro",
@@ -27,17 +31,25 @@
     "@types/diff": "^5.0.9",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
+<<<<<<< Updated upstream
     "@typescript-eslint/eslint-plugin": "^6.21.0",
+=======
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+>>>>>>> Stashed changes
     "copy-webpack-plugin": "^12.0.2",
     "cross-env": "^7.0.3",
     "electron": "^28.2.3",
     "electron-builder": "^24.9.1",
     "eslint": "^8.57.0",
+<<<<<<< Updated upstream
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
+=======
+>>>>>>> Stashed changes
     "eslint-plugin-react": "^7.33.2",
     "glob": "^10.3.10",
     "ignore-loader": "^0.1.2",
