@@ -22,7 +22,7 @@ export const Icons = {
   iconYoutube: 'fa-brands fa-youtube'
 } as const
 
-export const IconedButton: React.FC<{ iconName: keyof typeof Icons } & React.HtmlHTMLAttributes<HTMLElement>> = (props) => {
+export const IconedButton: React.FC<{ iconName: keyof typeof Icons } & JSX.IntrinsicElements['i']> = (props) => {
   const className = (props.className ?? "") + ` ${Icons[props.iconName]} `
   return <i {...props} className={className}></i >
 }

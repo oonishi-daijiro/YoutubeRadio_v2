@@ -86,7 +86,7 @@ export interface ReducerActions {
   }
 }
 
-export function Reducer (currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
+export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
   if (currentAppState === null) {
     return DefaultAppState
   }
@@ -192,4 +192,5 @@ export function Reducer (currentAppState: AppState, action: ReducerActions[keyof
         switchAnimationHook: ['']
       }
   }
+  return DefaultAppState;
 }
