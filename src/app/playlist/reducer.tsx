@@ -1,7 +1,6 @@
-import { PrimitivePlaylist } from "../../lib/config";
-import { YoutubeRadioPreload } from "../../preload/playlist";
-import { Displays } from "./components";
-
+import { type PrimitivePlaylist } from '../../lib/config'
+import { type YoutubeRadioPreload } from '../../preload/playlist'
+import { type Displays } from './components'
 
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -20,9 +19,9 @@ export const animationNames = [
 export interface AppState {
   isPlaylistsLoaded: boolean
   playlists: PrimitivePlaylist[]
-  displays: (keyof typeof Displays)[]
+  displays: Array<keyof typeof Displays>
   targetPlaylist: PrimitivePlaylist
-  switchAnimationHook: typeof animationNames[number][]
+  switchAnimationHook: Array<typeof animationNames[number]>
   isAnimating: boolean
 }
 
@@ -40,34 +39,33 @@ export const DefaultAppState: AppState = {
   isAnimating: false
 }
 
-
 export interface ReducerActions {
   'set-target-playlist': {
-    type: 'set-target-playlist',
+    type: 'set-target-playlist'
     props: PrimitivePlaylist
   }
   'push-display': {
-    type: 'push-display',
+    type: 'push-display'
     props: keyof typeof Displays
   }
   'pop-display': {
     type: 'pop-display'
   }
   'delete-playlist': {
-    type: 'delete-playlist',
+    type: 'delete-playlist'
     props: string
   }
   'edit-target-playlist': {
-    type: 'edit-target-playlist',
+    type: 'edit-target-playlist'
     props: {
-      playlist: PrimitivePlaylist,
+      playlist: PrimitivePlaylist
     }
   }
   'close-window': {
     type: 'close-window'
   }
   'animate': {
-    type: 'animate',
+    type: 'animate'
     props: 'pop' | 'push' | 'reload'
   }
   'animation-end': {
@@ -77,30 +75,27 @@ export interface ReducerActions {
     type: 'animation-start'
   }
   'load-playlists': {
-    type: 'load-playlists',
+    type: 'load-playlists'
     props: PrimitivePlaylist[]
   }
   'reload-playlists': {
-    type: 'reload-playlists',
+    type: 'reload-playlists'
   }
   'reload': {
     type: 'reload'
   }
 }
 
-
-
-export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
+export function Reducer (currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
   if (currentAppState === null) {
     return DefaultAppState
   }
   switch (action.type) {
-
     case 'push-display':
       currentAppState.displays.push(action.props)
       return {
         ...currentAppState,
-        displays: [...currentAppState.displays],
+        displays: [...currentAppState.displays]
       }
 
     case 'pop-display':
@@ -133,9 +128,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         playlists: [...currentAppState.playlists],
-        targetPlaylist: action.props.playlist,
+        targetPlaylist: action.props.playlist
       }
-
 
     case 'animate':
       let animationHook = []

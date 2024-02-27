@@ -1,10 +1,9 @@
-import * as React from "react"
-import * as ReactDOM from "react-dom/client";
-import { ReducerActions, Reducer, AppState, DefaultAppState } from "./reducer";
-import { YoutubeRadioPreload } from "../../preload/playlist";
-import { Playlist } from "../../lib/config";
-import { Displays } from "./components";
-
+import * as React from 'react'
+import * as ReactDOM from 'react-dom/client'
+import { type ReducerActions, Reducer, type AppState, DefaultAppState } from './reducer'
+import { type YoutubeRadioPreload } from '../../preload/playlist'
+import { type Playlist } from '../../lib/config'
+import { Displays } from './components'
 
 export interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -18,6 +17,7 @@ class SuspenseResource<T> {
     this.data = defaultData
     this.setFetcher()
   }
+
   read(): T {
     switch (this.stat) {
       case 'pending':
@@ -34,7 +34,7 @@ class SuspenseResource<T> {
     this.setFetcher()
   }
 
-  private setFetcher() {
+  private setFetcher(): void {
     this.promise = this.resouseFetcher().then(data => {
       this.data = data
       this.stat = 'fullfilled'
@@ -45,21 +45,19 @@ class SuspenseResource<T> {
 
   private stat: 'pending' | 'fullfilled' | 'rejected' = 'pending'
   private data: T
-  private resouseFetcher: () => Promise<T>
+  private readonly resouseFetcher: () => Promise<T>
   private promise: Promise<void>
-
 }
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot)
 
-export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => console.log("reducer is not ready"))
+export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => { console.log('reducer is not ready') })
 
 export const ContextAppState = React.createContext<AppState>(DefaultAppState)
 
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
 
-export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void;
-
+export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void
 
 const App: React.FC = () => {
   const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultAppState)
@@ -89,7 +87,7 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   if (!appState.isPlaylistsLoaded) {
     const playlists = sPlaylists.read()
     dispatch({
-      'type': 'load-playlists',
+      type: 'load-playlists',
       props: playlists
     })
   }
