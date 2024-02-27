@@ -1,8 +1,13 @@
 import * as https from "https";
 import { parse } from "url";
 import { getapikey } from "../youtube-api-key";
+<<<<<<< Updated upstream
 import { type ParsedUrlQueryInput, stringify } from "querystring";
 import { Playlist, type YoutubeVideo } from "../config";
+=======
+import { ParsedUrlQueryInput, stringify } from "querystring";
+import { YoutubeVideo } from "../config";
+>>>>>>> Stashed changes
 
 interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
   key: string;
@@ -96,7 +101,7 @@ export async function getTitles(ids: string[]): Promise<string[]> {
             `https://www.googleapis.com/youtube/v3/videos?${stringify(query)}`
           );
           const titles = JSON.parse(response).items.map(
-            (item: any) => item.snippet.title
+            (item: { snippet: { title: string } }) => item.snippet.title
           );
           return titles;
         } catch (err) {

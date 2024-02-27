@@ -1,4 +1,4 @@
-import { ipcMain, app, BrowserWindow, shell, session } from "electron";
+import { ipcMain, app, BrowserWindow, shell } from "electron";
 import { launchServer } from "./lib/server";
 import * as config from "./lib/config";
 import { YoutubeRadioThumbarButtons } from "./lib/thumbnail-toolber-buttons";

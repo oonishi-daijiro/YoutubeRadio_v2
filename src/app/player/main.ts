@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import {
   defaultPlaylist,
   type Playlist,
@@ -5,6 +6,11 @@ import {
 } from "../../lib/config";
 import type YoutubeRadioPreload from "../../preload/player";
 import { type playlistNavigation } from "../../preload/playlist";
+=======
+import { Playlist, PrimitivePlaylist } from "../../lib/config";
+import YoutubeRadioPreload from "../../preload/player";
+import { playlistNavigation } from "../../preload/playlist";
+>>>>>>> Stashed changes
 
 const tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
@@ -21,6 +27,7 @@ interface preload extends Window {
 
 declare const window: preload;
 
+<<<<<<< Updated upstream
 declare global {
   namespace YT {
     interface Player {
@@ -28,6 +35,11 @@ declare global {
     }
   }
 }
+=======
+declare const YT: {
+  Player: new (p: string, pp: unknown) => YT.Player;
+};
+>>>>>>> Stashed changes
 
 window.addEventListener("load", () => {
   stopServer();
@@ -132,7 +144,7 @@ async function loadPlaylist(appliedPlaylist: PrimitivePlaylist, index: number) {
     const idList: string[] = appliedPlaylist.videos.map((e) => {
       return e.id;
     });
-    player.loadPlaylist({
+    (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
       listType: "playlist",
       playlist: idList,
       index,
@@ -206,7 +218,11 @@ function playVideo() {
 
 const buttonOpenSelectPlaylist = document.getElementById("getUrl");
 
+<<<<<<< Updated upstream
 buttonOpenSelectPlaylist!.addEventListener("click", async (event) => {
+=======
+buttonOpenSelectPlaylist.addEventListener("click", async () => {
+>>>>>>> Stashed changes
   await window.YoutubeRadio.openSelectPlaylistWindow();
 });
 
@@ -260,8 +276,13 @@ buttonVolume!.addEventListener(
     buttonVolume!.style.display = "none";
     canvas.style.display = "block";
     const volume_num = 50 - player.getVolume() / 2;
+<<<<<<< Updated upstream
     field!.fillStyle = "#444444";
     field!.fillRect(0, volume_num, canvas.width, canvas.height);
+=======
+    field.fillStyle = "#444444";
+    field.fillRect(0, volume_num, canvas.width, canvas.height);
+>>>>>>> Stashed changes
   },
   false
 );

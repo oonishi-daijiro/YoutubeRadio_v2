@@ -112,7 +112,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         targetPlaylist: action.props
       }
 
-    case 'delete-playlist':
+    case 'delete-playlist': {
       window.YoutubeRadio.deletePlaylist(action.props)
       const index = currentAppState.playlists.findIndex(pl => pl.name === action.props)
       currentAppState.playlists.splice(index, 1)
@@ -121,6 +121,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         ...currentAppState,
         playlists: currentAppState.playlists
       }
+    }
 
     case 'edit-target-playlist':
       currentAppState.playlists[currentAppState.playlists.findIndex(pl => pl.name === action.props.playlist.name)] = action.props.playlist
@@ -131,7 +132,12 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         targetPlaylist: action.props.playlist
       }
 
+<<<<<<< Updated upstream
     case 'animate':
+=======
+
+    case 'animate': {
+>>>>>>> Stashed changes
       let animationHook = []
       switch (action.props) {
         case 'pop':
@@ -160,6 +166,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
             isAnimating: true
           }
       }
+      break;
+    }
 
     case 'close-window':
       window.YoutubeRadio.close()
