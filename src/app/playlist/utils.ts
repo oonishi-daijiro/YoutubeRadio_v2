@@ -6,7 +6,7 @@ import type { PrimitivePlaylist } from "../../lib/config";
 
 declare const window: preload;
 
-export function loadPlaylist(name: string, index: number = 0) {
+export function loadPlaylist(name: string, index: number = 0): void {
   window.YoutubeRadio.loadPlaylist(name, index);
 }
 
@@ -23,11 +23,12 @@ interface VideoURL {
 export function parseYoutubeVideoURL(url: string): VideoURL {
   const reIncludesHttps = /^https:\/\//;
   url = reIncludesHttps.test(url) ? url : `https://${url}`;
-  const parsedURL = window.YoutubeRadio.parse(url, true);
+  const ul = new URL(url);
+
   return {
-    protocol: parsedURL.protocol ?? "",
-    id: (parsedURL.query as { v: string }).v ?? "",
-    host: parsedURL.hostname ?? "",
+    protocol: ul.protocol ?? "",
+    id: ul.searchParams.get("v") ?? "",
+    host: ul.hostname ?? "",
   };
 }
 
@@ -41,17 +42,19 @@ export function parsePlaylistURL(url: string): PlaylistURL {
   const reIncludesHttps = /^https:\/\//;
   url = reIncludesHttps.test(url) ? url : `https://${url}`;
 
-  const parsedURL = window.YoutubeRadio.parse(url, true);
+  // const parsedURL = window.YoutubeRadio.parse(url, true);
+  const parsedURL = new URL(url);
+
   return {
     protocol: parsedURL.protocol ?? "",
-    id: (parsedURL.query as { list: string }).list ?? "",
+    id: parsedURL.searchParams.get("list") ?? "",
     host: parsedURL.hostname ?? "",
   };
 }
 
 export async function popDisplayWithAnimation(
   dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void
-) {
+): Promise<void> {
   // dispatch({
   //   type: 'animate',
   //   props: 'pop'
@@ -68,7 +71,7 @@ export async function popDisplayWithAnimation(
 export async function pushDisplayWithAnimation(
   dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void,
   displayName: ReducerActions["push-display"]["props"]
-) {
+): Promise<void> {
   dispatch({
     type: "push-display",
     props: displayName,
@@ -85,7 +88,7 @@ export async function pushDisplayWithAnimation(
 
 export async function reloadPlaylistsWithAnimation(
   dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void
-) {
+): Promise<void> {
   dispatch({
     type: "animate",
     props: "reload",
@@ -98,12 +101,6 @@ export async function reloadPlaylistsWithAnimation(
   dispatch({
     type: "reload-playlists",
   });
-}
-
-function getRandomInt(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min) + min);
 }
 
 export function getYoutubeThumbnailURLFromID(videoID: string): string {
@@ -121,7 +118,7 @@ export function getYoutubeURLFromID(id: string): string {
 }
 
 export async function sleep(time: number): Promise<void> {
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     setTimeout(() => {
       resolve();
     }, time);
@@ -147,7 +144,7 @@ export class MultipileConditions {
   private readonly conditions: boolean[];
 }
 
-export function isValidEdit(playlistEdited: PrimitivePlaylist) {
+export function isValidEdit(playlistEdited: PrimitivePlaylist): boolean {
   const appState = React.useContext(ContextAppState);
 
   const isValidPlaylistName = new MultipileConditions();
@@ -155,7 +152,7 @@ export function isValidEdit(playlistEdited: PrimitivePlaylist) {
   const isValidVideos = new MultipileConditions();
 
   const parsedPlaylistURL = parsePlaylistURL(
-    getPlaylistURLFromPlaylistID(playlistEdited.playlistID)
+    getPlaylistURLFromPlaylistID(playlistEdited.playlistID ?? "")
   );
 
   isValidPlaylistName

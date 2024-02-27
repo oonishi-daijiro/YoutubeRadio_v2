@@ -1,7 +1,7 @@
 {
   "env": {
-    "es2021": true,
-    "browser": true
+    "browser": true,
+    "node": true
   },
   "extends": [
     "standard-with-typescript",
@@ -14,6 +14,8 @@
   },
   "plugins": ["react"],
   "rules": {
-    "typescript-eslint/no-misused-promises": "off"
+    "@typescript-eslint/no-misused-promises": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-floating-promises": "off"
   }
 }

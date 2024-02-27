@@ -18,7 +18,7 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
 
   const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist)
 
-  let videoEditor: string | number | boolean | JSX.Element
+  let videoEditor: string | number | boolean | JSX.Element = <></>;
 
   if (playlistEdit.type === 'youtube') {
     videoEditor = <YoutubePlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
@@ -42,7 +42,7 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
 export default PlaylistEditorDisplay
 
 const PlaylistNameEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ setPlaylistEdit, playlistEdit }) => {
-  const refNameInput = React.useRef<HTMLInputElement>()
+  const refNameInput = React.useRef<HTMLInputElement>(null)
   const appState = React.useContext(ContextAppState)
 
   return (
@@ -65,8 +65,8 @@ const PlaylistNameEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylis
 }
 
 const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ playlistEdit, setPlaylistEdit }) => {
-  const playlistURL = playlistEdit.playlistID ? `www.youtube.com/playlist?list=${playlistEdit.playlistID} ` : ''
-  const refURLInput = React.useRef<HTMLInputElement>()
+  const playlistURL = playlistEdit.playlistID !== undefined ? `www.youtube.com/playlist?list=${playlistEdit.playlistID} ` : ''
+  const refURLInput = React.useRef<HTMLInputElement>(null)
 
   return <input
     type="text"
@@ -76,7 +76,7 @@ const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, s
     spellCheck={false}
     ref={refURLInput}
     onClick={() => {
-      refURLInput.current.select()
+      refURLInput.current?.select()
     }}
     onChange={(event) => {
       setPlaylistEdit({
@@ -90,7 +90,7 @@ const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, s
 const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ playlistEdit, setPlaylistEdit }) => {
   const videoKeys = React.useRef(playlistEdit.videos.map((_, i) => i))
 
-  const setEditedVideo = (video: YoutubeVideo | 'delete', index: number) => {
+  const setEditedVideo = (video: YoutubeVideo | 'delete', index: number): void => {
     if (video === 'delete') {
       setPlaylistEdit({
         ...playlistEdit,
@@ -110,7 +110,7 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
         setEditedVideo={(video) => { setEditedVideo(video, index) }} />)
   })
 
-  const handleOnclickAddVideo = () => {
+  const handleOnclickAddVideo = (): void => {
     const newKey = videoKeys.current.reduce((p, c) => p > c ? p : c, -1) + 1
     videoKeys.current.push(newKey)
     setPlaylistEdit({
@@ -139,7 +139,7 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   const [animationHook, setAnimationHook] = React.useState<'' | 'fade-away'>('')
   const url = isDefault ? '' : `youtube.com/watch?v=${props.video.id}`
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     setAnimationHook('fade-away')
     await sleep(400)
     setIsDeleted(true)

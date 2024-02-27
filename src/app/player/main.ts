@@ -1,4 +1,4 @@
-import type { type Playlist, type PrimitivePlaylist } from "../../lib/config";
+import type { Playlist, PrimitivePlaylist } from "../../lib/config";
 import type YoutubeRadioPreload from "../../preload/player";
 import { type playlistNavigation } from "../../preload/playlist";
 
@@ -6,7 +6,6 @@ const tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-document.getElementById("pause").className = "fas fa-play";
 let player: YT.Player; // youtube iframe api instance will be here;
 
 interface preload extends Window {
@@ -21,19 +20,8 @@ declare const YT: {
 };
 
 window.addEventListener("load", () => {
-  stopServer();
   window.YoutubeRadio.emitWindowGetReady();
 });
-
-function stopServer(): void {
-  const parm: Record<string, string> = {
-    loaded: "true",
-  };
-  const url = `${location.href}?${new URLSearchParams(parm)}`;
-  fetch(url, {
-    method: "GET",
-  });
-}
 
 window.onYouTubeIframeAPIReady = function () {
   // when youtube iframe api get ready, this function will call
@@ -41,7 +29,7 @@ window.onYouTubeIframeAPIReady = function () {
     height: "300",
     width: "288",
     events: {
-      onStateChange: (stat) => {
+      onStateChange: (stat: YT.OnStateChangeEvent) => {
         switch (stat.data) {
           case 1:
             window.YoutubeRadio.emitPlayerStartPlaying();
@@ -49,7 +37,7 @@ window.onYouTubeIframeAPIReady = function () {
         }
       },
       onReady: playerOnReady,
-      onError: (err) => {
+      onError: (err: YT.OnErrorEvent) => {
         setTimeout(() => {
           player.nextVideo();
         }, 2500);
@@ -66,7 +54,7 @@ async function getPlaylists(): Promise<Playlist[]> {
 }
 
 window.YoutubeRadio.onReqNavigation(
-  async (
+  (
     navigation: playlistNavigation = {
       shuffle: false,
     }
@@ -78,7 +66,7 @@ window.YoutubeRadio.onReqNavigation(
 window.YoutubeRadio.onLoadPlaylist(
   async (arg: { name: string; index: number }) => {
     const playlist = (await getPlaylists()).find((e) => e.name === arg.name);
-    loadPlaylist(playlist, arg.index);
+    await loadPlaylist(playlist as PrimitivePlaylist, arg.index);
   }
 );
 
@@ -91,15 +79,18 @@ interface loadPlaylistParm {
   suggestedQuality?: string;
 }
 
-async function loadPlaylist(appliedPlaylist: PrimitivePlaylist, index: number) {
-  if (!appliedPlaylist?.name) {
+async function loadPlaylist(
+  appliedPlaylist: PrimitivePlaylist,
+  index: number
+): Promise<void> {
+  if ((appliedPlaylist?.name).length === 0) {
     return;
   }
   player.setShuffle(false);
   player.stopVideo();
 
   if (appliedPlaylist.type === "youtube") {
-    player.loadPlaylist({
+    (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
       listType: "playlist",
       list: appliedPlaylist.playlistID,
       index,
@@ -115,50 +106,51 @@ async function loadPlaylist(appliedPlaylist: PrimitivePlaylist, index: number) {
 
     if (videos.length === 0) return;
     appliedPlaylist.videos = videos;
-    window.YoutubeRadio.editPlaylist(appliedPlaylist.name, appliedPlaylist); // For update playlist without using api key
+    await window.YoutubeRadio.editPlaylist(
+      appliedPlaylist.name,
+      appliedPlaylist
+    ).catch((err): void => {
+      console.log(err);
+    }); // For update playlist without using api key
   } else if (appliedPlaylist.type === "youtube_radio") {
-    if (!appliedPlaylist?.name || !appliedPlaylist.videos) {
+    if (
+      !(appliedPlaylist?.name === "") ||
+      !(appliedPlaylist.videos.length === 0)
+    ) {
       return;
     }
     const idList: string[] = appliedPlaylist.videos.map((e) => {
       return e.id;
     });
-    player.loadPlaylist({
+    (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
       listType: "playlist",
       playlist: idList,
       index,
       startSeconds: 0,
     });
-  } else if (appliedPlaylist.type === "single_video") {
-    if ((appliedPlaylist.videos = [])) {
-      return;
-    }
-
-    player.loadVideoById(appliedPlaylist.videos[0].id);
   }
-
   player.setLoop(true);
   player.setShuffle(appliedPlaylist.isShuffle);
 }
 
-async function playerOnReady() {
+async function playerOnReady(): Promise<void> {
   const volume = await window.YoutubeRadio.getVolume();
   const [playlist] = await getPlaylists();
-  loadPlaylist(playlist, 0);
+  await loadPlaylist(playlist, 0);
   setVolume(volume);
 }
 
 window.YoutubeRadio.onVideoPlayed(() => {
-  pauseButton.className = "fas fa-pause";
+  pauseButton!.className = "fas fa-pause";
   soundBars.forEach((element) => {
-    element.style.animationPlayState = "running";
+    (element as HTMLElement).style.animationPlayState = "running";
   });
 });
 
 window.YoutubeRadio.onVideoPaused(() => {
-  pauseButton.className = "fas fa-play";
+  pauseButton!.className = "fas fa-play";
   soundBars.forEach((element) => {
-    element.style.animationPlayState = "paused";
+    (element as HTMLElement).style.animationPlayState = "paused";
   });
 });
 
@@ -177,46 +169,46 @@ window.YoutubeRadio.onNextVideo(() => {
   nextVideo();
 });
 
-function nextVideo() {
+function nextVideo(): void {
   player.nextVideo();
 }
 
-function previousVideo() {
+function previousVideo(): void {
   player.previousVideo();
 }
 
-function pauseVideo() {
-  pauseButton.className = "fas fa-play";
+function pauseVideo(): void {
+  pauseButton!.className = "fas fa-play";
   soundBars.forEach((element) => {
-    element.style.animationPlayState = "paused";
+    (element as HTMLElement).style.animationPlayState = "paused";
   });
   player.pauseVideo();
 }
 
-function playVideo() {
-  pauseButton.className = "fas fa-pause";
+function playVideo(): void {
+  pauseButton!.className = "fas fa-pause";
   soundBars.forEach((element) => {
-    element.style.animationPlayState = "running";
+    (element as HTMLElement).style.animationPlayState = "running";
   });
   player.playVideo();
 }
 
 const buttonOpenSelectPlaylist = document.getElementById("getUrl");
 
-buttonOpenSelectPlaylist.addEventListener("click", async (event) => {
+buttonOpenSelectPlaylist!.addEventListener("click", async (event) => {
   await window.YoutubeRadio.openSelectPlaylistWindow();
 });
 
 const pauseButton = document.getElementById("pause");
 
-pauseButton.addEventListener(
+pauseButton!.addEventListener(
   "click",
   () => {
     if (player.getPlaylist() === null) {
       // when the player didnt has any playlist
       return;
     }
-    if (pauseButton.className === "fas fa-pause") {
+    if (pauseButton!.className === "fas fa-pause") {
       pauseVideo();
     } else {
       playVideo();
@@ -227,7 +219,7 @@ pauseButton.addEventListener(
 
 const buttonPreviousVideo = document.getElementById("previousVideo");
 
-buttonPreviousVideo.addEventListener("click", () => {
+buttonPreviousVideo!.addEventListener("click", () => {
   // when the player didnt has any playlist
   if (player.getPlaylist() === null) {
     return;
@@ -237,7 +229,7 @@ buttonPreviousVideo.addEventListener("click", () => {
 
 const buttonNextVideo = document.getElementById("nextVideo");
 
-buttonNextVideo.addEventListener(
+buttonNextVideo!.addEventListener(
   "click",
   () => {
     // when the player didnt has any playlist
@@ -251,14 +243,14 @@ buttonNextVideo.addEventListener(
 
 const buttonVolume = document.getElementById("volume");
 
-buttonVolume.addEventListener(
+buttonVolume!.addEventListener(
   "click",
   () => {
-    buttonVolume.style.display = "none";
+    buttonVolume!.style.display = "none";
     canvas.style.display = "block";
-    const volume_num = 50 - player.getVolume() / 2;
-    field.fillStyle = "#444444";
-    field.fillRect(0, volume_num, canvas.width, canvas.height);
+    const vokumeNum = 50 - player.getVolume() / 2;
+    field!.fillStyle = "#444444";
+    field!.fillRect(0, vokumeNum, canvas.width, canvas.height);
   },
   false
 );
@@ -266,29 +258,29 @@ buttonVolume.addEventListener(
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const field = canvas.getContext("2d");
 
-function setVolumeBar(volume: number) {
+function setVolumeBar(volume: number): void {
   if (volume > 100) {
     volume = 100;
   }
   const relativeVolume = volume / 100;
-  field.fillStyle = "#444444";
-  field.clearRect(0, 0, canvas.width, relativeVolume + 50);
-  field.fillRect(
+  field!.fillStyle = "#444444";
+  field!.clearRect(0, 0, canvas.width, relativeVolume + 50);
+  field!.fillRect(
     0,
     canvas.height,
     canvas.width,
     -relativeVolume * canvas.height
   );
   if (volume === 0) {
-    buttonVolume.className = "fas fa-volume-mute";
+    buttonVolume!.className = "fas fa-volume-mute";
   } else if (volume > 0 && volume < 50) {
-    buttonVolume.className = "fas fa-volume-down";
+    buttonVolume!.className = "fas fa-volume-down";
   } else if (volume > 50) {
-    buttonVolume.className = "fas fa-volume-up";
+    buttonVolume!.className = "fas fa-volume-up";
   }
 }
 
-function setVolume(volume: number) {
+function setVolume(volume: number): void {
   setVolumeBar(volume);
   player.setVolume(volume);
 }
@@ -318,7 +310,7 @@ canvas.addEventListener(
   () => {
     setTimeout(() => {
       canvas.style.display = "none";
-      buttonVolume.style.display = "block";
+      buttonVolume!.style.display = "block";
     }, 500);
   },
   false
@@ -329,21 +321,18 @@ canvas.addEventListener(
   () => {
     setTimeout(() => {
       canvas.style.display = "none";
-      buttonVolume.style.display = "block";
+      buttonVolume!.style.display = "block";
     }, 500);
   },
   false
 );
 
-const soundBars = [];
 const bars = document.getElementsByClassName("bars");
-Array.from(bars).forEach((e) => {
-  soundBars.push(e);
-});
+const soundBars: Element[] = Array.from(bars);
 
 const closeButton = document.getElementById("close_button");
 
-closeButton.addEventListener(
+closeButton!.addEventListener(
   "click",
   async () => {
     await window.YoutubeRadio.saveVolume(player.getVolume());
@@ -354,7 +343,7 @@ closeButton.addEventListener(
 
 const minimize = document.getElementById("minimize");
 
-minimize.addEventListener(
+minimize!.addEventListener(
   "click",
   () => {
     window.YoutubeRadio.minimize();

@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type * as config from '../lib/config'
-import { parse, type Url } from 'url'
 
 export interface playlistNavigation {
   shuffle: boolean
@@ -18,11 +17,11 @@ export interface YoutubeRadioPreload {
     playlsitName: string,
     playlist: config.PrimitivePlaylist
   ) => Promise<void>
-  parse: (
-    urlString: string,
-    parseQueryString: boolean,
-    slashesDenoteHost?: boolean
-  ) => Url
+  // parse: (
+  //   urlString: string,
+  //   parseQueryString: boolean,
+  //   slashesDenoteHost?: boolean
+  // ) => Url
   pinPlayer: () => Promise<boolean>
   isPinned: () => Promise<boolean>
   savePlaylists: (playlists: config.Playlist[]) => Promise<void>
@@ -59,9 +58,9 @@ const api: YoutubeRadioPreload = {
   openExternal (url: string): void {
     ipcRenderer.invoke('open-external', url)
   },
-  parse (urlString, parseQueryString, slashesDenoteHost?): Url {
-    return parse(urlString, parseQueryString, slashesDenoteHost)
-  },
+  // parse (urlString, parseQueryString, slashesDenoteHost?): Url {
+  //   return parse(urlString, parseQueryString, slashesDenoteHost)
+  // },
   async pinPlayer (): Promise<boolean> {
     return await ipcRenderer.invoke('pin-player')
   },
