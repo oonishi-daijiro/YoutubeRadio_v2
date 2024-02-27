@@ -20,11 +20,16 @@ export const Icons = {
   cross: 'fas fa-times',
   plusCircle: 'fas fa-plus-circle',
   iconYoutube: 'fa-brands fa-youtube'
-} as const
+} as const;
 
-export const IconedButton: React.FC<{ iconName: keyof typeof Icons } & JSX.IntrinsicElements['i']> = (props) => {
+
+type IconedButtonPropsType = {
+  iconName: keyof typeof Icons
+} & JSX.IntrinsicElements['i'];
+
+export const IconedButton: React.FC<IconedButtonPropsType> = (props) => {
   const className = (props.className ?? "") + ` ${Icons[props.iconName]} `
-  return <i {...props} className={className}></i >
+  return <i {...props} className={className}></i>
 }
 export const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playlist-detail-display-wrapper' | 'playlist-editor-wrapper' | 'playlist-type-selection-wrapper', index: number, children: React.ReactNode[] | React.ReactNode }> = (props) => {
   const appState = React.useContext(ContextAppState)

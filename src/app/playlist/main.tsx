@@ -16,15 +16,11 @@ class SuspenseResource<T> {
     this.resouseFetcher = resourceFetcher
     this.data = defaultData
     this.setFetcher()
-    this.promise = new Promise<void>((resolve) => {
-      resolve()
-    });
   }
 
   read(): T {
     switch (this.stat) {
       case 'pending':
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw this.promise
       case 'fullfilled':
         return this.data
@@ -53,7 +49,7 @@ class SuspenseResource<T> {
   private promise: Promise<void>
 }
 const domAppRoot = document.getElementById('root')
-const AppRoot = ReactDOM.createRoot(domAppRoot ?? document.createElement('div'))
+const AppRoot = ReactDOM.createRoot(domAppRoot)
 
 export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => { console.log('reducer is not ready') })
 

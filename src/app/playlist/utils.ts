@@ -121,7 +121,7 @@ export function getYoutubeURLFromID(id: string): string {
 }
 
 export async function sleep(time: number): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve();
     }, time);
@@ -155,7 +155,7 @@ export function isValidEdit(playlistEdited: PrimitivePlaylist) {
   const isValidVideos = new MultipileConditions();
 
   const parsedPlaylistURL = parsePlaylistURL(
-    getPlaylistURLFromPlaylistID(playlistEdited.playlistID ?? "")
+    getPlaylistURLFromPlaylistID(playlistEdited.playlistID)
   );
 
   isValidPlaylistName

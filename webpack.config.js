@@ -1,4 +1,4 @@
-const CopyFilePlugin = require("copy-webpack-plugin")
+const CopyFilePlugin = require("copy-webpack-plugin");
 
 const base = {
   output: {
@@ -7,13 +7,13 @@ const base = {
   },
   module: {
     rules: [{
-        test: /\.tsx?$/,
-        use: "ts-loader"
-      },
-      {
-        test: /\.(d.ts)$/,
-        loader: 'ignore-loader'
-      }
+      test: /\.tsx?$/,
+      use: "ts-loader"
+    },
+    {
+      test: /\.(d.ts)$/,
+      loader: 'ignore-loader'
+    }
     ]
   },
   resolve: {

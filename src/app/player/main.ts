@@ -1,16 +1,12 @@
-import {
-  defaultPlaylist,
-  type Playlist,
-  type PrimitivePlaylist,
-} from "../../lib/config";
+import type { type Playlist, type PrimitivePlaylist } from "../../lib/config";
 import type YoutubeRadioPreload from "../../preload/player";
 import { type playlistNavigation } from "../../preload/playlist";
 
 const tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName("script")[0];
-firstScriptTag.parentNode!.insertBefore(tag, firstScriptTag);
-document.getElementById("pause")!.className = "fas fa-play";
+firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+document.getElementById("pause").className = "fas fa-play";
 let player: YT.Player; // youtube iframe api instance will be here;
 
 interface preload extends Window {
@@ -20,14 +16,9 @@ interface preload extends Window {
 }
 
 declare const window: preload;
-
-declare global {
-  namespace YT {
-    interface Player {
-      loadPlaylist(parm: loadPlaylistParm): void;
-    }
-  }
-}
+declare const YT: {
+  Player: new (p: string, pp: unknown) => YT.Player;
+};
 
 window.addEventListener("load", () => {
   stopServer();
@@ -87,7 +78,7 @@ window.YoutubeRadio.onReqNavigation(
 window.YoutubeRadio.onLoadPlaylist(
   async (arg: { name: string; index: number }) => {
     const playlist = (await getPlaylists()).find((e) => e.name === arg.name);
-    loadPlaylist(playlist ?? defaultPlaylist, arg.index);
+    loadPlaylist(playlist, arg.index);
   }
 );
 
@@ -138,6 +129,12 @@ async function loadPlaylist(appliedPlaylist: PrimitivePlaylist, index: number) {
       index,
       startSeconds: 0,
     });
+  } else if (appliedPlaylist.type === "single_video") {
+    if ((appliedPlaylist.videos = [])) {
+      return;
+    }
+
+    player.loadVideoById(appliedPlaylist.videos[0].id);
   }
 
   player.setLoop(true);
@@ -152,14 +149,14 @@ async function playerOnReady() {
 }
 
 window.YoutubeRadio.onVideoPlayed(() => {
-  pauseButton!.className = "fas fa-pause";
+  pauseButton.className = "fas fa-pause";
   soundBars.forEach((element) => {
     element.style.animationPlayState = "running";
   });
 });
 
 window.YoutubeRadio.onVideoPaused(() => {
-  pauseButton!.className = "fas fa-play";
+  pauseButton.className = "fas fa-play";
   soundBars.forEach((element) => {
     element.style.animationPlayState = "paused";
   });
@@ -189,7 +186,7 @@ function previousVideo() {
 }
 
 function pauseVideo() {
-  pauseButton!.className = "fas fa-play";
+  pauseButton.className = "fas fa-play";
   soundBars.forEach((element) => {
     element.style.animationPlayState = "paused";
   });
@@ -197,8 +194,8 @@ function pauseVideo() {
 }
 
 function playVideo() {
-  pauseButton!.className = "fas fa-pause";
-  soundBars!.forEach((element) => {
+  pauseButton.className = "fas fa-pause";
+  soundBars.forEach((element) => {
     element.style.animationPlayState = "running";
   });
   player.playVideo();
@@ -206,20 +203,20 @@ function playVideo() {
 
 const buttonOpenSelectPlaylist = document.getElementById("getUrl");
 
-buttonOpenSelectPlaylist!.addEventListener("click", async (event) => {
+buttonOpenSelectPlaylist.addEventListener("click", async (event) => {
   await window.YoutubeRadio.openSelectPlaylistWindow();
 });
 
 const pauseButton = document.getElementById("pause");
 
-pauseButton!.addEventListener(
+pauseButton.addEventListener(
   "click",
   () => {
     if (player.getPlaylist() === null) {
       // when the player didnt has any playlist
       return;
     }
-    if (pauseButton!.className === "fas fa-pause") {
+    if (pauseButton.className === "fas fa-pause") {
       pauseVideo();
     } else {
       playVideo();
@@ -230,7 +227,7 @@ pauseButton!.addEventListener(
 
 const buttonPreviousVideo = document.getElementById("previousVideo");
 
-buttonPreviousVideo!.addEventListener("click", () => {
+buttonPreviousVideo.addEventListener("click", () => {
   // when the player didnt has any playlist
   if (player.getPlaylist() === null) {
     return;
@@ -240,7 +237,7 @@ buttonPreviousVideo!.addEventListener("click", () => {
 
 const buttonNextVideo = document.getElementById("nextVideo");
 
-buttonNextVideo!.addEventListener(
+buttonNextVideo.addEventListener(
   "click",
   () => {
     // when the player didnt has any playlist
@@ -254,14 +251,14 @@ buttonNextVideo!.addEventListener(
 
 const buttonVolume = document.getElementById("volume");
 
-buttonVolume!.addEventListener(
+buttonVolume.addEventListener(
   "click",
   () => {
-    buttonVolume!.style.display = "none";
+    buttonVolume.style.display = "none";
     canvas.style.display = "block";
     const volume_num = 50 - player.getVolume() / 2;
-    field!.fillStyle = "#444444";
-    field!.fillRect(0, volume_num, canvas.width, canvas.height);
+    field.fillStyle = "#444444";
+    field.fillRect(0, volume_num, canvas.width, canvas.height);
   },
   false
 );
@@ -274,20 +271,20 @@ function setVolumeBar(volume: number) {
     volume = 100;
   }
   const relativeVolume = volume / 100;
-  field!.fillStyle = "#444444";
-  field!.clearRect(0, 0, canvas.width, relativeVolume + 50);
-  field!.fillRect(
+  field.fillStyle = "#444444";
+  field.clearRect(0, 0, canvas.width, relativeVolume + 50);
+  field.fillRect(
     0,
     canvas.height,
     canvas.width,
     -relativeVolume * canvas.height
   );
   if (volume === 0) {
-    buttonVolume!.className = "fas fa-volume-mute";
+    buttonVolume.className = "fas fa-volume-mute";
   } else if (volume > 0 && volume < 50) {
-    buttonVolume!.className = "fas fa-volume-down";
+    buttonVolume.className = "fas fa-volume-down";
   } else if (volume > 50) {
-    buttonVolume!.className = "fas fa-volume-up";
+    buttonVolume.className = "fas fa-volume-up";
   }
 }
 
@@ -321,7 +318,7 @@ canvas.addEventListener(
   () => {
     setTimeout(() => {
       canvas.style.display = "none";
-      buttonVolume!.style.display = "block";
+      buttonVolume.style.display = "block";
     }, 500);
   },
   false
@@ -332,21 +329,21 @@ canvas.addEventListener(
   () => {
     setTimeout(() => {
       canvas.style.display = "none";
-      buttonVolume!.style.display = "block";
+      buttonVolume.style.display = "block";
     }, 500);
   },
   false
 );
 
-const soundBars: HTMLElement[] = [];
+const soundBars = [];
 const bars = document.getElementsByClassName("bars");
 Array.from(bars).forEach((e) => {
-  soundBars.push(e as HTMLElement);
+  soundBars.push(e);
 });
 
 const closeButton = document.getElementById("close_button");
 
-closeButton!.addEventListener(
+closeButton.addEventListener(
   "click",
   async () => {
     await window.YoutubeRadio.saveVolume(player.getVolume());
@@ -357,7 +354,7 @@ closeButton!.addEventListener(
 
 const minimize = document.getElementById("minimize");
 
-minimize!.addEventListener(
+minimize.addEventListener(
   "click",
   () => {
     window.YoutubeRadio.minimize();

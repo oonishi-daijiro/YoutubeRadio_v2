@@ -1,8 +1,7 @@
 {
   "env": {
     "es2021": true,
-    "browser": true,
-    "node": true
+    "browser": true
   },
   "extends": [
     "standard-with-typescript",
@@ -13,12 +12,8 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "@typescript-eslint/no-misused-promises": [
-    "error",
-    {
-      "checksVoidReturn": false
-    }
-  ],
   "plugins": ["react"],
-  "rules": {}
+  "rules": {
+    "typescript-eslint/no-misused-promises": "off"
+  }
 }

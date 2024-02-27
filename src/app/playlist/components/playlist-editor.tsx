@@ -18,14 +18,12 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
 
   const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist)
 
-  let videoEditor: string | number | boolean | JSX.Element | null = null
+  let videoEditor: string | number | boolean | JSX.Element
 
   if (playlistEdit.type === 'youtube') {
     videoEditor = <YoutubePlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
   } else if (playlistEdit.type === 'youtube_radio') {
     videoEditor = <YoutubeRadioPlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
-  } else {
-    videoEditor = <></>;
   }
 
   return (
@@ -44,7 +42,7 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
 export default PlaylistEditorDisplay
 
 const PlaylistNameEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ setPlaylistEdit, playlistEdit }) => {
-  const refNameInput = React.useRef<HTMLInputElement>(null);
+  const refNameInput = React.useRef<HTMLInputElement>()
   const appState = React.useContext(ContextAppState)
 
   return (
@@ -61,14 +59,14 @@ const PlaylistNameEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylis
             name: event.target.value
           })
         }}
-        ref={refNameInput!}
+        ref={refNameInput}
       />
     </div>)
 }
 
 const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ playlistEdit, setPlaylistEdit }) => {
   const playlistURL = playlistEdit.playlistID ? `www.youtube.com/playlist?list=${playlistEdit.playlistID} ` : ''
-  const refURLInput = React.useRef<HTMLInputElement>(null);
+  const refURLInput = React.useRef<HTMLInputElement>()
 
   return <input
     type="text"
@@ -78,7 +76,7 @@ const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, s
     spellCheck={false}
     ref={refURLInput}
     onClick={() => {
-      refURLInput.current?.select()
+      refURLInput.current.select()
     }}
     onChange={(event) => {
       setPlaylistEdit({
