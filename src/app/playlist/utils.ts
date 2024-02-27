@@ -1,6 +1,8 @@
-import { sPlaylists, preload } from "./main";
+import * as React from "react";
+import { sPlaylists, preload, ContextAppState } from "./main";
 import { playlistNavigation } from "../../preload/playlist";
 import { ReducerActions } from "./reducer";
+import { PrimitivePlaylist } from "../../lib/config";
 
 declare const window: preload;
 
@@ -140,4 +142,55 @@ export class MultipileConditions {
     return this.conditions.reduce((p, c) => p && c, true);
   }
   private conditions: boolean[];
+}
+
+export function isValidEdit(
+  playlistEdited: PrimitivePlaylist
+) {
+  const appState = React.useContext(ContextAppState);
+
+  const isValidPlaylistName = new MultipileConditions();
+  const isValidPlaylistURL = new MultipileConditions();
+  const isValidVideos = new MultipileConditions();
+
+  const parsedPlaylistURL = parsePlaylistURL(
+    getPlaylistURLFromPlaylistID(playlistEdited.playlistID)
+  );
+
+  isValidPlaylistName
+    .add(playlistEdited.name.length > 0)
+    .add(
+      !appState.playlists.map((pl) => pl.name).includes(playlistEdited.name),
+      playlistEdited.name !== appState.targetPlaylist.name
+    );
+
+  isValidPlaylistURL
+    .add(parsedPlaylistURL.host === "www.youtube.com")
+    .add(parsedPlaylistURL.id.length === 34)
+    .add(parsedPlaylistURL.protocol === "https:");
+
+  isValidVideos
+    .add(
+      playlistEdited.videos
+        .map((v) => parseYoutubeVideoURL(getYoutubeURLFromID(v.id)))
+        .map(
+          (p) =>
+            p.host === "www.youtube.com" &&
+            p.id.length === 11 &&
+            p.protocol === "https:"
+        )
+        .reduce((c, p) => c && p, true)
+    )
+    .add(playlistEdited.videos.length > 0);
+
+  let isValidEdit = false;
+
+  if (playlistEdited.type === "youtube") {
+    isValidEdit = isValidPlaylistName.reduce() && isValidPlaylistURL.reduce();
+  } else if (playlistEdited.type === "youtube_radio") {
+    isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce();
+  } else if (playlistEdited.type === "single_video") {
+    isValidEdit = isValidPlaylistName.reduce() && isValidVideos.reduce();
+  }
+  return isValidEdit;
 }

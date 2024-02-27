@@ -51,11 +51,14 @@ class SuspenseResource<T> {
 }
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot)
+
 export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => console.log("reducer is not ready"))
 
 export const ContextAppState = React.createContext<AppState>(DefaultAppState)
+
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
 
+export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void;
 
 
 const App: React.FC = () => {
