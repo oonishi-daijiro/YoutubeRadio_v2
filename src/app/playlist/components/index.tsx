@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
 import * as React from 'react'
 import { ContextAppState } from '../main'
-=======
-import * as React from 'react';
-import { ContextAppState } from "../main";
->>>>>>> Stashed changes
 
 import PlaylistDetailDisplay from './playlist-detail'
 import PlaylistEditorDisplay from './playlist-editor'
@@ -27,16 +22,9 @@ export const Icons = {
   iconYoutube: 'fa-brands fa-youtube'
 } as const
 
-<<<<<<< Updated upstream
 export const IconedButton: React.FC<{ iconName: keyof typeof Icons } & JSX.IntrinsicElements['i']> = (props) => {
   const className = (props.className ?? "") + ` ${Icons[props.iconName]} `
   return <i {...props} className={className}></i >
-=======
-
-export const IconedButton: React.FC<{ iconName: keyof typeof Icons } & JSX.IntrinsicElements['i']> = (props) => {
-   const className = ((props?.className) ?? "") + ` ${Icons[props.iconName]} `
-   return <i  {...props} className={className}></i >
->>>>>>> Stashed changes
 }
 export const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playlist-detail-display-wrapper' | 'playlist-editor-wrapper' | 'playlist-type-selection-wrapper', index: number, children: React.ReactNode[] | React.ReactNode }> = (props) => {
   const appState = React.useContext(ContextAppState)

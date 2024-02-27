@@ -100,6 +100,12 @@ export async function reloadPlaylistsWithAnimation(
   });
 }
 
+function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min);
+}
+
 export function getYoutubeThumbnailURLFromID(videoID: string): string {
   return videoID.length === 11
     ? `https://img.youtube.com/vi/${videoID ?? ""}/sddefault.jpg`
@@ -114,13 +120,8 @@ export function getYoutubeURLFromID(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`;
 }
 
-<<<<<<< Updated upstream
 export async function sleep(time: number): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-=======
-export function sleep(time: number): Promise<void> {
-  return new Promise((resolve) => {
->>>>>>> Stashed changes
     setTimeout(() => {
       resolve();
     }, time);
