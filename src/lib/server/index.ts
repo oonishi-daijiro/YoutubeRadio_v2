@@ -3,10 +3,6 @@ import * as http from "http";
 import { type AddressInfo } from "net";
 import * as url from "url";
 import * as path from "path";
-<<<<<<< Updated upstream
-import { lchown } from "original-fs";
-=======
->>>>>>> Stashed changes
 
 const playerIndex = readFileSync(
   path.resolve(__dirname, "./app/player/player.html")
@@ -20,19 +16,11 @@ const playerStylesheet = readFileSync(
 
 export function launchServer() {
   const server = http.createServer((req, res) => {
-<<<<<<< Updated upstream
     const parm = url.parse(req?.url ?? "", true);
     if (parm.query.loaded === "true") {
       // server.close()
     }
     const pathname = url.parse(req?.url ?? "").pathname;
-=======
-    const parm = url.parse(req.url as string, true);
-    if (parm.query.loaded === "true") {
-      // server.close()
-    }
-    const pathname = url.parse(req.url as string).pathname;
->>>>>>> Stashed changes
     switch (pathname) {
       case "/":
         res.writeHead(200, {

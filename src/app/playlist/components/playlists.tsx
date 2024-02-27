@@ -95,11 +95,7 @@ const ButtonPinPlayer: React.FC = () => {
       }}
 
       style={{
-<<<<<<< Updated upstream
         color: isPinned ? '#353535' : '#909090'
-=======
-        color: isPinned ? "#353535" : "#909090"
->>>>>>> Stashed changes
       }}
     />
   )

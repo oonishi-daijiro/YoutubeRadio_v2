@@ -15,11 +15,7 @@ const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
         <IconedButton
           iconName="arrowLeft"
           className="button-back"
-<<<<<<< Updated upstream
           onClick={async () => { await popDisplayWithAnimation(dispatch); }} />
-=======
-          onClick={() => popDisplayWithAnimation(dispatch)} />
->>>>>>> Stashed changes
         <PlaylistInformationDisplay playlist={appState.targetPlaylist} />
         <VideoListDisplay playlist={appState.targetPlaylist} />
       </div>
@@ -35,11 +31,7 @@ const PlaylistNavigator: React.FC = () => {
 
   const playlistURLDisplay =
     <div spellCheck={false} className="yt-playlist-url-display"
-<<<<<<< Updated upstream
       onClick={() => { window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(appState.targetPlaylist.playlistID ?? "")) }}>
-=======
-      onClick={() => window.YoutubeRadio.openExternal(getPlaylistURLFromPlaylistID(appState.targetPlaylist.playlistID))}>
->>>>>>> Stashed changes
       {`www.youtube.com/playlist?list=${appState.targetPlaylist.playlistID}`}
     </div>
 
@@ -63,17 +55,6 @@ const ButtonPlay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
     window.YoutubeRadio.close()
   }
 
-<<<<<<< Updated upstream
-=======
-  const handleOnClickButonPlayPl = () => {
-    loadPlaylist(props.playlist.name)
-    navigatePlaylist({
-      shuffle: props.playlist.isShuffle,
-    })
-    window.YoutubeRadio.close()
-  }
-
->>>>>>> Stashed changes
   return <IconedButton
     iconName="play"
     className="button-play navigator"
@@ -107,17 +88,9 @@ const ButtonEdit: React.FC<{ dispatch: dispathFunc }> = (props) => {
   return <IconedButton
     iconName="pencil"
     className="button-edit"
-<<<<<<< Updated upstream
     onClick={async () => await pushDisplayWithAnimation(props.dispatch, 'playlist-editor')}
   />
 }
-=======
-    onClick={() => {
-      pushDisplayWithAnimation(props.dispatch, 'playlist-editor')
-    }}
-  />
-};
->>>>>>> Stashed changes
 
 const NameDisplayAndNavigator: React.FC = () => {
   const appState = React.useContext(ContextAppState)
@@ -129,11 +102,7 @@ const NameDisplayAndNavigator: React.FC = () => {
   )
 }
 
-<<<<<<< Updated upstream
 const PlaylistInformationDisplay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
-=======
-const PlaylistInformationDisplay: React.FC<{ playlist: PrimitivePlaylist }> = () => {
->>>>>>> Stashed changes
   const appState = React.useContext(ContextAppState)
   return (
     <div id="playlist-info-display">
@@ -178,13 +147,8 @@ const ButtonShuffle: React.FC = () => {
 }
 
 const VideoDisplay: React.FC<{
-<<<<<<< Updated upstream
   video: YoutubeVideo
   videoIndex: number
-=======
-  video: YoutubeVideo,
-  videoIndex: number,
->>>>>>> Stashed changes
   playlist: PrimitivePlaylist
 }> = (props) => {
   const appstate = React.useContext(ContextAppState)
@@ -195,11 +159,7 @@ const VideoDisplay: React.FC<{
       shuffle: appstate.targetPlaylist.isShuffle
     })
     window.YoutubeRadio.close()
-<<<<<<< Updated upstream
   }
-=======
-  };
->>>>>>> Stashed changes
 
   return (
     <div className="video-display">
@@ -214,11 +174,7 @@ const VideoListDisplay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
   const appState = React.useContext(ContextAppState)
   return (
     <div className="videolist-display">
-<<<<<<< Updated upstream
       {appState.targetPlaylist.videos.map((video, index) => (<VideoDisplay video={video} videoIndex={index} playlist={props.playlist} />))}
-=======
-      {appState.targetPlaylist.videos.map((video, index) => (<VideoDisplay key={index} video={video} videoIndex={index} playlist={props.playlist} />))}
->>>>>>> Stashed changes
     </div>
   )
 }
@@ -231,11 +187,7 @@ const CharterDisplay: React.FC<{ value: string }> = (props) => {
       className="video-title-display charter-display"
       type="text"
       style={{
-<<<<<<< Updated upstream
         pointerEvents: 'none'
-=======
-        pointerEvents: "none"
->>>>>>> Stashed changes
       }} />
   )
 }

@@ -15,7 +15,6 @@ export default interface YoutubeRadioPreload {
   onReqPreviousVideo: (callback: () => void) => void;
   onLoadPlaylist: (
     callback: (arg: { name: string; index: number }) => Promise<void>
-<<<<<<< Updated upstream
   ) => void;
   emitPlayerStartPlaying: () => void;
   onPlayerStartPlaying: () => Promise<any>;
@@ -24,17 +23,6 @@ export default interface YoutubeRadioPreload {
   getVolume: () => Promise<number>;
   emitWindowGetReady: () => void;
   onReqNavigation: (
-=======
-  ): void;
-  // createYoutubeVideo(info: config.YoutubeVideo): Promise<config.YoutubeVideo>;
-  emitPlayerStartPlaying(): void;
-  onPlayerStartPlaying(): Promise<void>;
-  test(): void;
-  saveVolume(volume: number): Promise<void>;
-  getVolume(): Promise<number>;
-  emitWindowGetReady(): void;
-  onReqNavigation(
->>>>>>> Stashed changes
     callback: (playlistNavigation: playlistNavigation) => void
   ) => void;
   editPlaylist: (
@@ -84,15 +72,10 @@ const api: YoutubeRadioPreload = {
   emitPlayerStartPlaying(): void {
     ipcRenderer.invoke("player-start-playing");
   },
-<<<<<<< Updated upstream
   async onPlayerStartPlaying(): Promise<any> {
     return await new Promise((resolve, reject) => {
-=======
-  onPlayerStartPlaying(): Promise<void> {
-    return new Promise((resolve) => {
->>>>>>> Stashed changes
       ipcRenderer.on("player-start-playing", () => {
-        resolve();
+        resolve({});
       });
     });
   },
