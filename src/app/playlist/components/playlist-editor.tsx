@@ -6,7 +6,7 @@ import {
   parsePlaylistURL,
   popDisplayWithAnimation,
   sleep,
-  reloadPlaylistsWithAnimation
+  editAndSavePlaylist
 } from '../utils'
 import { IconedButton, Wrapper, Thumbnail, useDnDswapList, DnDSwapListProvider } from '.'
 import { type PrimitivePlaylist, type YoutubeVideo } from '../../../lib/config'
@@ -23,12 +23,20 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
 
 
   let videoEditor: string | number | boolean | JSX.Element = <></>;
+  const [ytplVideosOrder, setYtplVideosOrder] = React.useState(playlistEdit.videos.map((_, i) => i));
+
+  if (playlistEdit.type === 'youtube') {
+    videoEditor = <YoutubePlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
+  } else if (playlistEdit.type === 'youtube_radio') {
+    videoEditor = <YoutubeRadioPlaylistVideosEditor emitOrder={setYtplVideosOrder} playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
+  }
 
   const refForDetectScroll = React.useRef<HTMLDivElement>(null);
+  console.log("sus");
+
 
   const handleScroll = (): void => {
     const scrollTop = (refForDetectScroll.current?.scrollTop ?? 0);
-    console.log(scrollTop);
     if (scrollTop < 5 && playlistEdit.videos.length !== 4) {
       setShouldHideThumbnail(false);
     } else if (scrollTop > 10) {
@@ -49,10 +57,16 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
     return () => refForDetectScroll.current?.removeEventListener('scroll', handleScroll);
   })
 
-  if (playlistEdit.type === 'youtube') {
-    videoEditor = <YoutubePlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
-  } else if (playlistEdit.type === 'youtube_radio') {
-    videoEditor = <YoutubeRadioPlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
+
+  const getOrderEditedPlaylist = (pl: PrimitivePlaylist): PrimitivePlaylist => {
+    if (pl.type === "youtube_radio") {
+      return {
+        ...pl,
+        videos: ytplVideosOrder.map(i => pl.videos[i]).filter(e => e !== undefined)
+      }
+    } else {
+      return pl;
+    }
   }
 
   return (
@@ -62,8 +76,10 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
         <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)}
           className={shouldHideThumbnail ? 'fade-away-thumbnail thumbnail-playlist-editor-hidden' : `${appState.isAnimating ? '' : 'fade-in-thmubnail'} thumbnail-playlist-editor`} />
         <PlaylistNameEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
-        <div ref={refForDetectScroll} id={!shouldHideThumbnail ? 'editor-video-content-display' : ''} className={shouldHideThumbnail ? 'editor-video-content-display-thumbnail-hidden' : ''}>{videoEditor}</div>
-        <ButtonSavePlaylist playlistEdited={playlistEdit} />
+        <div ref={refForDetectScroll} id={!shouldHideThumbnail ? 'editor-video-content-display' : ''} className={shouldHideThumbnail ? 'editor-video-content-display-thumbnail-hidden' : ''}>
+          {videoEditor}
+        </div>
+        <ButtonSavePlaylist playlistEdited={getOrderEditedPlaylist(playlistEdit)} />
       </div>
     </Wrapper>
   )
@@ -117,7 +133,7 @@ const YoutubePlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, s
   />
 }
 
-const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void }> = ({ playlistEdit, setPlaylistEdit }) => {
+const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlaylist, setPlaylistEdit: (pl: PrimitivePlaylist) => void, emitOrder: (order: number[]) => void }> = ({ emitOrder, playlistEdit, setPlaylistEdit }) => {
   const videoKeys = React.useRef(playlistEdit.videos.map((_, i) => i))
 
   const setEditedVideo = (video: YoutubeVideo | 'delete', index: number): void => {
@@ -140,10 +156,16 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
     return (
       <EditableVideoDisplay key={videoKeys.current[index]} video={video} index={index}
         setEditedVideo={(video) => { setEditedVideo(video, index) }} />)
-  }), [playlistEdit.videos, playlistEdit.name]);
+  }), [playlistEdit.videos.length, playlistEdit.videos, playlistEdit.name]);
 
 
-  const handleOnclickAddVideo = (): void => {
+  const [order] = dnd;
+
+  React.useEffect(() => {
+    emitOrder(order ?? playlistEdit.videos.map((_, i) => i));
+  }, [order]);
+
+  const handleOnClickAddVideo = (): void => {
     const newKey = videoKeys.current.reduce((p, c) => p > c ? p : c, -1) + 1
     videoKeys.current.push(newKey)
     setPlaylistEdit({
@@ -154,7 +176,7 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
 
   return <>
     <DnDSwapListProvider dnd={dnd} wrapElmTagName='div' wrapElmProps={{ className: 'dnd-wrap-editor-video-display' }} />
-    {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={handleOnclickAddVideo} /> : <></>}
+    {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={handleOnClickAddVideo} /> : <></>}
   </>
 }
 
@@ -216,6 +238,8 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   )
 }
 
+
+
 const ButtonSavePlaylist: React.FC<{ playlistEdited: PrimitivePlaylist }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
@@ -229,19 +253,9 @@ const ButtonSavePlaylist: React.FC<{ playlistEdited: PrimitivePlaylist }> = (pro
       }}
       onClick={async () => {
         if (isValid) {
-          dispatch({
-            type: 'edit-target-playlist',
-            props: {
-              playlist: props.playlistEdited
-            }
-          })
-          dispatch({
-            type: 'animation-end'
-          })
-          await window.YoutubeRadio.editPlaylist(appState.targetPlaylist.name, props.playlistEdited)
-          reloadPlaylistsWithAnimation(dispatch)
+          editAndSavePlaylist(appState.targetPlaylist.name, dispatch, props.playlistEdited);
         }
       }} />
+  );
 
-  )
-}
+}  

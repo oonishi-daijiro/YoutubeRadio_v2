@@ -39,6 +39,7 @@ export const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playl
 
 export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props: JSX.IntrinsicElements['img']): JSX.Element => {
   return <img {...props} style={{
+    ...props.style,
     background: '#FFFFFF'
   }}></img>
 };
@@ -60,11 +61,14 @@ type WrapElmTagName = 'div' | 'span';
 type ReactStateFuncReturnType<T> = ReturnType<typeof React.useState<T>>;
 
 export function useDnDswapList<T>(listFactory: () => Array<T & { key: any }>, deps: any[]): [...ReactStateFuncReturnType<number[]>, T[]] {
+
   const list = React.useMemo(listFactory, deps);
+
   const [order, setOrder] = React.useState<number[]>(list.map((_, i) => i));
   const previousKeyRef = React.useRef(list.map(e => e.key));
 
-  React.useEffect(() => {
+  React.useMemo((): void => {
+    console.log("new order");
     const maxOrder = order.reduce((p, c) => p > c ? p : c, -1);
     if (list.length > order.length) {
       const order2append = [];
@@ -78,8 +82,8 @@ export function useDnDswapList<T>(listFactory: () => Array<T & { key: any }>, de
       setOrder(rmvdOrder.map(e => [...rmvdOrder].sort((r, l) => r > l ? 1 : -1).findIndex(i => i === e)));
     }
     previousKeyRef.current = list.map(e => e.key);
-
   }, [list]);
+
 
   return [order, setOrder as ReactStateFuncReturnType<number[]>[1], list];
 };
@@ -125,7 +129,6 @@ interface DragablePropsType<K extends WrapElmTagName> {
 
 const DragableElmImpl = <K extends WrapElmTagName>(props: React.PropsWithChildren<DragablePropsType<K>>): JSX.Element => {
   const elmProps = props.wrapElmProps;
-  console.log("render elm");
 
   const dragEventHandler: JSX.IntrinsicElements[K] = {
     ...props.wrapElmProps,

@@ -158,15 +158,19 @@ export class Playlist implements PrimitivePlaylist {
     }> = [];
 
     for (const diffOperation of difference) {
-      if (diffOperation.added ?? false) {
+      if (diffOperation.added!) {
         diffOperation.value.forEach((e: string) => {
           idWithIndex.push({
             id: e,
             index,
           });
+          this.videos.splice(index, 0, {
+            id: e,
+            title: "",
+          });
           index++;
         });
-      } else if (diffOperation.removed ?? false) {
+      } else if (diffOperation.removed!) {
         diffOperation.value.forEach(() => {
           this.videos.splice(index, 1);
         });
@@ -178,10 +182,10 @@ export class Playlist implements PrimitivePlaylist {
     }
     const titles = await youtube.getTitles(idWithIndex.map((e) => e.id));
     idWithIndex.forEach((e, i) => {
-      this.videos.splice(e.index, 0, {
+      this.videos[e.index] = {
         id: e.id,
-        title: titles[i] ?? "",
-      });
+        title: titles[i],
+      };
     });
   }
 

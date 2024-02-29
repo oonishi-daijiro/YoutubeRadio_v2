@@ -80,7 +80,6 @@ function splitArray<T>(array: T[], divLength: number): T[][] {
 
 export async function getTitles(ids: string[]): Promise<string[]> {
   const splited = splitArray(ids, 50);
-  console.log(splited);
   // [ [id,id,id] [id,id,id] [id]] -> [[title,...] [title,...] [title]] -> [title...]
   const allTitles: string[] = (
     await Promise.all(

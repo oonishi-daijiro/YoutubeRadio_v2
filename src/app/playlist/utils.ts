@@ -65,8 +65,10 @@ export function parsePlaylistURL(url: string): PlaylistURL {
   }
 }
 
+type DispatchFunction = (action: ReducerActions[keyof ReducerActions]) => void;
+
 export async function popDisplayWithAnimation(
-  dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void
+  dispatch: DispatchFunction
 ): Promise<void> {
   // dispatch({
   //   type: 'animate',
@@ -82,7 +84,7 @@ export async function popDisplayWithAnimation(
 }
 
 export async function pushDisplayWithAnimation(
-  dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void,
+  dispatch: DispatchFunction,
   displayName: ReducerActions["push-display"]["props"]
 ): Promise<void> {
   dispatch({
@@ -100,7 +102,7 @@ export async function pushDisplayWithAnimation(
 }
 
 export async function reloadPlaylistsWithAnimation(
-  dispatch: (ReducerAction: ReducerActions[keyof ReducerActions]) => void
+  dispatch: DispatchFunction
 ): Promise<void> {
   dispatch({
     type: "animate",
@@ -114,6 +116,25 @@ export async function reloadPlaylistsWithAnimation(
   dispatch({
     type: "reload-playlists",
   });
+}
+
+export async function editAndSavePlaylist(
+  playlistName: string,
+  dispatch: DispatchFunction,
+  playlistEdited: PrimitivePlaylist
+): Promise<void> {
+  dispatch({
+    type: "edit-target-playlist",
+    props: {
+      playlist: playlistEdited,
+    },
+  });
+  dispatch({
+    type: "animation-end",
+  });
+  console.log(playlistEdited);
+  await window.YoutubeRadio.editPlaylist(playlistName, playlistEdited);
+  await reloadPlaylistsWithAnimation(dispatch);
 }
 
 export function getYoutubeThumbnailURLFromID(videoID: string): string {
