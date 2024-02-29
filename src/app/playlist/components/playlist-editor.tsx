@@ -8,7 +8,7 @@ import {
   sleep,
   reloadPlaylistsWithAnimation
 } from '../utils'
-import { IconedButton, Wrapper, Thumbnail } from '.'
+import { IconedButton, Wrapper, Thumbnail, useDnDswapList, DnDSwapListProvider } from '.'
 import { type PrimitivePlaylist, type YoutubeVideo } from '../../../lib/config'
 
 declare const window: preload
@@ -16,9 +16,38 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
 
-  const [playlistEdit, setPlaylistEdit] = React.useState(appState.targetPlaylist)
+  const [playlistEdit, setPlaylistEdit] = React.useState({ ...appState.targetPlaylist })
+
+  let [shouldHideThumbnail, setShouldHideThumbnail] = React.useState(false);
+  shouldHideThumbnail = shouldHideThumbnail && (playlistEdit.type === 'youtube_radio');
+
 
   let videoEditor: string | number | boolean | JSX.Element = <></>;
+
+  const refForDetectScroll = React.useRef<HTMLDivElement>(null);
+
+  const handleScroll = (): void => {
+    const scrollTop = (refForDetectScroll.current?.scrollTop ?? 0);
+    console.log(scrollTop);
+    if (scrollTop < 5 && playlistEdit.videos.length !== 4) {
+      setShouldHideThumbnail(false);
+    } else if (scrollTop > 10) {
+      setShouldHideThumbnail(true);
+    }
+  }
+
+  React.useEffect(() => {
+    if (playlistEdit.videos.length > 3 && refForDetectScroll.current?.scrollTop !== 0) {
+      setShouldHideThumbnail(true);
+    } else {
+      setShouldHideThumbnail(false);
+    }
+  }, [playlistEdit.videos.length])
+
+  React.useEffect(() => {
+    refForDetectScroll.current?.addEventListener('scroll', handleScroll);
+    return () => refForDetectScroll.current?.removeEventListener('scroll', handleScroll);
+  })
 
   if (playlistEdit.type === 'youtube') {
     videoEditor = <YoutubePlaylistVideosEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
@@ -30,9 +59,10 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
     <Wrapper wrapTarget="playlist-editor-wrapper" index={props.index}>
       <div id="playlist-editor">
         <IconedButton iconName="arrowLeft" className="button-back" onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
-        <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)} className="thumbnail-playlist-editor" style={{ background: 'aqua' }} />
+        <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)}
+          className={shouldHideThumbnail ? 'fade-away-thumbnail thumbnail-playlist-editor-hidden' : `${appState.isAnimating ? '' : 'fade-in-thmubnail'} thumbnail-playlist-editor`} />
         <PlaylistNameEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
-        <div id="editor-video-content-display">{videoEditor}</div>
+        <div ref={refForDetectScroll} id={!shouldHideThumbnail ? 'editor-video-content-display' : ''} className={shouldHideThumbnail ? 'editor-video-content-display-thumbnail-hidden' : ''}>{videoEditor}</div>
         <ButtonSavePlaylist playlistEdited={playlistEdit} />
       </div>
     </Wrapper>
@@ -100,15 +130,18 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
     } else {
       playlistEdit.videos[index] = video
       setPlaylistEdit({
-        ...playlistEdit
+        ...playlistEdit,
+        videos: playlistEdit.videos.map((e, i) => i !== index ? e : video)
       })
     }
   }
-  const videoEditor = playlistEdit.videos.map((video, index) => {
+
+  const dnd = useDnDswapList(() => playlistEdit.videos.map((video, index) => {
     return (
       <EditableVideoDisplay key={videoKeys.current[index]} video={video} index={index}
         setEditedVideo={(video) => { setEditedVideo(video, index) }} />)
-  })
+  }), [playlistEdit.videos, playlistEdit.name]);
+
 
   const handleOnclickAddVideo = (): void => {
     const newKey = videoKeys.current.reduce((p, c) => p > c ? p : c, -1) + 1
@@ -120,7 +153,7 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
   }
 
   return <>
-    {videoEditor}
+    <DnDSwapListProvider dnd={dnd} wrapElmTagName='div' wrapElmProps={{ className: 'dnd-wrap-editor-video-display' }} />
     {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={handleOnclickAddVideo} /> : <></>}
   </>
 }
@@ -131,6 +164,8 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   const [currentDisplay, setCurrentDisplay] = React.useState<'title' | 'url'>('title')
 
   const isDefault = props.video.id === ''
+
+
   if (isDefault && currentDisplay === 'title') {
     setCurrentDisplay('url')
   }

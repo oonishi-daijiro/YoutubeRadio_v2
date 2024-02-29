@@ -113,10 +113,7 @@ async function loadPlaylist(
       console.log(err);
     }); // For update playlist without using api key
   } else if (appliedPlaylist.type === "youtube_radio") {
-    if (
-      !(appliedPlaylist?.name === "") ||
-      !(appliedPlaylist.videos.length === 0)
-    ) {
+    if (appliedPlaylist?.name === "" || appliedPlaylist.videos.length === 0) {
       return;
     }
     const idList: string[] = appliedPlaylist.videos.map((e) => {

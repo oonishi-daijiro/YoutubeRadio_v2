@@ -23,13 +23,21 @@ interface VideoURL {
 export function parseYoutubeVideoURL(url: string): VideoURL {
   const reIncludesHttps = /^https:\/\//;
   url = reIncludesHttps.test(url) ? url : `https://${url}`;
-  const ul = new URL(url);
+  try {
+    const ul = new URL(url);
 
-  return {
-    protocol: ul.protocol ?? "",
-    id: ul.searchParams.get("v") ?? "",
-    host: ul.hostname ?? "",
-  };
+    return {
+      protocol: ul.protocol ?? "",
+      id: ul.searchParams.get("v") ?? "",
+      host: ul.hostname ?? "",
+    };
+  } catch (e) {
+    return {
+      protocol: "",
+      id: "",
+      host: "",
+    };
+  }
 }
 
 interface PlaylistURL {
@@ -41,15 +49,20 @@ interface PlaylistURL {
 export function parsePlaylistURL(url: string): PlaylistURL {
   const reIncludesHttps = /^https:\/\//;
   url = reIncludesHttps.test(url) ? url : `https://${url}`;
-
-  // const parsedURL = window.YoutubeRadio.parse(url, true);
-  const parsedURL = new URL(url);
-
-  return {
-    protocol: parsedURL.protocol ?? "",
-    id: parsedURL.searchParams.get("list") ?? "",
-    host: parsedURL.hostname ?? "",
-  };
+  try {
+    const parsedURL = new URL(url);
+    return {
+      protocol: parsedURL.protocol ?? "",
+      id: parsedURL.searchParams.get("list") ?? "",
+      host: parsedURL.hostname ?? "",
+    };
+  } catch (e) {
+    return {
+      protocol: "",
+      id: "",
+      host: "",
+    };
+  }
 }
 
 export async function popDisplayWithAnimation(
@@ -77,13 +90,13 @@ export async function pushDisplayWithAnimation(
     props: displayName,
   });
   // dispatch({
-  //   type: 'animate',
-  //   props: 'push'
-  // })
-  // await sleep(700)
+  //   type: "animate",
+  //   props: "push",
+  // });
+  // await sleep(700);
   // dispatch({
-  //   type: 'animation-end'
-  // })
+  //   type: "animation-end",
+  // });
 }
 
 export async function reloadPlaylistsWithAnimation(
