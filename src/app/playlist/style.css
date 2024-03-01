@@ -202,7 +202,6 @@ span {
   animation: fade-in-thumbnail 0.3s ease-out forwards;
 }
 
-
 @keyframes fade-in-from-right {
   0% {
     transform: translateX(100%);
@@ -292,7 +291,6 @@ span {
     margin-top: 25px;
   }
 }
-
 
 .video-url-display {
   display: none;
@@ -792,4 +790,19 @@ div#label-selection-description {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+#button-reorder-playlists {
+  position: fixed;
+  right: 70px;
+  top: 17px;
+  color: #353535;
+  z-index: 100;
+  cursor: pointer;
+}
+
+.playlist-order-editor-wrapper {
+  cursor: grab;
+  opacity: 60%;
+  z-index: 100;
 }

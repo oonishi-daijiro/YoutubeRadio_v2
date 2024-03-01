@@ -19,7 +19,8 @@ export const Icons = {
   close: 'fas fa-times-circle',
   cross: 'fas fa-times',
   plusCircle: 'fas fa-plus-circle',
-  iconYoutube: 'fa-brands fa-youtube'
+  iconYoutube: 'fa-brands fa-youtube',
+  reorder: 'fas fa-arrow-right-arrow-left'
 } as const;
 
 
@@ -68,7 +69,6 @@ export function useDnDswapList<T>(listFactory: () => Array<T & { key: any }>, de
   const previousKeyRef = React.useRef(list.map(e => e.key));
 
   React.useMemo((): void => {
-    console.log("new order");
     const maxOrder = order.reduce((p, c) => p > c ? p : c, -1);
     if (list.length > order.length) {
       const order2append = [];
@@ -76,7 +76,7 @@ export function useDnDswapList<T>(listFactory: () => Array<T & { key: any }>, de
         order2append.push(maxOrder + i);
       }
       setOrder([...order, ...order2append]);
-    } else {
+    } else if (list.length < order.length) {
       const rmDiff = previousKeyRef.current.filter(k => !list.map(e => e.key).includes(k)).map(diff => previousKeyRef.current.findIndex(k => k === diff)).filter(i => i >= 0);
       const rmvdOrder = order.filter((i) => !rmDiff.includes(i));
       setOrder(rmvdOrder.map(e => [...rmvdOrder].sort((r, l) => r > l ? 1 : -1).findIndex(i => i === e)));
@@ -84,14 +84,13 @@ export function useDnDswapList<T>(listFactory: () => Array<T & { key: any }>, de
     previousKeyRef.current = list.map(e => e.key);
   }, [list]);
 
-
   return [order, setOrder as ReactStateFuncReturnType<number[]>[1], list];
 };
 
 interface DnDSwapListPropsType<K extends WrapElmTagName> {
   dnd: [...ReactStateFuncReturnType<number[]>, React.ReactNode[]]
-  wrapElmTagName: K
-  wrapElmProps: JSX.IntrinsicElements[K]
+  wrapElmTagName?: K
+  wrapElmProps?: JSX.IntrinsicElements[K]
 }
 
 export const DnDSwapListProvider = <K extends WrapElmTagName>(props: DnDSwapListPropsType<K>): React.ReactElement[] => {
@@ -114,7 +113,7 @@ export const DnDSwapListProvider = <K extends WrapElmTagName>(props: DnDSwapList
     }
   }, []);
 
-  return order!.map((e: number, i: number) => <DragableElm wrapElmTagName={props.wrapElmTagName} wrapElmProps={elmPropsMemo} key={e} index={i} getSwapTarget={getRef} swap={swap}>{childrenMemo[e]}</DragableElm >)
+  return order!.map((e: number, i: number) => <DragableElm wrapElmTagName={props.wrapElmTagName ?? "div"} wrapElmProps={elmPropsMemo ?? {}} key={e} index={i} getSwapTarget={getRef} swap={swap}>{childrenMemo[e]}</DragableElm >)
 };
 
 interface DragablePropsType<K extends WrapElmTagName> {
@@ -137,16 +136,17 @@ const DragableElmImpl = <K extends WrapElmTagName>(props: React.PropsWithChildre
       props.getSwapTarget().current = props.index;
     },
     onDragEnd: (e: React.DragEvent<HTMLDivElement>) => {
-      elmProps.onDragEnd ?? ((_) => { })(e)
+      console.log(elmProps.onDragEnd);
+      (elmProps.onDragEnd ?? ((_: any) => { }))(e)
       props.getSwapTarget().current = 'no-drag'
     },
     onDragEnter: (e: React.DragEvent<HTMLDivElement>) => {
-      elmProps.onDragEnter ?? ((_) => { })(e)
+      (elmProps.onDragEnter ?? ((_: any) => { }))(e)
       e.preventDefault()
       props.swap(props.index, props.getSwapTarget().current)
     },
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => {
-      elmProps.onDragEnter ?? ((_) => { })(e)
+      (elmProps.onDragEnter ?? ((_: any) => { }))(e)
       e.preventDefault()
     },
     draggable: true,

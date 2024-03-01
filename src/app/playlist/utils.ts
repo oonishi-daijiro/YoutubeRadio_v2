@@ -1,5 +1,5 @@
 import * as React from "react";
-import { sPlaylists, type preload, ContextAppState } from "./main";
+import { sPlaylists, type preload, ContextAppState, dispathFunc } from "./main";
 import { type playlistNavigation } from "../../preload/playlist";
 import { type ReducerActions } from "./reducer";
 import type { PrimitivePlaylist } from "../../lib/config";
@@ -135,6 +135,22 @@ export async function editAndSavePlaylist(
   console.log(playlistEdited);
   await window.YoutubeRadio.editPlaylist(playlistName, playlistEdited);
   await reloadPlaylistsWithAnimation(dispatch);
+}
+
+export async function reorderPlaylists(
+  dispatch: dispathFunc,
+  playlists: PrimitivePlaylist[]
+) {
+  dispatch({
+    type: "reorder-playlists",
+    props: playlists,
+  });
+
+  await window.YoutubeRadio.savePlaylists(playlists);
+  sPlaylists.reload();
+  dispatch({
+    type: "reload-playlists",
+  });
 }
 
 export function getYoutubeThumbnailURLFromID(videoID: string): string {

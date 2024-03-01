@@ -81,8 +81,9 @@ export interface ReducerActions {
   'reload-playlists': {
     type: 'reload-playlists'
   }
-  'reload': {
-    type: 'reload'
+  'reorder-playlists': {
+    type: 'reorder-playlists',
+    props: PrimitivePlaylist[]
   }
 }
 
@@ -183,7 +184,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         isPlaylistsLoaded: true,
-        playlists: action.props
+        playlists: [...action.props]
       }
 
     case 'reload-playlists':
@@ -193,6 +194,11 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         isPlaylistsLoaded: false,
         displays: ['playlists'],
         switchAnimationHook: ['']
+      }
+    case 'reorder-playlists':
+      return {
+        ...currentAppState,
+        playlists: action.props
       }
     default:
       return DefaultAppState;

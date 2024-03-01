@@ -17,14 +17,9 @@ export interface YoutubeRadioPreload {
     playlsitName: string,
     playlist: config.PrimitivePlaylist
   ) => Promise<void>
-  // parse: (
-  //   urlString: string,
-  //   parseQueryString: boolean,
-  //   slashesDenoteHost?: boolean
-  // ) => Url
   pinPlayer: () => Promise<boolean>
   isPinned: () => Promise<boolean>
-  savePlaylists: (playlists: config.Playlist[]) => Promise<void>
+  savePlaylists: (playlists: config.PrimitivePlaylist[]) => Promise<void>
 }
 
 const api: YoutubeRadioPreload = {
@@ -67,7 +62,7 @@ const api: YoutubeRadioPreload = {
   async isPinned (): Promise<boolean> {
     return await ipcRenderer.invoke('is-pinned')
   },
-  async savePlaylists (playlists: config.Playlist[]): Promise<void> {
+  async savePlaylists (playlists: config.PrimitivePlaylist[]): Promise<void> {
     return await ipcRenderer.invoke('save-playlists', playlists)
   }
 }
