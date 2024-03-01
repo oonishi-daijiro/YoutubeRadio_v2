@@ -4,7 +4,8 @@
     "target": "ESNext",
     "module": "ESNext",
     "jsx": "react-jsx",
-    "sourceMap": true
+    "sourceMap": true,
+    "strict": true
   },
   "include": ["./"],
   "exclude": ["./node_modules", "./dist"]

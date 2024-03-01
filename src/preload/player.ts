@@ -1,37 +1,36 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { Playlist } from "../lib/config";
-import * as config from "../lib/config";
-import { playlistNavigation } from "./playlist";
+import { type PrimitivePlaylist, type Playlist } from "../lib/config";
+import { type playlistNavigation } from "./playlist";
 export default interface YoutubeRadioPreload {
-  getPlaylists(): Promise<Playlist[]>;
-  close(): void;
-  minimize(): void;
-  onVideoPlayed(callback: () => void): void;
-  onVideoPaused(callback: () => void): void;
-  onNextVideo(callback: () => void): void;
-  onReqPlayVideo(callback: () => void): void;
-  onReqPauseVideo(callback: () => void): void;
-  openSelectPlaylistWindow(): Promise<void>;
-  onReqPreviousVideo(callback: () => void): void;
-  onLoadPlaylist(
+  getPlaylists: () => Promise<Playlist[]>;
+  close: () => void;
+  minimize: () => void;
+  onVideoPlayed: (callback: () => void) => void;
+  onVideoPaused: (callback: () => void) => void;
+  onNextVideo: (callback: () => void) => void;
+  onReqPlayVideo: (callback: () => void) => void;
+  onReqPauseVideo: (callback: () => void) => void;
+  openSelectPlaylistWindow: () => Promise<void>;
+  onReqPreviousVideo: (callback: () => void) => void;
+  onLoadPlaylist: (
     callback: (arg: { name: string; index: number }) => Promise<void>
-  ): void;
+  ) => void;
   // createYoutubeVideo(info: config.YoutubeVideo): Promise<config.YoutubeVideo>;
-  emitPlayerStartPlaying(): void;
-  onPlayerStartPlaying(): Promise<any>;
-  test(): void;
-  saveVolume(volume: number): Promise<void>;
-  getVolume(): Promise<number>;
-  emitWindowGetReady(): void;
-  onReqNavigation(
+  emitPlayerStartPlaying: () => void;
+  onPlayerStartPlaying: () => Promise<any>;
+  test: () => void;
+  saveVolume: (volume: number) => Promise<void>;
+  getVolume: () => Promise<number>;
+  emitWindowGetReady: () => void;
+  onReqNavigation: (
     callback: (playlistNavigation: playlistNavigation) => void
-  ): void;
-  editPlaylist(name: string, newPlaylist: config.PrimitivePlaylist): Promise<void>;
+  ) => void;
+  editPlaylist: (name: string, newPlaylist: PrimitivePlaylist) => Promise<void>;
 }
 
 const api: YoutubeRadioPreload = {
   getPlaylists: async (): Promise<Playlist[]> => {
-    return ipcRenderer.invoke("get-playlists");
+    return await ipcRenderer.invoke("get-playlists");
   },
   minimize() {
     ipcRenderer.invoke("minimize-player");
@@ -57,15 +56,18 @@ const api: YoutubeRadioPreload = {
   onReqPauseVideo(callback: () => void) {
     ipcRenderer.on("req-pause-video", callback);
   },
-  openSelectPlaylistWindow: () => {
-    return ipcRenderer.invoke("open-playlist-window");
+  openSelectPlaylistWindow: async () => {
+    return await ipcRenderer.invoke("open-playlist-window");
   },
   onLoadPlaylist(
     callback: (arg: { name: string; index: number }) => Promise<void>
   ) {
-    ipcRenderer.on("load-playlist", (_, arg) => {
-      callback(arg);
-    });
+    ipcRenderer.on(
+      "load-playlist",
+      (_, arg: { name: string; index: number }) => {
+        callback(arg);
+      }
+    );
   },
   // async createYoutubeVideo(info): Promise<config.YoutubeVideo> {
   //   return ipcRenderer.invoke("create-youtube-video", info);
@@ -73,8 +75,8 @@ const api: YoutubeRadioPreload = {
   emitPlayerStartPlaying(): void {
     ipcRenderer.invoke("player-start-playing");
   },
-  onPlayerStartPlaying(): Promise<any> {
-    return new Promise((resolve, reject) => {
+  async onPlayerStartPlaying(): Promise<any> {
+    return await new Promise((resolve, reject) => {
       ipcRenderer.on("player-start-playing", () => {
         resolve({});
       });
@@ -83,11 +85,11 @@ const api: YoutubeRadioPreload = {
   test() {
     ipcRenderer.invoke("test");
   },
-  saveVolume(volume: number): Promise<void> {
-    return ipcRenderer.invoke("save-volume", volume);
+  async saveVolume(volume: number): Promise<void> {
+    return await ipcRenderer.invoke("save-volume", volume);
   },
-  getVolume(): Promise<number> {
-    return ipcRenderer.invoke("get-volume");
+  async getVolume(): Promise<number> {
+    return await ipcRenderer.invoke("get-volume");
   },
   emitWindowGetReady() {
     ipcRenderer.invoke("ready-to-show-player");
@@ -97,8 +99,11 @@ const api: YoutubeRadioPreload = {
       callback(navigation);
     });
   },
-  editPlaylist(name: string, newPLaylist: config.Playlist): Promise<void> {
-    return ipcRenderer.invoke("edit-playlist", name, newPLaylist);
+  async editPlaylist(
+    name: string,
+    newPLaylist: PrimitivePlaylist
+  ): Promise<void> {
+    return await ipcRenderer.invoke("edit-playlist", name, newPLaylist);
   },
 };
 

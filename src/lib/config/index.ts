@@ -1,5 +1,5 @@
 import { app } from "electron";
-import * as electronStore from "electron-store";
+import * as ElectronStore from "electron-store";
 import * as diff from "diff";
 
 import * as youtube from "../youtube";
@@ -10,7 +10,7 @@ interface _playlistTypes {
   single_video: SingleVideoPlaylist;
 }
 export type playlistTypes = keyof _playlistTypes;
-export const configFile = new electronStore({
+export const configFile = new ElectronStore({
   cwd: app.getPath("userData"),
 });
 
@@ -23,27 +23,29 @@ const defaultPlaylist: PrimitivePlaylist = {
 
 export const YoutubeRadioConfig = {
   getAllPlaylists(): PrimitivePlaylist[] {
-    const rawConfig = configFile.get(
-      "playlists",
-      []
-    ) as Array<PrimitivePlaylist>;
+    const rawConfig = configFile.get("playlists", []) as PrimitivePlaylist[];
     const playlists = rawConfig.filter((pl) => {
       return [
         pl.videos.length > 0,
         pl.name.length > 0,
-        pl.type === "youtube" ? pl.playlistID.length > 0 : true,
+        pl.type === "youtube"
+          ? (pl.playlistID ?? { length: 0 }).length > 0
+          : true,
       ].reduce((previous, current) => previous && current);
     });
     return playlists;
   },
   getPlaylist(name: string): PrimitivePlaylist {
-    return YoutubeRadioConfig.getAllPlaylists().find((e) => e.name === name);
+    return (
+      YoutubeRadioConfig.getAllPlaylists().find((e) => e.name === name) ??
+      defaultPlaylist
+    );
   },
   setAllPlaylists(playlists: PrimitivePlaylist[]) {
     configFile.set("playlists", playlists);
   },
   setPlaylist(playlist: PrimitivePlaylist) {
-    if (!playlist.name.length || !playlist.videos.length) {
+    if (!(playlist.name.length === 0) || playlist.videos.length === 0) {
       return;
     }
     const playlists = YoutubeRadioConfig.getAllPlaylists();
@@ -98,18 +100,18 @@ export const YoutubeRadioConfig = {
   },
 };
 
-export type PrimitivePlaylist = {
+export interface PrimitivePlaylist {
   type: playlistTypes;
   name: string;
   videos: YoutubeVideo[];
   isShuffle: boolean;
   playlistID?: string;
-};
+}
 
-export type YoutubeVideo = {
+export interface YoutubeVideo {
   id: string;
   title: string;
-};
+}
 
 export class Playlist implements PrimitivePlaylist {
   type: playlistTypes;
@@ -128,6 +130,7 @@ export class Playlist implements PrimitivePlaylist {
     } else if (type === "single_video") {
       return new SingleVideoPlaylist(pl) as _playlistTypes[KEY];
     }
+    return defaultPlaylist as _playlistTypes[KEY];
   }
 
   constructor(prmPlaylist: PrimitivePlaylist) {
@@ -137,10 +140,10 @@ export class Playlist implements PrimitivePlaylist {
     this.type = prmPlaylist.type;
   }
 
-  applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
+  async applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
     this.name = pl.name;
     this.isShuffle = pl.isShuffle;
-    return this.updateVideos(pl.videos);
+    await this.updateVideos(pl.videos);
   }
 
   protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
@@ -155,15 +158,19 @@ export class Playlist implements PrimitivePlaylist {
     }> = [];
 
     for (const diffOperation of difference) {
-      if (diffOperation.added) {
+      if (diffOperation.added!) {
         diffOperation.value.forEach((e: string) => {
           idWithIndex.push({
             id: e,
-            index: index,
+            index,
+          });
+          this.videos.splice(index, 0, {
+            id: e,
+            title: "",
           });
           index++;
         });
-      } else if (diffOperation.removed) {
+      } else if (diffOperation.removed!) {
         diffOperation.value.forEach(() => {
           this.videos.splice(index, 1);
         });
@@ -175,10 +182,10 @@ export class Playlist implements PrimitivePlaylist {
     }
     const titles = await youtube.getTitles(idWithIndex.map((e) => e.id));
     idWithIndex.forEach((e, i) => {
-      this.videos.splice(e.index, 0, {
+      this.videos[e.index] = {
         id: e.id,
-        title: titles[i] ?? "",
-      });
+        title: titles[i],
+      };
     });
   }
 
@@ -195,19 +202,20 @@ export class YoutubePlaylist extends Playlist {
 
   constructor(prmPlaylist: PrimitivePlaylist) {
     super(prmPlaylist);
-    this.playlistID = prmPlaylist.playlistID;
+    this.playlistID = prmPlaylist.playlistID ?? "";
   }
 
   async applyPlaylist(pl: PrimitivePlaylist): Promise<void> {
     if (this.playlistID !== pl.playlistID) {
       this.name = pl.name;
       this.isShuffle = pl.isShuffle;
-      await this.updatePlaylistID(pl.playlistID);
+      await this.updatePlaylistID(pl.playlistID ?? "");
     } else {
       await super.applyPlaylist(pl);
     }
   }
-  private async updatePlaylistID(ID: string) {
+
+  private async updatePlaylistID(ID: string): Promise<void> {
     this.videos = await youtube.getAllVideoFromYoutubePlaylistID(ID);
     this.playlistID = ID;
   }
@@ -215,11 +223,12 @@ export class YoutubePlaylist extends Playlist {
 
 export class YoutubeRadioPlaylist extends Playlist {
   type: playlistTypes = "youtube_radio";
-  constructor(prmPlaylist: PrimitivePlaylist) {
+  public constructor(prmPlaylist: PrimitivePlaylist) {
     super(prmPlaylist);
   }
+
   protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
-    return super.updateVideos(newVideoList);
+    await super.updateVideos(newVideoList);
   }
 }
 
@@ -229,6 +238,7 @@ export class SingleVideoPlaylist extends Playlist {
     super(prmPlaylist);
     this.name = this.videos[0].title;
   }
+
   protected async updateVideos(newVideoList: YoutubeVideo[]): Promise<void> {
     await super.updateVideos(newVideoList);
     this.name = this.videos[0].title;

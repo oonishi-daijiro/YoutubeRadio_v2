@@ -1,10 +1,9 @@
-import { ipcMain, app, BrowserWindow, shell, session } from "electron";
+import { ipcMain, app, BrowserWindow, shell } from "electron";
 import { launchServer } from "./lib/server";
 import * as config from "./lib/config";
 import { YoutubeRadioThumbarButtons } from "./lib/thumbnail-toolber-buttons";
-import { playlistNavigation } from "./preload/playlist";
+import { type playlistNavigation } from "./preload/playlist";
 import * as youtube from "./lib/youtube";
-import * as url from "url";
 import * as path from "path";
 
 // app.disableHardwareAcceleration()
@@ -25,7 +24,7 @@ app.on("ready", () => {
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
-      preload: `${__dirname}/preload/player.js`,
+      preload: path.join(__dirname, "/preload/player.js"),
       nodeIntegration: false,
       sandbox: true,
     },
@@ -103,7 +102,6 @@ ipcMain.handle(
 
 ipcMain.handle("save-volume", (_, volume: number = 50) => {
   config.YoutubeRadioConfig.setVolume(volume);
-  return;
 });
 
 ipcMain.handle("get-volume", () => {
@@ -133,7 +131,7 @@ ipcMain.handle("open-playlist-window", () => {
     parent: mainWindow,
     webPreferences: {
       contextIsolation: true,
-      preload: `${__dirname}/preload/playlist.js`,
+      preload: path.join(__dirname, "/preload/playlist.js"),
       nodeIntegration: false,
       sandbox: true,
     },
@@ -161,12 +159,12 @@ ipcMain.handle("delete-playlist", (_, name: string) => {
   config.YoutubeRadioConfig.deletePlaylist(name);
 });
 
-ipcMain.handle("get-youtube-title", (_, id: string) => {
-  return youtube.getTitle(id);
+ipcMain.handle("get-youtube-title", async (_, id: string) => {
+  return await youtube.getTitle(id);
 });
 
 ipcMain.handle("open-external", (_, youtubeUrl: string) => {
-  const parsedUrl = url.parse(youtubeUrl);
+  const parsedUrl = new URL(youtubeUrl);
 
   if (parsedUrl.host === "www.youtube.com" && parsedUrl.protocol === "https:") {
     shell.openExternal(youtubeUrl);
@@ -175,8 +173,8 @@ ipcMain.handle("open-external", (_, youtubeUrl: string) => {
 
 ipcMain.handle(
   "edit-playlist",
-  (_, playlistName: string, newPlaylist: config.PrimitivePlaylist) => {
-    return config.YoutubeRadioConfig.editPlaylistAndSave(
+  async (_, playlistName: string, newPlaylist: config.PrimitivePlaylist) => {
+    await config.YoutubeRadioConfig.editPlaylistAndSave(
       playlistName,
       newPlaylist
     );

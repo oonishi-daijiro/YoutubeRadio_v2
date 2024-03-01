@@ -1,23 +1,28 @@
-import * as React from "react"
-import * as ReactDOM from "react-dom/client";
-import { ReducerActions, Reducer, AppState, DefaultAppState, Displays } from "./reducer";
-import { YoutubeRadioPreload } from "../../preload/playlist";
-import { Playlist } from "../../lib/config";
+import * as React from 'react'
+import * as ReactDOM from 'react-dom/client'
+import { type ReducerActions, Reducer, type AppState, DefaultAppState } from './reducer'
+import { type YoutubeRadioPreload } from '../../preload/playlist'
+import { type Playlist } from '../../lib/config'
+import { Displays } from './components'
 
-interface preload extends Window {
+export interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
-export declare const window: preload
+
+declare const window: preload
 
 class SuspenseResource<T> {
   constructor(resourceFetcher: () => Promise<T>, defaultData: T) {
     this.resouseFetcher = resourceFetcher
     this.data = defaultData
     this.setFetcher()
+    this.promise = new Promise<void>((resolve) => { resolve() })
   }
+
   read(): T {
     switch (this.stat) {
       case 'pending':
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         throw this.promise
       case 'fullfilled':
         return this.data
@@ -31,7 +36,7 @@ class SuspenseResource<T> {
     this.setFetcher()
   }
 
-  private setFetcher() {
+  private setFetcher(): void {
     this.promise = this.resouseFetcher().then(data => {
       this.data = data
       this.stat = 'fullfilled'
@@ -42,18 +47,19 @@ class SuspenseResource<T> {
 
   private stat: 'pending' | 'fullfilled' | 'rejected' = 'pending'
   private data: T
-  private resouseFetcher: () => Promise<T>
+  private readonly resouseFetcher: () => Promise<T>
   private promise: Promise<void>
-
 }
 const domAppRoot = document.getElementById('root')
-const AppRoot = ReactDOM.createRoot(domAppRoot)
-export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => console.log("reducer is not ready"))
+const AppRoot = ReactDOM.createRoot(domAppRoot!)
+
+export const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => { console.log('reducer is not ready') })
 
 export const ContextAppState = React.createContext<AppState>(DefaultAppState)
+
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
 
-
+export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void
 
 const App: React.FC = () => {
   const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultAppState)
@@ -83,7 +89,7 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
   if (!appState.isPlaylistsLoaded) {
     const playlists = sPlaylists.read()
     dispatch({
-      'type': 'load-playlists',
+      type: 'load-playlists',
       props: playlists
     })
   }

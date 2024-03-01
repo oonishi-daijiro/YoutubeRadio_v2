@@ -1,22 +1,11 @@
-import * as React from "react"
-import { Playlist, PrimitivePlaylist, YoutubePlaylist } from "../../lib/config";
-import { playlistNavigation, YoutubeRadioPreload } from "../../preload/playlist";
-import { PlaylistDetailDisplay, PlaylistEditorDisplay, PlaylistTypeSelection, PlaylistsDisplay } from "./components"
-import { sPlaylists } from "./main";
+import { type PrimitivePlaylist } from '../../lib/config'
+import { type YoutubeRadioPreload } from '../../preload/playlist'
+import { type Displays } from './components'
 
 interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
 }
 export declare const window: preload
-
-
-export const Displays = {
-  'playlists': (index: number) => <PlaylistsDisplay index={index} />,
-  'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
-  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
-  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />
-} as const
-
 
 export const animationNames = [
   'fade-out-to-right',
@@ -30,9 +19,9 @@ export const animationNames = [
 export interface AppState {
   isPlaylistsLoaded: boolean
   playlists: PrimitivePlaylist[]
-  displays: (keyof typeof Displays)[]
+  displays: Array<keyof typeof Displays>
   targetPlaylist: PrimitivePlaylist
-  switchAnimationHook: typeof animationNames[number][]
+  switchAnimationHook: Array<typeof animationNames[number]>
   isAnimating: boolean
 }
 
@@ -50,34 +39,33 @@ export const DefaultAppState: AppState = {
   isAnimating: false
 }
 
-
 export interface ReducerActions {
   'set-target-playlist': {
-    type: 'set-target-playlist',
+    type: 'set-target-playlist'
     props: PrimitivePlaylist
   }
   'push-display': {
-    type: 'push-display',
+    type: 'push-display'
     props: keyof typeof Displays
   }
   'pop-display': {
     type: 'pop-display'
   }
   'delete-playlist': {
-    type: 'delete-playlist',
+    type: 'delete-playlist'
     props: string
   }
   'edit-target-playlist': {
-    type: 'edit-target-playlist',
+    type: 'edit-target-playlist'
     props: {
-      playlist: PrimitivePlaylist,
+      playlist: PrimitivePlaylist
     }
   }
   'close-window': {
     type: 'close-window'
   }
   'animate': {
-    type: 'animate',
+    type: 'animate'
     props: 'pop' | 'push' | 'reload'
   }
   'animation-end': {
@@ -87,30 +75,27 @@ export interface ReducerActions {
     type: 'animation-start'
   }
   'load-playlists': {
-    type: 'load-playlists',
+    type: 'load-playlists'
     props: PrimitivePlaylist[]
   }
   'reload-playlists': {
-    type: 'reload-playlists',
+    type: 'reload-playlists'
   }
   'reload': {
     type: 'reload'
   }
 }
 
-
-
 export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
   if (currentAppState === null) {
     return DefaultAppState
   }
   switch (action.type) {
-
     case 'push-display':
       currentAppState.displays.push(action.props)
       return {
         ...currentAppState,
-        displays: [...currentAppState.displays],
+        displays: [...currentAppState.displays]
       }
 
     case 'pop-display':
@@ -127,7 +112,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         targetPlaylist: action.props
       }
 
-    case 'delete-playlist':
+    case 'delete-playlist': {
       window.YoutubeRadio.deletePlaylist(action.props)
       const index = currentAppState.playlists.findIndex(pl => pl.name === action.props)
       currentAppState.playlists.splice(index, 1)
@@ -136,6 +121,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         ...currentAppState,
         playlists: currentAppState.playlists
       }
+    }
 
     case 'edit-target-playlist':
       currentAppState.playlists[currentAppState.playlists.findIndex(pl => pl.name === action.props.playlist.name)] = action.props.playlist
@@ -143,11 +129,10 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         playlists: [...currentAppState.playlists],
-        targetPlaylist: action.props.playlist,
+        targetPlaylist: action.props.playlist
       }
 
-
-    case 'animate':
+    case 'animate': {
       let animationHook = []
       switch (action.props) {
         case 'pop':
@@ -176,6 +161,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
             isAnimating: true
           }
       }
+      break;
+    }
 
     case 'close-window':
       window.YoutubeRadio.close()
@@ -207,5 +194,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         displays: ['playlists'],
         switchAnimationHook: ['']
       }
+    default:
+      return DefaultAppState;
   }
 }

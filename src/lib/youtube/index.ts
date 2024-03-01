@@ -1,8 +1,7 @@
 import * as https from "https";
-import { parse } from "url";
 import { getapikey } from "../youtube-api-key";
-import { ParsedUrlQueryInput, stringify } from "querystring";
-import { Playlist, YoutubeVideo } from "../config";
+import { type ParsedUrlQueryInput, stringify } from "querystring";
+import { type YoutubeVideo } from "../config";
 
 interface YoutubeDataApiQuery extends ParsedUrlQueryInput {
   key: string;
@@ -33,9 +32,9 @@ async function httpGet(url: string): Promise<string> {
 }
 
 export function getID(youtubeURL: string): string {
-  const queryParms = parse(youtubeURL, true);
-  const id = queryParms.query.v;
-  return id as string;
+  const queryParms = new URL(youtubeURL);
+  const id = queryParms.searchParams.get("v");
+  return id ?? "";
 }
 
 export async function getYoutubeTitleFromDataAPI(ID: string): Promise<string> {
@@ -51,7 +50,7 @@ export async function getYoutubeTitleFromDataAPI(ID: string): Promise<string> {
 }
 
 export async function getTitle(ID: string = ""): Promise<string> {
-  if (ID === "" || ID.length != 11) {
+  if (ID === "" || ID.length !== 11) {
     return "";
   }
   try {
@@ -62,8 +61,8 @@ export async function getTitle(ID: string = ""): Promise<string> {
   }
 }
 
-function splitArray<T>(array: Array<T>, divLength: number): Array<Array<T>> {
-  const splited: Array<Array<T>> = [];
+function splitArray<T>(array: T[], divLength: number): T[][] {
+  const splited: T[][] = [];
   const divideCount = (array.length - (array.length % divLength)) / divLength;
   for (let i = 0; i < divideCount; i++) {
     splited.push(array.slice(i * divLength, i * divLength + divLength));
@@ -81,9 +80,8 @@ function splitArray<T>(array: Array<T>, divLength: number): Array<Array<T>> {
 
 export async function getTitles(ids: string[]): Promise<string[]> {
   const splited = splitArray(ids, 50);
-  console.log(splited);
   // [ [id,id,id] [id,id,id] [id]] -> [[title,...] [title,...] [title]] -> [title...]
-  const allTitles: Array<string> = (
+  const allTitles: string[] = (
     await Promise.all(
       splited.map(async (splitedIds): Promise<string[]> => {
         try {
@@ -100,11 +98,12 @@ export async function getTitles(ids: string[]): Promise<string[]> {
           );
           return titles;
         } catch (err) {
-          let nullTitles = [];
+          const nullTitles = [];
           for (let i = 0; i < splitedIds.length; i++) {
             nullTitles.push("");
           }
         }
+        return [];
       })
     )
   ).reduce((p, c) => p.concat(c), []);
@@ -112,7 +111,8 @@ export async function getTitles(ids: string[]): Promise<string[]> {
 }
 
 export function getPlaylistID(url: string): string {
-  return parse(url, true).query.list as string;
+  const ul = new URL(url);
+  return ul.searchParams.get("list") ?? "";
 }
 
 export async function getAllVideoFromYoutubePlaylistID(
@@ -131,7 +131,7 @@ export async function getAllVideoFromYoutubePlaylistID(
 
   async function getVideos(
     videos: YoutubeVideo[] = [],
-    nextPageToken: string = undefined
+    nextPageToken: string | undefined = undefined
   ): Promise<YoutubeVideo[]> {
     if (nextPageToken !== undefined) {
       query.pageToken = nextPageToken;
@@ -141,21 +141,28 @@ export async function getAllVideoFromYoutubePlaylistID(
     const response: string = await httpGet(url);
     const jsonResult = JSON.parse(response);
 
-    if (jsonResult.items) {
-      JSON.parse(response).items.forEach((item) => {
-        const title = item.snippet.title;
-        if (title === "Deleted video") {
-          return;
+    if (jsonResult.items !== undefined) {
+      JSON.parse(response).items.forEach(
+        (item: {
+          snippet: { title: string; resourceId: { videoId: string } };
+        }) => {
+          const title = item.snippet.title;
+          if (title === "Deleted video") {
+            return;
+          }
+          const id = item.snippet.resourceId.videoId;
+          videos.push({
+            id,
+            title,
+          } satisfies YoutubeVideo);
         }
-        const id = item.snippet.resourceId.videoId;
-        videos.push({
-          id: id,
-          title: title,
-        } satisfies YoutubeVideo);
-      });
+      );
     }
     if (jsonResult.nextPageToken !== undefined) {
-      return getVideos(videos, jsonResult.nextPageToken);
+      return await getVideos(
+        videos,
+        jsonResult.nextPageToken as string | undefined
+      );
     }
 
     return videos;
@@ -164,6 +171,9 @@ export async function getAllVideoFromYoutubePlaylistID(
 }
 
 export function isPlaylistURL(url: string): boolean {
-  const u = parse(url, true);
-  return Boolean(u.query.list) && u.query.list.length === 34;
+  const u = new URL(url);
+  const isIncludesList = u.searchParams.get("list") !== null;
+  const isParmLengthValid = u.searchParams.get("list")?.length === 34;
+
+  return isIncludesList && isParmLengthValid;
 }
