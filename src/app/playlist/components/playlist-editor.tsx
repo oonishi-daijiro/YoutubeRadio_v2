@@ -17,9 +17,13 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
 
   const [playlistEdit, setPlaylistEdit] = React.useState({ ...appState.targetPlaylist })
+  const refForDetectScroll = React.useRef<HTMLDivElement>(null);
 
-  let [shouldHideThumbnail, setShouldHideThumbnail] = React.useState(false);
-  shouldHideThumbnail = shouldHideThumbnail && (playlistEdit.type === 'youtube_radio');
+  let [isThumbnailHidden, setIsThmubnailHidden] = React.useState(false);
+  isThumbnailHidden = isThumbnailHidden && (playlistEdit.type === 'youtube_radio');
+
+  type hideThumbnailAnimationName = 'fade-away-thumbnail' | 'fade-in-thumbnail' | '';
+  const [animationClassName, setAnimationClassName] = React.useState<hideThumbnailAnimationName>('');
 
 
   let videoEditor: string | number | boolean | JSX.Element = <></>;
@@ -31,26 +35,18 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
     videoEditor = <YoutubeRadioPlaylistVideosEditor emitOrder={setYtplVideosOrder} playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
   }
 
-  const refForDetectScroll = React.useRef<HTMLDivElement>(null);
-  console.log("sus");
-
-
   const handleScroll = (): void => {
     const scrollTop = (refForDetectScroll.current?.scrollTop ?? 0);
-    if (scrollTop < 5 && playlistEdit.videos.length !== 4) {
-      setShouldHideThumbnail(false);
+
+    if (scrollTop === 0 && playlistEdit.videos.length !== 4) {
+      setAnimationClassName('fade-in-thumbnail');
+      setIsThmubnailHidden(false);
     } else if (scrollTop > 10) {
-      setShouldHideThumbnail(true);
+      console.log("hidden", scrollTop);
+      setAnimationClassName('fade-away-thumbnail');
+      setIsThmubnailHidden(true);
     }
   }
-
-  React.useEffect(() => {
-    if (playlistEdit.videos.length > 3 && refForDetectScroll.current?.scrollTop !== 0) {
-      setShouldHideThumbnail(true);
-    } else {
-      setShouldHideThumbnail(false);
-    }
-  }, [playlistEdit.videos.length])
 
   React.useEffect(() => {
     refForDetectScroll.current?.addEventListener('scroll', handleScroll);
@@ -58,7 +54,7 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   })
 
 
-  const getOrderEditedPlaylist = (pl: PrimitivePlaylist): PrimitivePlaylist => {
+  const getReorderedPlaylist = (pl: PrimitivePlaylist): PrimitivePlaylist => {
     if (pl.type === "youtube_radio") {
       return {
         ...pl,
@@ -74,12 +70,12 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
       <div id="playlist-editor">
         <IconedButton iconName="arrowLeft" className="button-back" onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
         <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)}
-          className={shouldHideThumbnail ? 'fade-away-thumbnail thumbnail-playlist-editor-hidden' : `${appState.isAnimating ? '' : 'fade-in-thmubnail'} thumbnail-playlist-editor`} />
+          className={`${isThumbnailHidden ? 'thumbnail-playlist-editor-hidden' : 'thumbnail-playlist-editor'} ${animationClassName}`} />
         <PlaylistNameEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
-        <div ref={refForDetectScroll} id={!shouldHideThumbnail ? 'editor-video-content-display' : ''} className={shouldHideThumbnail ? 'editor-video-content-display-thumbnail-hidden' : ''}>
+        <div ref={refForDetectScroll} id={!isThumbnailHidden ? 'editor-video-content-display' : 'editor-video-content-display-thumbnail-hidden'}>
           {videoEditor}
         </div>
-        <ButtonSavePlaylist playlistEdited={getOrderEditedPlaylist(playlistEdit)} />
+        <ButtonSavePlaylist playlistEdited={getReorderedPlaylist(playlistEdit)} />
       </div>
     </Wrapper>
   )

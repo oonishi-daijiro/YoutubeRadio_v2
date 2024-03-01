@@ -198,9 +198,10 @@ span {
   animation: fade-away-thumbnail 0.3s ease-out forwards;
 }
 
-.fade-in-thmubnail {
+.fade-in-thumbnail {
   animation: fade-in-thumbnail 0.3s ease-out forwards;
 }
+
 
 @keyframes fade-in-from-right {
   0% {
@@ -288,8 +289,10 @@ span {
     object-fit: cover;
     clip-path: circle(0px at center);
     opacity: 0;
+    margin-top: 25px;
   }
 }
+
 
 .video-url-display {
   display: none;
@@ -531,7 +534,6 @@ span {
 }
 
 .thumbnail-playlist-editor-hidden {
-  margin-top: 25px;
   object-fit: cover;
   clip-path: circle(41px at center);
   object-fit: cover;
@@ -605,7 +607,7 @@ img {
   flex-direction: column;
   overflow: scroll;
 }
-.editor-video-content-display-thumbnail-hidden {
+#editor-video-content-display-thumbnail-hidden {
   display: flex;
   width: 75%;
   height: 70vh;

@@ -70,17 +70,17 @@ type DispatchFunction = (action: ReducerActions[keyof ReducerActions]) => void;
 export async function popDisplayWithAnimation(
   dispatch: DispatchFunction
 ): Promise<void> {
-  // dispatch({
-  //   type: 'animate',
-  //   props: 'pop'
-  // })
-  // await sleep(700)
+  dispatch({
+    type: "animate",
+    props: "pop",
+  });
+  await sleep(700);
   dispatch({
     type: "pop-display",
   });
-  // dispatch({
-  //   type: 'animation-end'
-  // })
+  dispatch({
+    type: "animation-end",
+  });
 }
 
 export async function pushDisplayWithAnimation(
@@ -91,14 +91,14 @@ export async function pushDisplayWithAnimation(
     type: "push-display",
     props: displayName,
   });
-  // dispatch({
-  //   type: "animate",
-  //   props: "push",
-  // });
-  // await sleep(700);
-  // dispatch({
-  //   type: "animation-end",
-  // });
+  dispatch({
+    type: "animate",
+    props: "push",
+  });
+  await sleep(700);
+  dispatch({
+    type: "animation-end",
+  });
 }
 
 export async function reloadPlaylistsWithAnimation(
