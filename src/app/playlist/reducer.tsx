@@ -85,9 +85,11 @@ export interface ReducerActions {
     type: 'reorder-playlists',
     props: PrimitivePlaylist[]
   }
+
 }
 
 export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
+  console.log(action.type);
   if (currentAppState === null) {
     return DefaultAppState
   }
@@ -188,7 +190,6 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       }
 
     case 'reload-playlists':
-
       return {
         ...currentAppState,
         isPlaylistsLoaded: false,

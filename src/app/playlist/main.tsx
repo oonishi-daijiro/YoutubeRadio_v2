@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom/client'
 import { type ReducerActions, Reducer, type AppState, DefaultAppState } from './reducer'
 import { type YoutubeRadioPreload } from '../../preload/playlist'
 import { type Playlist } from '../../lib/config'
-import { Displays } from './components'
+import { Displays, FallbackReloadPlaylist } from './components'
 
 export interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -22,9 +22,10 @@ class SuspenseResource<T> {
   read(): T {
     switch (this.stat) {
       case 'pending':
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
-        throw this.promise
+        console.log("pending");
+        throw this.promise as unknown as Error
       case 'fullfilled':
+        console.log("fullfilled");
         return this.data
       case 'rejected':
         return this.data
@@ -32,6 +33,7 @@ class SuspenseResource<T> {
   }
 
   reload(): void {
+    console.log('set stat to pending');
     this.stat = 'pending'
     this.setFetcher()
   }
@@ -67,10 +69,11 @@ const App: React.FC = () => {
   return (
     <ContextAppState.Provider value={appState}>
       <ContextDispatchAppState.Provider value={dispatchAppState}>
-        <React.Suspense fallback=<Fallback />>
-          <Suspenser>
+        <React.Suspense fallback={<FallbackReloadPlaylist />}>
+          <PlaylistLoadSuspenser>
+            {/* <FallbackReloadPlaylist /> */}
             {appState.displays.map((displayName, index) => Displays[displayName](index))}
-          </Suspenser>
+          </PlaylistLoadSuspenser>
         </React.Suspense>
       </ContextDispatchAppState.Provider >
     </ContextAppState.Provider>
@@ -78,11 +81,8 @@ const App: React.FC = () => {
 }
 
 AppRoot.render(<App />)
-const Fallback: React.FC = () => {
-  return <>fallback</>
-}
 
-const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
+const PlaylistLoadSuspenser: React.FC<{ children: JSX.Element | JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
 
@@ -94,7 +94,6 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
     })
   }
 
-  return (<>
-    {...props.children}
-  </>)
+  return props.children;
 }
+

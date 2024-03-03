@@ -140,7 +140,7 @@ export async function editAndSavePlaylist(
 export async function reorderPlaylists(
   dispatch: dispathFunc,
   playlists: PrimitivePlaylist[]
-) {
+): Promise<void> {
   dispatch({
     type: "reorder-playlists",
     props: playlists,

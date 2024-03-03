@@ -5,6 +5,7 @@ import PlaylistDetailDisplay from './playlist-detail'
 import PlaylistEditorDisplay from './playlist-editor'
 import PlaylistTypeSelection from './playlist-selection'
 import PlaylistsDisplay from './playlists'
+import Fallback from './fallback'
 
 
 export const Icons = {
@@ -45,13 +46,10 @@ export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props: JSX.Int
   }}></img>
 };
 
-
-export const FallBack: React.FC = () => {
-  return <></>
-}
+export const FallbackReloadPlaylist = Fallback;
 
 export const Displays = {
-  playlists: (index: number) => <PlaylistsDisplay index={index} />,
+  'playlists': (index: number) => <PlaylistsDisplay index={index} />,
   'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
   'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
   'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />
@@ -136,7 +134,6 @@ const DragableElmImpl = <K extends WrapElmTagName>(props: React.PropsWithChildre
       props.getSwapTarget().current = props.index;
     },
     onDragEnd: (e: React.DragEvent<HTMLDivElement>) => {
-      console.log(elmProps.onDragEnd);
       (elmProps.onDragEnd ?? ((_: any) => { }))(e)
       props.getSwapTarget().current = 'no-drag'
     },
