@@ -1,23 +1,33 @@
 import * as React from 'react'
-import { ContextAppState, ContextDispatchAppState, type preload, type dispathFunc } from '../main'
+import { ContextAppState, ContextDispatchAppState, type preload } from '../main'
 import { type PrimitivePlaylist, type YoutubeVideo } from '../../../lib/config'
 import { getYoutubeThumbnailURLFromID, pushDisplayWithAnimation, popDisplayWithAnimation, navigatePlaylist, loadPlaylist, getPlaylistURLFromPlaylistID } from '../utils'
 import { IconedButton, Wrapper, Thumbnail } from '.'
 
 declare const window: preload
 
+const ContextSetPopupState = React.createContext<React.Dispatch<React.SetStateAction<boolean>>>((s): void => { });
+
 const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
   const appState = React.useContext(ContextAppState)
   const dispatch = React.useContext(ContextDispatchAppState)
+
+  const [isPopupShown, setIsPopupShown] = React.useState(false);
+
   return (
     <Wrapper wrapTarget='playlist-detail-display-wrapper' index={props.index}>
-      <div className="playlist-detail-display">
+      <div className="playlist-detail-display" style={{
+        pointerEvents: isPopupShown ? 'none' : 'auto',
+      }}>
         <IconedButton
           iconName="arrowLeft"
           className="button-back"
           onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
-        <PlaylistInformationDisplay playlist={appState.targetPlaylist} />
-        <VideoListDisplay playlist={appState.targetPlaylist} />
+        <ContextSetPopupState.Provider value={setIsPopupShown}>
+          <PlaylistInformationDisplay playlist={appState.targetPlaylist} />
+          <VideoListDisplay playlist={appState.targetPlaylist} />
+          {isPopupShown ? <PopupWhetherDelete playlistName={appState.targetPlaylist.name} /> : <></>}
+        </ContextSetPopupState.Provider>
       </div>
     </Wrapper>
   )
@@ -26,8 +36,9 @@ const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
 export default PlaylistDetailDisplay
 
 const PlaylistNavigator: React.FC = () => {
-  const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
+  const setIsPopupShown = React.useContext(ContextSetPopupState);
+
 
   const playlistURLDisplay =
     <div spellCheck={false} className="yt-playlist-url-display"
@@ -39,9 +50,41 @@ const PlaylistNavigator: React.FC = () => {
     <div id="playlist-navigator">
       <ButtonPlay playlist={appState.targetPlaylist} />
       <ButtonShuffle />
-      <ButtonDelete dispatch={dispatch} playlist={appState.targetPlaylist} />
-      <ButtonEdit dispatch={dispatch} />
+      <ButtonDelete playlist={appState.targetPlaylist} onClick={() => { setIsPopupShown(true) }} />
+      <ButtonEdit />
       {(appState.targetPlaylist.type === 'youtube' ? playlistURLDisplay : <></>)}
+    </div>
+  )
+}
+
+const PopupWhetherDelete: React.FC<{ playlistName: string }> = (props) => {
+  const dispatch = React.useContext(ContextDispatchAppState);
+  const setPlaylistShown = React.useContext(ContextSetPopupState);
+  const [shouldHidePopup, setShouldHidePopup] = React.useState(false);
+
+  const onClickYes = (): void => {
+    dispatch({
+      type: 'delete-playlist',
+      props: props.playlistName
+    })
+    popDisplayWithAnimation(dispatch)
+  };
+
+  return (
+    <div id="popup-wheter-delete" className={`pop-popup ${shouldHidePopup ? 'hide-popup' : ''}`}>
+      <div id="popup-delete-message">このプレイリストを削除しますか？</div>
+      <div id="wheter-delete-selection">
+        <div id="wheter-delete-button-yes" className="yorn-button" onClick={async () => {
+          setShouldHidePopup(true)
+          await new Promise(resolve => setTimeout(resolve, 300));
+          onClickYes()
+        }}>はい</div>
+        <div id="wheter-delete-button-no" className="yorn-button" onClick={async () => {
+          setShouldHidePopup(true)
+          await new Promise(resolve => setTimeout(resolve, 300));
+          setPlaylistShown(false)
+        }}>いいえ</div>
+      </div>
     </div>
   )
 }
@@ -70,26 +113,24 @@ const PlaylistNameDisplay: React.FC<{ name: string }> = (props) => {
   )
 }
 
-const ButtonDelete: React.FC<{ dispatch: dispathFunc, playlist: PrimitivePlaylist }> = (props) => {
+const ButtonDelete: React.FC<{ playlist: PrimitivePlaylist, onClick: () => void }> = (props) => {
+
   return <IconedButton
     iconName="trashBin"
     className="button-remove navigator"
     onClick={() => {
-      props.dispatch({
-        type: 'delete-playlist',
-        props: props.playlist.name
-      })
-      popDisplayWithAnimation(props.dispatch)
+      props.onClick();
     }}
   />
 }
 
-const ButtonEdit: React.FC<{ dispatch: dispathFunc }> = (props) => {
+const ButtonEdit: React.FC = () => {
+  const dispatch = React.useContext(ContextDispatchAppState);
   return <IconedButton
     iconName="pencil"
     className="button-edit"
     onClick={() => {
-      pushDisplayWithAnimation(props.dispatch, 'playlist-editor')
+      pushDisplayWithAnimation(dispatch, 'playlist-editor')
     }}
   />
 }

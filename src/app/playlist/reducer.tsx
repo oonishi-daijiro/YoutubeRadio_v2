@@ -36,7 +36,7 @@ export const DefaultAppState: AppState = {
     isShuffle: false
   },
   switchAnimationHook: [''],
-  isAnimating: false
+  isAnimating: false,
 }
 
 export interface ReducerActions {
@@ -81,12 +81,17 @@ export interface ReducerActions {
   'reload-playlists': {
     type: 'reload-playlists'
   }
-  'reload': {
-    type: 'reload'
+  'reorder-playlists': {
+    type: 'reorder-playlists',
+    props: PrimitivePlaylist[]
+  }
+  'set-pending-of-edit': {
+    type: 'set-pending-of-edit'
   }
 }
 
 export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
+  console.log(action.type);
   if (currentAppState === null) {
     return DefaultAppState
   }
@@ -129,7 +134,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         playlists: [...currentAppState.playlists],
-        targetPlaylist: action.props.playlist
+        targetPlaylist: action.props.playlist,
       }
 
     case 'animate': {
@@ -183,17 +188,28 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         isPlaylistsLoaded: true,
-        playlists: action.props
+        playlists: [...action.props]
       }
 
     case 'reload-playlists':
-
       return {
         ...currentAppState,
         isPlaylistsLoaded: false,
         displays: ['playlists'],
         switchAnimationHook: ['']
       }
+    case 'reorder-playlists':
+      return {
+        ...currentAppState,
+        playlists: action.props
+      }
+    case 'set-pending-of-edit':
+      return {
+        ...currentAppState,
+        switchAnimationHook: [''],
+        displays: ['playlist-edit-fallback']
+      }
+
     default:
       return DefaultAppState;
   }

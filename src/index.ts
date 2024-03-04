@@ -180,3 +180,7 @@ ipcMain.handle(
     );
   }
 );
+
+ipcMain.handle("save-playlists", (_, playlists: config.PrimitivePlaylist[]) => {
+  config.YoutubeRadioConfig.setAllPlaylists(playlists);
+});

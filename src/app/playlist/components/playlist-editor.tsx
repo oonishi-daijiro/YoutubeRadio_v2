@@ -42,7 +42,6 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
       setAnimationClassName('fade-in-thumbnail');
       setIsThmubnailHidden(false);
     } else if (scrollTop > 10) {
-      console.log("hidden", scrollTop);
       setAnimationClassName('fade-away-thumbnail');
       setIsThmubnailHidden(true);
     }

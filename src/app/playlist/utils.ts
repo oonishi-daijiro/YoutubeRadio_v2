@@ -1,5 +1,10 @@
 import * as React from "react";
-import { sPlaylists, type preload, ContextAppState } from "./main";
+import {
+  sPlaylists,
+  type preload,
+  ContextAppState,
+  type dispathFunc,
+} from "./main";
 import { type playlistNavigation } from "../../preload/playlist";
 import { type ReducerActions } from "./reducer";
 import type { PrimitivePlaylist } from "../../lib/config";
@@ -101,8 +106,10 @@ export async function pushDisplayWithAnimation(
   });
 }
 
-export async function reloadPlaylistsWithAnimation(
-  dispatch: DispatchFunction
+export async function editAndSavePlaylist(
+  playlistName: string,
+  dispatch: DispatchFunction,
+  playlistEdited: PrimitivePlaylist
 ): Promise<void> {
   dispatch({
     type: "animate",
@@ -112,29 +119,31 @@ export async function reloadPlaylistsWithAnimation(
   dispatch({
     type: "animation-end",
   });
+
+  dispatch({
+    type: "set-pending-of-edit",
+  });
+  await window.YoutubeRadio.editPlaylist(playlistName, playlistEdited);
   sPlaylists.reload();
   dispatch({
     type: "reload-playlists",
   });
 }
 
-export async function editAndSavePlaylist(
-  playlistName: string,
-  dispatch: DispatchFunction,
-  playlistEdited: PrimitivePlaylist
+export async function reorderPlaylists(
+  dispatch: dispathFunc,
+  playlists: PrimitivePlaylist[]
 ): Promise<void> {
   dispatch({
-    type: "edit-target-playlist",
-    props: {
-      playlist: playlistEdited,
-    },
+    type: "reorder-playlists",
+    props: playlists,
   });
+
+  await window.YoutubeRadio.savePlaylists(playlists);
+  sPlaylists.reload();
   dispatch({
-    type: "animation-end",
+    type: "reload-playlists",
   });
-  console.log(playlistEdited);
-  await window.YoutubeRadio.editPlaylist(playlistName, playlistEdited);
-  await reloadPlaylistsWithAnimation(dispatch);
 }
 
 export function getYoutubeThumbnailURLFromID(videoID: string): string {
