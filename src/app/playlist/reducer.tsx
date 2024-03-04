@@ -36,7 +36,7 @@ export const DefaultAppState: AppState = {
     isShuffle: false
   },
   switchAnimationHook: [''],
-  isAnimating: false
+  isAnimating: false,
 }
 
 export interface ReducerActions {
@@ -209,6 +209,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         switchAnimationHook: [''],
         displays: ['playlist-edit-fallback']
       }
+
     default:
       return DefaultAppState;
   }
