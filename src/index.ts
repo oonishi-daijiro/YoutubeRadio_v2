@@ -23,6 +23,7 @@ app.on("ready", () => {
     resizable: false,
     useContentSize: true,
     webPreferences: {
+      devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/player.js"),
       nodeIntegration: false,
@@ -130,6 +131,7 @@ ipcMain.handle("open-playlist-window", () => {
     show: false,
     parent: mainWindow,
     webPreferences: {
+      devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/playlist.js"),
       nodeIntegration: false,
