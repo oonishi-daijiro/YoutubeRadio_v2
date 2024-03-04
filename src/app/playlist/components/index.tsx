@@ -6,7 +6,6 @@ import PlaylistEditorDisplay from './playlist-editor'
 import PlaylistTypeSelection from './playlist-selection'
 import PlaylistsDisplay from './playlists'
 import Fallback from './fallback'
-import { blob } from 'stream/consumers'
 
 
 export const Icons = {
@@ -71,7 +70,7 @@ export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
     }
   }, [props.src]);
 
-  return <img {...props} src={imgURL}></img>
+  return <img {...props} style={{ ...props.style, backgroundColor: 'white' }} src={imgURL}></img>
 };
 
 export const FallbackReloadPlaylist = Fallback;
@@ -80,7 +79,8 @@ export const Displays = {
   'playlists': (index: number) => <PlaylistsDisplay index={index} />,
   'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
   'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
-  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />
+  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />,
+  'playlist-edit-fallback': (index: number) => <Fallback index={index} />
 } as const
 
 

@@ -69,7 +69,7 @@ const App: React.FC = () => {
   return (
     <ContextAppState.Provider value={appState}>
       <ContextDispatchAppState.Provider value={dispatchAppState}>
-        <React.Suspense fallback={<FallbackReloadPlaylist />}>
+        <React.Suspense fallback={<FallbackReloadPlaylist index={0} />}>
           <PlaylistLoadSuspenser>
             {appState.displays.map((displayName, index) => Displays[displayName](index))}
           </PlaylistLoadSuspenser>

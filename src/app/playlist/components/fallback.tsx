@@ -5,7 +5,7 @@ import { IconedButton, Wrapper } from "../components";
 
 declare const window: preload;
 
-const Fallback: React.FC = () => {
+const Fallback: React.FC<{ index: number }> = () => {
    return (
       <Wrapper wrapTarget='playlist-display-wrapper' index={0}>
          <div id="playlists-display">
@@ -19,7 +19,7 @@ const Fallback: React.FC = () => {
 };
 
 
-const PendingPlaylistDisplayImpl: React.FC = () => {
+const PendingPlaylistDisplay: React.FC = () => {
    const getRandomWidth = (): number => {
       const min = 0;
       const max = 20;
@@ -36,7 +36,5 @@ const PendingPlaylistDisplayImpl: React.FC = () => {
       </div >
    )
 }
-const PendingPlaylistDisplay = React.memo(PendingPlaylistDisplayImpl);
-
 
 export default Fallback;

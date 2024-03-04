@@ -85,7 +85,9 @@ export interface ReducerActions {
     type: 'reorder-playlists',
     props: PrimitivePlaylist[]
   }
-
+  'set-pending-of-edit': {
+    type: 'set-pending-of-edit'
+  }
 }
 
 export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
@@ -132,7 +134,7 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         playlists: [...currentAppState.playlists],
-        targetPlaylist: action.props.playlist
+        targetPlaylist: action.props.playlist,
       }
 
     case 'animate': {
@@ -200,6 +202,12 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
       return {
         ...currentAppState,
         playlists: action.props
+      }
+    case 'set-pending-of-edit':
+      return {
+        ...currentAppState,
+        switchAnimationHook: [''],
+        displays: ['playlist-edit-fallback']
       }
     default:
       return DefaultAppState;
