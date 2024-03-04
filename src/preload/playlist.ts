@@ -24,9 +24,9 @@ export interface YoutubeRadioPreload {
 
 const api: YoutubeRadioPreload = {
   async getPlaylists(): Promise<config.Playlist[]> {
-    // await new Promise<void>((resolve) => {
-    //   setTimeout(resolve, 1000);
-    // });
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 1000);
+    });
     return await ipcRenderer.invoke("get-playlists");
   },
   close(): void {

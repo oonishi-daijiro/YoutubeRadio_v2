@@ -6,6 +6,7 @@ import PlaylistEditorDisplay from './playlist-editor'
 import PlaylistTypeSelection from './playlist-selection'
 import PlaylistsDisplay from './playlists'
 import Fallback from './fallback'
+import { blob } from 'stream/consumers'
 
 
 export const Icons = {
@@ -38,12 +39,39 @@ export const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playl
   return <div id={props.wrapTarget} className={`${appState.switchAnimationHook[props.index]}`} style={{ pointerEvents: appState.isAnimating ? 'none' : 'auto' }}>{props.children}</div>
 }
 
+async function fetchImageResource(src: string): Promise<Blob> {
+  try {
+    const data = await fetch(src);
+    const blob = await data.blob();
+    return blob;
+  } catch (err) {
+    console.error(err);
+  }
+  return new Blob([]);
+}
 
-export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props: JSX.IntrinsicElements['img']): JSX.Element => {
-  return <img {...props} style={{
-    ...props.style,
-    background: '#FFFFFF'
-  }}></img>
+const ImageBlobStorage = new Map<string, Blob>();
+
+
+export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
+  const [imgURL, setImgURL] = React.useState("");
+
+  React.useEffect(() => {
+    if (props.src !== undefined) {
+      if (ImageBlobStorage.has(props.src)) {
+        const url = URL.createObjectURL(ImageBlobStorage.get(props.src)!);
+        setImgURL(url);
+      } else {
+        fetchImageResource(props.src ?? "").then(blob => {
+          const url = URL.createObjectURL(blob);
+          setImgURL(url);
+          ImageBlobStorage.set(props.src!, blob);
+        })
+      }
+    }
+  }, [props.src]);
+
+  return <img {...props} src={imgURL}></img>
 };
 
 export const FallbackReloadPlaylist = Fallback;

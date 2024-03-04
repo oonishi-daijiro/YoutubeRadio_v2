@@ -15,8 +15,8 @@ class SuspenseResource<T> {
   constructor(resourceFetcher: () => Promise<T>, defaultData: T) {
     this.resouseFetcher = resourceFetcher
     this.data = defaultData
+    this.promise = new Promise<void>((resolve) => { resolve() });
     this.setFetcher()
-    this.promise = new Promise<void>((resolve) => { resolve() })
   }
 
   read(): T {
@@ -71,7 +71,6 @@ const App: React.FC = () => {
       <ContextDispatchAppState.Provider value={dispatchAppState}>
         <React.Suspense fallback={<FallbackReloadPlaylist />}>
           <PlaylistLoadSuspenser>
-            {/* <FallbackReloadPlaylist /> */}
             {appState.displays.map((displayName, index) => Displays[displayName](index))}
           </PlaylistLoadSuspenser>
         </React.Suspense>
