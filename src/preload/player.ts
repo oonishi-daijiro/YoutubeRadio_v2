@@ -18,7 +18,6 @@ export default interface YoutubeRadioPreload {
   // createYoutubeVideo(info: config.YoutubeVideo): Promise<config.YoutubeVideo>;
   emitPlayerStartPlaying: () => void;
   onPlayerStartPlaying: () => Promise<any>;
-  test: () => void;
   saveVolume: (volume: number) => Promise<void>;
   getVolume: () => Promise<number>;
   emitWindowGetReady: () => void;
@@ -69,9 +68,6 @@ const api: YoutubeRadioPreload = {
       }
     );
   },
-  // async createYoutubeVideo(info): Promise<config.YoutubeVideo> {
-  //   return ipcRenderer.invoke("create-youtube-video", info);
-  // },
   emitPlayerStartPlaying(): void {
     ipcRenderer.invoke("player-start-playing");
   },
@@ -81,9 +77,6 @@ const api: YoutubeRadioPreload = {
         resolve({});
       });
     });
-  },
-  test() {
-    ipcRenderer.invoke("test");
   },
   async saveVolume(volume: number): Promise<void> {
     return await ipcRenderer.invoke("save-volume", volume);
