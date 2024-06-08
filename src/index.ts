@@ -23,14 +23,13 @@ app.on("ready", () => {
     resizable: false,
     useContentSize: true,
     webPreferences: {
+      devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/player.js"),
       nodeIntegration: false,
       sandbox: true,
     },
   });
-
-  // mainWindow.webContents.openDevTools();
 
   mainWindow.loadURL(`http://localhost:${port}`);
   mainWindow.setIcon(path.resolve(__dirname, "../icon/icon.ico"));
@@ -132,13 +131,13 @@ ipcMain.handle("open-playlist-window", () => {
     show: false,
     parent: mainWindow,
     webPreferences: {
+      devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/playlist.js"),
       nodeIntegration: false,
       sandbox: true,
     },
   });
-  playlistWindow.webContents.openDevTools();
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
