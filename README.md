@@ -6,6 +6,9 @@ YoutubeRadioはシンプルなウィンドウでYoutube上の動画やプレイ�
 git clone https://github.com/oonishi-daijiro/YoutubeRadio_v2
 ```
 ```
+git checkout release
+```
+```
 npm i
 ```
 ```
