@@ -25,17 +25,16 @@ export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
   return (
     <Wrapper wrapTarget="playlist-type-selection-wrapper" index={props.index}>
       <div id="selection-and-description">
-        <div id="label-selection-description">タイプを選択</div>
         <div id="selections">
           <div className="selection" onClick={() => {
             pushEditorWithAnimation('youtube_radio')
           }}>
-            <img src="./youtube_radio.svg" id="icon-youtube-radio"></img>
+            <IconedButton iconName="list" className='selectionIcon'></IconedButton>
           </div>
           <div className="selection" onClick={() => {
             pushEditorWithAnimation('youtube')
           }}>
-            <IconedButton iconName="iconYoutube" id="iconYoutube" />
+            <IconedButton iconName="cloud" className='selectionIcon' />
           </div>
         </div>
       </div>

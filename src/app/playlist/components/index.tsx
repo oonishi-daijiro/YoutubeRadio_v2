@@ -21,7 +21,9 @@ export const Icons = {
   cross: 'fas fa-times',
   plusCircle: 'fas fa-plus-circle',
   iconYoutube: 'fa-brands fa-youtube',
-  reorder: 'fas fa-arrow-right-arrow-left'
+  reorder: 'fas fa-arrow-right-arrow-left',
+  cloud: 'fas fa-cloud-download-alt',
+  list: 'fas fa-list'
 } as const;
 
 
