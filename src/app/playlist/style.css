@@ -128,17 +128,17 @@ span {
 }
 
 .button-create-playlist {
-  display: flex;
-  background-color: #ffffffff;
-  width: 53%;
-  height: 59px;
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  color: #353535;
-  font-family: "Noto Sans JP", sans-serif;
+    display: flex;
+    background-color: #ffffffff;
+    width: 30vh;
+    height: 16vh;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    color: #353535;
+    font-family: "Noto Sans JP", sans-serif;
 }
 
 .hidden {
@@ -148,7 +148,6 @@ span {
 .plus-icon {
   display: flex;
   height: 100%;
-  margin-right: 10px;
   color: #353535;
   align-items: center;
   justify-content: center;
@@ -784,31 +783,24 @@ img {
   justify-content: center;
 }
 
-#iconYoutube {
-  font-size: 355%;
-  color: #ff0000;
+.selectionIcon {
+  font-size: 200%;
+  color: #353535;
 }
 
 .selection {
   display: flex;
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   align-items: center;
   flex-direction: column;
   background: white;
   justify-content: center;
   border-radius: 13px;
-  margin: 0 22px;
+  margin: 0 35px;
   cursor: pointer;
 }
 
-#label-selection-description {
-  margin-bottom: 10px;
-  font-family: "Noto Sans JP";
-  color: #353535;
-  font-weight: 900;
-  font-size: 165%;
-}
 
 #selection-and-description {
   display: flex;

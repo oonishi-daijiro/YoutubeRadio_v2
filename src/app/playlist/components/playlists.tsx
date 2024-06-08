@@ -10,7 +10,6 @@ const PlaylistDisplay: React.FC<{ playlist: PrimitivePlaylist, index: number, is
   const playlistThumbnailSrc = getYoutubeThumbnailURLFromID((props.playlist.videos[0] ?? { id: '' }).id)
   const dispatch = React.useContext(ContextDispatchAppState)
 
-
   return (
     <div className="playlist-display">
       <Thumbnail src={playlistThumbnailSrc} className="thumbnail"></Thumbnail>
@@ -92,7 +91,7 @@ const ButtonCreatePlaylist: React.FC = () => {
       pushDisplayWithAnimation(dispatch, 'playlist-type-selection')
     }}>
       <i className='fas fa-plus plus-icon'></i>
-      <div id="new-playlist-text">プレイリストを作成</div>
+      
     </div>
   )
 }
