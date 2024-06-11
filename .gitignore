@@ -3,6 +3,7 @@
 /dist
 /build
 /assets
+/.vscode
 *.enc
 *.js
 !webpack.config.js
