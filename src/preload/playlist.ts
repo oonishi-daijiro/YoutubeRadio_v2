@@ -9,7 +9,7 @@ export interface YoutubeRadioPreload {
   getPlaylists: () => Promise<config.Playlist[]>;
   close: () => void;
   loadPlaylist: (name: string, index: number) => void;
-  navigatePlaylist: (navigation: playlistNavigation) => void;
+  setCurrentPlaylistShuffle: (shuffle: boolean) => void;
   deletePlaylist: (name: string) => Promise<void>;
   getYoutubeTitleFromID: (url: string) => Promise<string>;
   openExternal: (url: string) => void;
@@ -20,11 +20,11 @@ export interface YoutubeRadioPreload {
   pinPlayer: () => Promise<boolean>;
   isPinned: () => Promise<boolean>;
   savePlaylists: (playlists: config.PrimitivePlaylist[]) => Promise<void>;
+  getCurrentPlayingListName: () => Promise<string>;
 }
 
 const api: YoutubeRadioPreload = {
   async getPlaylists(): Promise<config.Playlist[]> {
-    // await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     return await ipcRenderer.invoke("get-playlists");
   },
   close(): void {
@@ -36,8 +36,8 @@ const api: YoutubeRadioPreload = {
       index,
     });
   },
-  navigatePlaylist(navigation: playlistNavigation) {
-    ipcRenderer.invoke("navigate-playlist", navigation);
+  setCurrentPlaylistShuffle(shuffle: boolean) {
+    ipcRenderer.invoke("set-shuffle-current-playlist", shuffle);
   },
   async deletePlaylist(name: string): Promise<void> {
     return await ipcRenderer.invoke("delete-playlist", name);
@@ -65,6 +65,13 @@ const api: YoutubeRadioPreload = {
   },
   async savePlaylists(playlists: config.PrimitivePlaylist[]): Promise<void> {
     return await ipcRenderer.invoke("save-playlists", playlists);
+  },
+  async getCurrentPlayingListName() {
+    return await new Promise<string>((resolve) => {
+      ipcRenderer.once("current-playing-list-name", (_, name: string) => {
+        resolve(name);
+      });
+    });
   },
 };
 contextBridge.exposeInMainWorld("YoutubeRadio", api);

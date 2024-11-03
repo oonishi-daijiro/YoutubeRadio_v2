@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ContextAppState, ContextDispatchAppState, type preload } from '../main'
-import { getYoutubeThumbnailURLFromID, pushDisplayWithAnimation, loadPlaylist, navigatePlaylist, reorderPlaylists } from '../utils'
+import { getYoutubeThumbnailURLFromID, pushDisplayWithAnimation, loadPlaylist, reorderPlaylists } from '../utils'
 import { type PrimitivePlaylist } from '../../../lib/config'
 import { IconedButton, Wrapper, Thumbnail, useDnDswapList, DnDSwapListProvider } from '.'
 
@@ -32,9 +32,6 @@ const PlaylistDisplay: React.FC<{ playlist: PrimitivePlaylist, index: number, is
         onClick={() => {
           if (!props.isOrderEditing) {
             loadPlaylist(props.playlist.name)
-            navigatePlaylist({
-              shuffle: props.playlist.isShuffle
-            })
             dispatch({
               type: 'close-window'
             })

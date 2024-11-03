@@ -1,6 +1,5 @@
 import type { Playlist, PrimitivePlaylist } from "../../lib/config";
 import type YoutubeRadioPreload from "../../preload/player";
-import { type playlistNavigation } from "../../preload/playlist";
 
 const tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
@@ -53,15 +52,9 @@ async function getPlaylists(): Promise<Playlist[]> {
   return await window.YoutubeRadio.getPlaylists();
 }
 
-window.YoutubeRadio.onReqNavigation(
-  (
-    navigation: playlistNavigation = {
-      shuffle: false,
-    }
-  ) => {
-    player.setShuffle(navigation.shuffle);
-  }
-);
+window.YoutubeRadio.onSetShuffleCurrentPlaylist((shuffle: boolean) => {
+  player.setShuffle(shuffle);
+});
 
 window.YoutubeRadio.onLoadPlaylist(
   async (arg: { name: string; index: number }) => {
@@ -79,6 +72,13 @@ interface loadPlaylistParm {
   suggestedQuality?: string;
 }
 
+let currentPlayingListName = "";
+
+const buttonOpenSelectPlaylist = document.getElementById("getUrl");
+buttonOpenSelectPlaylist!.addEventListener("click", () => {
+  window.YoutubeRadio.openSelectPlaylistWindow(currentPlayingListName);
+});
+
 async function loadPlaylist(
   appliedPlaylist: PrimitivePlaylist,
   index: number
@@ -88,6 +88,7 @@ async function loadPlaylist(
   }
   player.setShuffle(false);
   player.stopVideo();
+  currentPlayingListName = appliedPlaylist.name;
 
   if (appliedPlaylist.type === "youtube") {
     (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
@@ -189,12 +190,6 @@ function playVideo(): void {
   });
   player.playVideo();
 }
-
-const buttonOpenSelectPlaylist = document.getElementById("getUrl");
-
-buttonOpenSelectPlaylist!.addEventListener("click", async (event) => {
-  await window.YoutubeRadio.openSelectPlaylistWindow();
-});
 
 const pauseButton = document.getElementById("pause");
 

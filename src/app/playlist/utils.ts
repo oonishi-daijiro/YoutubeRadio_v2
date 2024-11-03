@@ -5,7 +5,6 @@ import {
   ContextAppState,
   type dispathFunc,
 } from "./main";
-import { type playlistNavigation } from "../../preload/playlist";
 import { type ReducerActions } from "./reducer";
 import type { PrimitivePlaylist } from "../../lib/config";
 
@@ -15,8 +14,8 @@ export function loadPlaylist(name: string, index: number = 0): void {
   window.YoutubeRadio.loadPlaylist(name, index);
 }
 
-export function navigatePlaylist(navigation: playlistNavigation): void {
-  window.YoutubeRadio.navigatePlaylist(navigation);
+export function setCurrentPlaylistShuffle(shuffle: boolean): void {
+  window.YoutubeRadio.setCurrentPlaylistShuffle(shuffle);
 }
 
 interface VideoURL {

@@ -54,7 +54,6 @@ app.on("ready", () => {
 
   mainWindow.webContents.on("media-paused", () => {
     mainWindow.setThumbarButtons(buttonsVideoPaused);
-
     mainWindow.webContents.send("video-paused");
   });
 
@@ -68,9 +67,12 @@ app.on("ready", () => {
   });
 });
 
-ipcMain.handle("navigate-playlist", (_, navigation: playlistNavigation) => {
-  mainWindow.webContents.send("navigate-playlist", navigation);
-});
+ipcMain.handle(
+  "set-shuffle-current-playlist",
+  (_, navigation: playlistNavigation) => {
+    mainWindow.webContents.send("set-shuffle-current-playlist", navigation);
+  }
+);
 
 ipcMain.handle("get-playlists", () => {
   const pl = config.YoutubeRadioConfig.getAllPlaylists();
@@ -118,7 +120,7 @@ ipcMain.handle("pin-player", () => {
   return mainWindow.isAlwaysOnTop();
 });
 
-ipcMain.handle("open-playlist-window", () => {
+ipcMain.handle("open-playlist-window", (_, currentPlaylistName: string) => {
   playlistWindow = new BrowserWindow({
     frame: false,
     width: 520,
@@ -143,12 +145,14 @@ ipcMain.handle("open-playlist-window", () => {
   );
   playlistWindow.once("ready-to-show", () => {
     playlistWindow.show();
+    playlistWindow.webContents.send(
+      "current-playing-list-name",
+      currentPlaylistName
+    );
   });
 });
 
 ipcMain.handle("close-playlist-window", () => {
-  // playlistWindow.reload();
-
   playlistWindow.close();
   playlistWindow = null as unknown as BrowserWindow;
 });
