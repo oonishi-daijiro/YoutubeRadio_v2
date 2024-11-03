@@ -118,7 +118,6 @@ export async function editAndSavePlaylist(
   dispatch({
     type: "animation-end",
   });
-
   dispatch({
     type: "set-pending-of-edit",
   });

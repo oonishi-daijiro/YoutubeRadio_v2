@@ -91,6 +91,9 @@ export interface ReducerActions {
     type: 'set-current-playing-list-name'
     props: string
   }
+  'set-pending-of-edit': {
+    type: 'set-pending-of-edit'
+  }
 }
 
 export function Reducer(currentAppState: AppState, action: ReducerActions[keyof ReducerActions]): AppState {
@@ -212,6 +215,8 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         currentPlayingListName: action.props
       };
 
+    case 'set-pending-of-edit':
+      return { ...currentAppState, displays: ['playlist-edit-fallback'], switchAnimationHook: [''] };
 
     default:
       return DefaultAppState;
