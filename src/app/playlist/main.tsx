@@ -16,7 +16,6 @@ class SuspenseResource<T> {
     this.resouseFetcher = resourceFetcher
     this.data = defaultData
     this.setFetcher()
-    this.promise = new Promise<void>((resolve) => { resolve() })
   }
 
   read(): T {
@@ -48,7 +47,7 @@ class SuspenseResource<T> {
   private stat: 'pending' | 'fullfilled' | 'rejected' = 'pending'
   private data: T
   private readonly resouseFetcher: () => Promise<T>
-  private promise: Promise<void>
+  private promise: Promise<void> | undefined
 }
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot!)
@@ -60,6 +59,8 @@ export const ContextAppState = React.createContext<AppState>(DefaultAppState)
 export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
 
 export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void
+
+const sCurrentPlayingListName = new SuspenseResource<string>(window.YoutubeRadio.getCurrentPlayingListName, "");
 
 const App: React.FC = () => {
   const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultAppState)
@@ -88,9 +89,19 @@ const Suspenser: React.FC<{ children: JSX.Element[] }> = (props) => {
 
   if (!appState.isPlaylistsLoaded) {
     const playlists = sPlaylists.read()
+
     dispatch({
       type: 'load-playlists',
       props: playlists
+    })
+  }
+
+  if (appState.currentPlayingListName === "") {
+    const currentPlayingListName = sCurrentPlayingListName.read()
+
+    dispatch({
+      type: 'set-current-playing-list-name',
+      props: currentPlayingListName
     })
   }
 

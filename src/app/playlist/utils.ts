@@ -1,6 +1,10 @@
 import * as React from "react";
-import { sPlaylists, type preload, ContextAppState, dispathFunc } from "./main";
-import { type playlistNavigation } from "../../preload/playlist";
+import {
+  sPlaylists,
+  type preload,
+  ContextAppState,
+  type dispathFunc,
+} from "./main";
 import { type ReducerActions } from "./reducer";
 import type { PrimitivePlaylist } from "../../lib/config";
 
@@ -10,8 +14,8 @@ export function loadPlaylist(name: string, index: number = 0): void {
   window.YoutubeRadio.loadPlaylist(name, index);
 }
 
-export function navigatePlaylist(navigation: playlistNavigation): void {
-  window.YoutubeRadio.navigatePlaylist(navigation);
+export function setCurrentPlaylistShuffle(shuffle: boolean): void {
+  window.YoutubeRadio.setCurrentPlaylistShuffle(shuffle);
 }
 
 interface VideoURL {
@@ -140,7 +144,7 @@ export async function editAndSavePlaylist(
 export async function reorderPlaylists(
   dispatch: dispathFunc,
   playlists: PrimitivePlaylist[]
-) {
+): Promise<void> {
   dispatch({
     type: "reorder-playlists",
     props: playlists,

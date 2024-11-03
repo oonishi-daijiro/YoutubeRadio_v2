@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ContextAppState, ContextDispatchAppState, type preload, type dispathFunc } from '../main'
 import { type PrimitivePlaylist, type YoutubeVideo } from '../../../lib/config'
-import { getYoutubeThumbnailURLFromID, pushDisplayWithAnimation, popDisplayWithAnimation, navigatePlaylist, loadPlaylist, getPlaylistURLFromPlaylistID } from '../utils'
+import { getYoutubeThumbnailURLFromID, pushDisplayWithAnimation, popDisplayWithAnimation, setCurrentPlaylistShuffle, loadPlaylist, getPlaylistURLFromPlaylistID } from '../utils'
 import { IconedButton, Wrapper, Thumbnail } from '.'
 
 declare const window: preload
@@ -49,9 +49,6 @@ const PlaylistNavigator: React.FC = () => {
 const ButtonPlay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
   const handleOnClickButonPlayPl = (): void => {
     loadPlaylist(props.playlist.name)
-    navigatePlaylist({
-      shuffle: props.playlist.isShuffle
-    })
     window.YoutubeRadio.close()
   }
 
@@ -131,9 +128,9 @@ const ButtonShuffle: React.FC = () => {
       ...appState.targetPlaylist,
       isShuffle: !appState.targetPlaylist.isShuffle
     })
-    navigatePlaylist({
-      shuffle: !appState.targetPlaylist.isShuffle
-    })
+    if (appState.targetPlaylist.name === appState.currentPlayingListName) {
+      setCurrentPlaylistShuffle(!appState.targetPlaylist.isShuffle)
+    }
   }
 
   return (
@@ -157,9 +154,6 @@ const VideoDisplay: React.FC<{
 
   const handleOnClickPlayVideoButton = (): void => {
     loadPlaylist(appstate.targetPlaylist.name, props.videoIndex)
-    navigatePlaylist({
-      shuffle: appstate.targetPlaylist.isShuffle
-    })
     window.YoutubeRadio.close()
   }
 

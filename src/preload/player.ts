@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { type PrimitivePlaylist, type Playlist } from "../lib/config";
-import { type playlistNavigation } from "./playlist";
 export default interface YoutubeRadioPreload {
   getPlaylists: () => Promise<Playlist[]>;
   close: () => void;
@@ -10,7 +9,7 @@ export default interface YoutubeRadioPreload {
   onNextVideo: (callback: () => void) => void;
   onReqPlayVideo: (callback: () => void) => void;
   onReqPauseVideo: (callback: () => void) => void;
-  openSelectPlaylistWindow: () => Promise<void>;
+  openSelectPlaylistWindow: (currentPlayingListName: string) => Promise<void>;
   onReqPreviousVideo: (callback: () => void) => void;
   onLoadPlaylist: (
     callback: (arg: { name: string; index: number }) => Promise<void>
@@ -22,9 +21,7 @@ export default interface YoutubeRadioPreload {
   saveVolume: (volume: number) => Promise<void>;
   getVolume: () => Promise<number>;
   emitWindowGetReady: () => void;
-  onReqNavigation: (
-    callback: (playlistNavigation: playlistNavigation) => void
-  ) => void;
+  onSetShuffleCurrentPlaylist: (callback: (shuffle: boolean) => void) => void;
   editPlaylist: (name: string, newPlaylist: PrimitivePlaylist) => Promise<void>;
 }
 
@@ -56,8 +53,11 @@ const api: YoutubeRadioPreload = {
   onReqPauseVideo(callback: () => void) {
     ipcRenderer.on("req-pause-video", callback);
   },
-  openSelectPlaylistWindow: async () => {
-    return await ipcRenderer.invoke("open-playlist-window");
+  openSelectPlaylistWindow: async (currentPlayingListName: string) => {
+    return await ipcRenderer.invoke(
+      "open-playlist-window",
+      currentPlayingListName
+    );
   },
   onLoadPlaylist(
     callback: (arg: { name: string; index: number }) => Promise<void>
@@ -94,9 +94,9 @@ const api: YoutubeRadioPreload = {
   emitWindowGetReady() {
     ipcRenderer.invoke("ready-to-show-player");
   },
-  onReqNavigation(callback) {
-    ipcRenderer.on("navigate-playlist", (_, navigation: playlistNavigation) => {
-      callback(navigation);
+  onSetShuffleCurrentPlaylist(callback) {
+    ipcRenderer.on("set-shuffle-current-playlist", (_, shuffle: boolean) => {
+      callback(shuffle);
     });
   },
   async editPlaylist(
