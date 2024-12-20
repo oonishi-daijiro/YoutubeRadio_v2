@@ -95,17 +95,7 @@ const PlaylistLoadSuspenser: React.FC<{ children: JSX.Element | JSX.Element[] }>
       props: playlists
     })
   }
-
-  if (appState.currentPlayingListName === "") {
-    const currentPlayingListName = sCurrentPlayingListName.read()
-
-    dispatch({
-      type: 'set-current-playing-list-name',
-      props: currentPlayingListName
-    })
-  }
-
-  if (appState.currentPlayingListName === "") {
+  if (!appState.isCurrentPlaylistNameLoaded) {
     const currentPlayingListName = sCurrentPlayingListName.read()
 
     dispatch({
