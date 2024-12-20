@@ -140,6 +140,7 @@ ipcMain.handle("open-playlist-window", (_, currentPlaylistName: string) => {
       sandbox: true,
     },
   });
+  // playlistWindow.webContents.openDevTools();
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
