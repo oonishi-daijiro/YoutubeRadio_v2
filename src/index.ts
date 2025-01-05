@@ -23,7 +23,7 @@ app.on("ready", () => {
     resizable: false,
     useContentSize: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/player.js"),
       nodeIntegration: false,
@@ -33,6 +33,8 @@ app.on("ready", () => {
 
   mainWindow.loadURL(`http://localhost:${port}`);
   mainWindow.setIcon(path.resolve(__dirname, "../icon/icon.ico"));
+
+  mainWindow.webContents.openDevTools();
 
   const buttons = new YoutubeRadioThumbarButtons(mainWindow);
 
@@ -133,14 +135,14 @@ ipcMain.handle("open-playlist-window", (_, currentPlaylistName: string) => {
     show: false,
     parent: mainWindow,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/playlist.js"),
       nodeIntegration: false,
       sandbox: true,
     },
   });
-  // playlistWindow.webContents.openDevTools();
+  playlistWindow.webContents.openDevTools();
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
