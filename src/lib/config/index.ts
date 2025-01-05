@@ -14,7 +14,7 @@ export const configFile = new ElectronStore({
   cwd: app.getPath("userData"),
 });
 
-const defaultPlaylist: PrimitivePlaylist = {
+export const defaultPlaylist: PrimitivePlaylist = {
   name: "",
   videos: [{ id: "", title: "" }],
   isShuffle: false,

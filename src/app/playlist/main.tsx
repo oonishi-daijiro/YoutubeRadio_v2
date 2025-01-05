@@ -4,6 +4,7 @@ import { type ReducerActions, Reducer, type AppState, DefaultAppState } from './
 import { type YoutubeRadioPreload } from '../../preload/playlist'
 import { type Playlist } from '../../lib/config'
 import { Displays, FallbackReloadPlaylist } from './components'
+import SuspenseResource from '../../lib/suspense-resource'
 
 export interface preload extends Window {
   YoutubeRadio: YoutubeRadioPreload
@@ -11,47 +12,6 @@ export interface preload extends Window {
 
 declare const window: preload
 
-class SuspenseResource<T> {
-  constructor(resourceFetcher: () => Promise<T>, defaultData: T) {
-    this.resouseFetcher = resourceFetcher
-    this.data = defaultData
-    this.promise = new Promise<void>((resolve) => { resolve() });
-    this.setFetcher()
-  }
-
-  read(): T {
-    switch (this.stat) {
-      case 'pending':
-        console.log("pending");
-        throw this.promise as unknown as Error
-      case 'fullfilled':
-        console.log("fullfilled");
-        return this.data
-      case 'rejected':
-        return this.data
-    }
-  }
-
-  reload(): void {
-    console.log('set stat to pending');
-    this.stat = 'pending'
-    this.setFetcher()
-  }
-
-  private setFetcher(): void {
-    this.promise = this.resouseFetcher().then(data => {
-      this.data = data
-      this.stat = 'fullfilled'
-    }).catch(() => {
-      this.stat = 'rejected'
-    })
-  }
-
-  private stat: 'pending' | 'fullfilled' | 'rejected' = 'pending'
-  private data: T
-  private readonly resouseFetcher: () => Promise<T>
-  private promise: Promise<void> | undefined
-}
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot!)
 

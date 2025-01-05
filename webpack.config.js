@@ -39,7 +39,7 @@ const base = {
       }]
     })
   ],
-  mode: "production",
+  mode: "development",
   devtool: "inline-source-map"
 }
 
@@ -55,7 +55,7 @@ const renderer = {
   ...base,
   target: 'electron-renderer',
   entry: {
-    'app/player/main.js': './src/app/player/main.ts',
+    'app/player/main.js': './src/app/player/main.tsx',
     'app/playlist/main.js': './src/app/playlist/main.tsx',
   }
 }
