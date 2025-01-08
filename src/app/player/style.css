@@ -81,11 +81,12 @@ body {
   height: 30px;
   position: absolute;
   bottom: 15px;
-  right: 22px;
+  right: 29px;
   margin: 2px;
-  display: inline-block;
   text-align: center;
   cursor: pointer;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 #bar1 {
@@ -124,11 +125,11 @@ body {
   }
 
   50% {
-    transform: scaley(1.3);
+    transform: scaleY(1.3);
   }
 
   100% {
-    transform: scaley(0.6);
+    transform: scaleY(0.6);
   }
 }
 
@@ -137,7 +138,6 @@ body {
 }
 
 #canvas {
-  display: none;
   position: absolute;
   padding: 0px;
   top: 175px;
@@ -205,4 +205,11 @@ body {
   background-color: black;
   width: 288px;
   height: 240px;
+}
+
+#player-fallback {
+  width: 288px;
+  height: 288px;
+  background: black;
+  -webkit-app-region:drag;
 }

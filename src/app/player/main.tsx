@@ -1,15 +1,9 @@
-// import { log } from "node:console";
-// import type { Playlist, PrimitivePlaylist } from "../../lib/config";
 import type YoutubeRadioPreload from "../../preload/player";
-
-
 import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { DefaultPlayerState, defaultPlaylist, type PlayerState, Reducer, type ReducerActions } from "./reducer";
 import { type PrimitivePlaylist } from "../../lib/config";
-import { log } from "console";
-// import SuspenseResource from "../../lib/suspense-resource";
-
+import SuspenseResource from "../../lib/suspense-resource";
 
 interface preload extends Window {
    YoutubeRadio: YoutubeRadioPreload;
@@ -18,399 +12,53 @@ interface preload extends Window {
 }
 
 declare const window: preload;
-// declare const YT: {
-//    Player: new (p: string, pp: unknown) => YT.Player;
-// };
-
-// window.addEventListener("load", () => {
-//    window.YoutubeRadio.emitWindowGetReady();
-// });
-
-// window.onYouTubeIframeAPIReady = function () {
-//    // when youtube iframe api get ready, this function will call
-//    player = new YT.Player("player", {
-//       height: "300",
-//       width: "288",
-//       events: {
-//          onStateChange: (stat: YT.OnStateChangeEvent) => {
-//             switch (stat.data) {
-//                case 1:
-//                   window.YoutubeRadio.emitPlayerStartPlaying();
-//                   break;
-//             }
-//          },
-//          onReady: playerOnReady,
-//          onError: (err: YT.OnErrorEvent) => {
-//             setTimeout(() => {
-//                player.nextVideo();
-//             }, 2500);
-//             console.error("iframe api Error:", err);
-//          },
-//       },
-//       host: "https://www.youtube-nocookie.com",
-//    });
-//    window.player = player;
-// };
-
-
-// window.YoutubeRadio.onSetShuffleCurrentPlaylist((shuffle: boolean) => {
-//    player.setShuffle(shuffle);
-// });
-
-// window.YoutubeRadio.onLoadPlaylist(
-//    async (arg: { name: string; index: number }) => {
-//       const playlist = (await getPlaylists()).find((e) => e.name === arg.name);
-//       await loadPlaylist(playlist as PrimitivePlaylist, arg.index);
-//    }
-// );
-
-// interface loadPlaylistParm {
-//    listType?: string;
-//    list?: string | string;
-//    playlist?: string[] | string;
-//    index?: number;
-//    startSeconds?: number;
-//    suggestedQuality?: string;
-// }
-
-// let currentPlayingListName = "";
-
-// const buttonOpenSelectPlaylist = document.getElementById("getUrl");
-// buttonOpenSelectPlaylist!.addEventListener("click", () => {
-//    window.YoutubeRadio.openSelectPlaylistWindow(currentPlayingListName);
-// });
-
-// async function loadPlaylist(
-//    appliedPlaylist: PrimitivePlaylist,
-//    index: number
-// ): Promise<void> {
-//    if ((appliedPlaylist?.name).length === 0) {
-//       return;
-//    }
-//    player.setShuffle(false);
-//    player.stopVideo();
-//    currentPlayingListName = appliedPlaylist.name;
-
-//    if (appliedPlaylist.type === "youtube") {
-//       (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
-//          listType: "playlist",
-//          list: appliedPlaylist.playlistID,
-//          index,
-//          startSeconds: 0,
-//       });
-//       await window.YoutubeRadio.onPlayerStartPlaying();
-//       const videos = player.getPlaylist().map((id) => {
-//          return {
-//             id,
-//             title: "",
-//          };
-//       });
-
-//       if (videos.length === 0) return;
-//       appliedPlaylist.videos = videos;
-//       await window.YoutubeRadio.editPlaylist(
-//          appliedPlaylist.name,
-//          appliedPlaylist
-//       ).catch((err): void => {
-//          console.log(err);
-//       }); // For update playlist without using api key
-//    } else if (appliedPlaylist.type === "youtube_radio") {
-//       if (appliedPlaylist?.name === "" || appliedPlaylist.videos.length === 0) {
-//          return;
-//       }
-//       const idList: string[] = appliedPlaylist.videos.map((e) => {
-//          return e.id;
-//       });
-//       (player.loadPlaylist as (parm: loadPlaylistParm) => void)({
-//          listType: "playlist",
-//          playlist: idList,
-//          index,
-//          startSeconds: 0,
-//       });
-//    }
-//    player.setLoop(true);
-//    player.setShuffle(appliedPlaylist.isShuffle);
-// }
-
-// async function playerOnReady(): Promise<void> {
-//    const volume = await window.YoutubeRadio.getVolume();
-//    const [playlist] = await getPlaylists();
-//    await loadPlaylist(playlist, 0);
-//    setVolume(volume);
-// }
-
-// window.YoutubeRadio.onVideoPlayed(() => {
-//    pauseButton!.className = "fas fa-pause";
-//    soundBars.forEach((element) => {
-//       (element as HTMLElement).style.animationPlayState = "running";
-//    });
-// });
-
-// window.YoutubeRadio.onVideoPaused(() => {
-//    pauseButton!.className = "fas fa-play";
-//    soundBars.forEach((element) => {
-//       (element as HTMLElement).style.animationPlayState = "paused";
-//    });
-// });
-
-// window.YoutubeRadio.onReqPauseVideo(() => {
-//    pauseVideo();
-// });
-// window.YoutubeRadio.onReqPlayVideo(() => {
-//    playVideo();
-// });
-
-// window.YoutubeRadio.onReqPreviousVideo(() => {
-//    previousVideo();
-// });
-
-// window.YoutubeRadio.onNextVideo(() => {
-//    nextVideo();
-// });
-
-// function nextVideo(): void {
-//    player.nextVideo();
-// }
-
-// function previousVideo(): void {
-//    player.previousVideo();
-// }
-
-// function pauseVideo(): void {
-//    pauseButton!.className = "fas fa-play";
-//    soundBars.forEach((element) => {
-//       (element as HTMLElement).style.animationPlayState = "paused";
-//    });
-//    player.pauseVideo();
-// }
-
-// function playVideo(): void {
-//    pauseButton!.className = "fas fa-pause";
-//    soundBars.forEach((element) => {
-//       (element as HTMLElement).style.animationPlayState = "running";
-//    });
-//    player.playVideo();
-// }
-
-// const pauseButton = document.getElementById("pause");
-
-// pauseButton!.addEventListener(
-//    "click",
-//    () => {
-//       if (player.getPlaylist() === null) {
-//          // when the player didnt has any playlist
-//          return;
-//       }
-//       if (pauseButton!.className === "fas fa-pause") {
-//          pauseVideo();
-//       } else {
-//          playVideo();
-//       }
-//    },
-//    false
-// );
-
-// const buttonPreviousVideo = document.getElementById("previousVideo");
-
-// buttonPreviousVideo!.addEventListener("click", () => {
-//    // when the player didnt has any playlist
-//    if (player.getPlaylist() === null) {
-//       return;
-//    }
-//    previousVideo();
-// });
-
-// const buttonNextVideo = document.getElementById("nextVideo");
-
-// buttonNextVideo!.addEventListener(
-//    "click",
-//    () => {
-//       // when the player didnt has any playlist
-//       if (player.getPlaylist() === null) {
-//          return;
-//       }
-//       nextVideo();
-//    },
-//    false
-// );
-
-// const buttonVolume = document.getElementById("volume");
-
-// buttonVolume!.addEventListener(
-//    "click",
-//    () => {
-//       buttonVolume!.style.display = "none";
-//       canvas.style.display = "block";
-//       const vokumeNum = 50 - player.getVolume() / 2;
-//       field!.fillStyle = "#444444";
-//       field!.fillRect(0, vokumeNum, canvas.width, canvas.height);
-//    },
-//    false
-// );
-
-// const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-// const field = canvas.getContext("2d");
-
-// function setVolumeBar(volume: number): void {
-//    if (volume > 100) {
-//       volume = 100;
-//    }
-//    const relativeVolume = volume / 100;
-//    field!.fillStyle = "#444444";
-//    field!.clearRect(0, 0, canvas.width, relativeVolume + 50);
-//    field!.fillRect(
-//       0,
-//       canvas.height,
-//       canvas.width,
-//       -relativeVolume * canvas.height
-//    );
-//    if (volume === 0) {
-//       buttonVolume!.className = "fas fa-volume-mute";
-//    } else if (volume > 0 && volume < 50) {
-//       buttonVolume!.className = "fas fa-volume-down";
-//    } else if (volume > 50) {
-//       buttonVolume!.className = "fas fa-volume-up";
-//    }
-// }
-
-// function setVolume(volume: number): void {
-//    setVolumeBar(volume);
-//    player.setVolume(volume);
-// }
-
-// canvas.addEventListener(
-//    "click",
-//    (event) => {
-//       if (event.which === 1) {
-//          setVolume(100 - event.offsetY * 2);
-//       }
-//    },
-//    false
-// );
-
-// canvas.addEventListener(
-//    "mousemove",
-//    (event) => {
-//       if (event.which === 1) {
-//          setVolume(100 - event.offsetY * 2);
-//       }
-//    },
-//    false
-// );
-
-// canvas.addEventListener(
-//    "mouseup",
-//    () => {
-//       setTimeout(() => {
-//          canvas.style.display = "none";
-//          buttonVolume!.style.display = "block";
-//       }, 500);
-//    },
-//    false
-// );
-
-// canvas.addEventListener(
-//    "mouseout",
-//    () => {
-//       setTimeout(() => {
-//          canvas.style.display = "none";
-//          buttonVolume!.style.display = "block";
-//       }, 500);
-//    },
-//    false
-// );
-
-// const bars = document.getElementsByClassName("bars");
-// const soundBars: Element[] = Array.from(bars);
-
-// const closeButton = document.getElementById("close_button");
-
-// closeButton!.addEventListener(
-//    "click",
-//    async () => {
-//       await window.YoutubeRadio.saveVolume(player.getVolume());
-//       window.YoutubeRadio.close();
-//    },
-//    false
-// );
-
-// const minimize = document.getElementById("minimize");
-
-// minimize!.addEventListener(
-//    "click",
-//    () => {
-//       window.YoutubeRadio.minimize();
-//    },
-//    false
-// );
-
-
-
-// const sIframePlayerInstance = new SuspenseResource<YT.Player | null>(async (mountElementID: string, option: YT.PlayerOptions) => {
-//    interface extWindow extends Window {
-//       onYouTubeIframeAPIReady?: () => void
-//    };
-//    const pl = new Promise<YT.Player>((resolve) => {
-//       (window as extWindow).onYouTubeIframeAPIReady = () => {
-//          resolve(new YT.Player(mountElementID, option))
-//          delete (window as extWindow).onYouTubeIframeAPIReady;
-//       };
-//    });
-
-//    const tag = document.createElement("script");
-//    tag.src = "https://www.youtube.com/iframe_api";
-//    const firstScriptTag = document.getElementsByTagName("script")[0];
-//    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-//    return await pl;
-// }, null);
-
-
-interface loadPlaylistParm {
-   listType?: string;
-   list?: string | string;
-   playlist?: string[] | string;
-   index?: number;
-   startSeconds?: number;
-   suggestedQuality?: string;
-}
-
 
 const ContextDispatchAppState = React.createContext<(ReducerAction: ReducerActions[keyof ReducerActions]) => void>(() => { console.log('reducer is not ready') })
+type appstateDispatcher_t = React.Dispatch<ReducerActions[keyof ReducerActions]>;
+
 const ContextAppState = React.createContext<PlayerState>(DefaultPlayerState)
+
+const sIframePlayerConstructor = new SuspenseResource(async (): Promise<(mountDOMid: string, option: YT.PlayerOptions) => YT.Player> => {
+   interface extWindow extends Window {
+      onYouTubeIframeAPIReady?: () => void
+   }
+   const playerConstructor = new Promise<(mountDOMid: string, option: YT.PlayerOptions) => YT.Player>(resolve => {
+      (window as extWindow).onYouTubeIframeAPIReady = () => {
+         resolve((mountDOMid: string, option: YT.PlayerOptions) => new YT.Player(mountDOMid, option));
+         delete (window as extWindow).onYouTubeIframeAPIReady;
+      };
+   })
+
+   const tag = document.createElement("script");
+   tag.src = "https://www.youtube.com/iframe_api";
+   const firstScriptTag = document.getElementsByTagName("script")[0];
+   firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+   return await playerConstructor;
+}, () => ({} as unknown as YT.Player));
+
+window.addEventListener("load", () => {
+   window.YoutubeRadio.emitWindowGetReady();
+});
 
 const App: React.FC = () => {
    const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultPlayerState)
 
    React.useEffect(() => {
-      setOnloadEventHandler(dispatchAppState);
+      addExternalEventListenner(appState, dispatchAppState);
+   }, [appState.isPlayerLoaded]);
+
+   React.useEffect(() => {
+   }, [appState.currentPlaylist]);
+
+   React.useEffect(() => {
+      window.YoutubeRadio.getVolume().then(volume => {
+         dispatchAppState({
+            type: 'set-volume',
+            props: volume
+         })
+      })
    }, []);
-   console.log("approot:", appState.iframePlayerInstance);
-
-
-   if (appState.currentPlaylist.type === 'youtube') {
-      console.log(appState.iframePlayerInstance);
-
-
-
-      // (appState.iframePlayerInstance?.loadPlaylist as (parm: loadPlaylistParm) => void)({
-      //    listType: "playlist",
-      //    list: appState.currentPlaylist.playlistID,
-      //    index: appState.startIndex,
-      //    startSeconds: 0,
-      // });
-
-   } else if (appState.currentPlaylist.type === "youtube_radio") {
-      const idList = appState.currentPlaylist.videos.map(e => e.id);
-      // appState.iframePlayerInstance?.loadPlaylist(idList, appState.startIndex, 0);
-
-      (appState.iframePlayerInstance?.loadPlaylist as (parm: loadPlaylistParm) => void)({
-         listType: "playlist",
-         playlist: idList,
-         index: appState.startIndex,
-         startSeconds: 0,
-      });
-   };
 
 
    return (
@@ -418,7 +66,7 @@ const App: React.FC = () => {
          <ContextAppState.Provider value={appState}>
             <ContextDispatchAppState.Provider value={dispatchAppState}>
                <WindowInterface />
-               <React.Suspense fallback={"suspend"}>
+               <React.Suspense fallback={<PlayerFallback />}>
                   <IframeYoutubePlayer />
                </React.Suspense>
                <PlayerInterface />
@@ -426,7 +74,6 @@ const App: React.FC = () => {
                <PlayerSoundBar />
             </ContextDispatchAppState.Provider>
          </ContextAppState.Provider>
-
       </>
    )
 }
@@ -434,6 +81,72 @@ const App: React.FC = () => {
 const domAppRoot = document.getElementById('root')
 const AppRoot = ReactDOM.createRoot(domAppRoot!)
 AppRoot.render(<App />)
+
+
+function addExternalEventListenner(appState: PlayerState, dispatchAppState: appstateDispatcher_t): void {
+   if (appState.isPlayerLoaded) {
+      const { player } = appState;
+      window.YoutubeRadio.onLoadPlaylist(
+         async (arg: { name: string; index: number }) => {
+            const playlist = (await window.YoutubeRadio.getPlaylists()).find((e) => e.name === arg.name) ?? defaultPlaylist;
+            dispatchAppState({
+               type: 'set-current-playing-playlist',
+               props: playlist
+            })
+         }
+      );
+      // paused by webcontens
+      window.YoutubeRadio.onVideoPlayed(() => {
+         dispatchAppState({
+            'type': 'set-current-playing-state',
+            props: 'playing'
+         })
+      });
+
+      window.YoutubeRadio.onVideoPaused(() => {
+         dispatchAppState({
+            "type": 'set-current-playing-state',
+            props: 'pausing'
+         })
+      });
+      // from taskbar thumbnail button
+      window.YoutubeRadio.onReqPauseVideo(() => {
+         dispatchAppState({
+            "type": 'set-current-playing-state',
+            props: 'pausing'
+         })
+         player.pauseVideo();
+      });
+
+      window.YoutubeRadio.onReqPlayVideo(() => {
+         dispatchAppState({
+            "type": 'set-current-playing-state',
+            props: 'playing'
+         })
+         player.playVideo();
+      });
+
+      window.YoutubeRadio.onReqPreviousVideo(() => {
+         player.previousVideo();
+         dispatchAppState({
+            type: 'set-current-playing-state',
+            props: 'playing'
+         })
+      });
+
+      window.YoutubeRadio.onNextVideo(() => {
+         player.nextVideo();
+         dispatchAppState({
+            type: 'set-current-playing-state',
+            props: 'playing'
+         })
+      });
+
+      window.YoutubeRadio.onSetShuffleCurrentPlaylist((shuffle: boolean) => {
+         player.setShuffle(shuffle);
+      });
+   }
+}
 
 
 const WindowInterface: React.FC = () => {
@@ -447,7 +160,7 @@ const WindowInterface: React.FC = () => {
    }
 
    const closeWindow = async (): Promise<void> => {
-      await window.YoutubeRadio.saveVolume(appState.currentVolume);
+      await window.YoutubeRadio.saveVolume(appState.volume);
       window.YoutubeRadio.close();
    }
 
@@ -459,60 +172,23 @@ const WindowInterface: React.FC = () => {
       </div>
    )
 }
-
+const PlayerFallback: React.FC = () => {
+   return (
+      <div id="player_container">
+         <div id="player-fallback"></div>
+      </div>
+   )
+}
 
 const IframeYoutubePlayer: React.FC = () => {
    const playerDomID = "player";
+
+   const playerConstructor = sIframePlayerConstructor.read();
    const dispatchAppState = React.useContext(ContextDispatchAppState);
-   const appState = React.useContext(ContextAppState);
-
-
-   const player = useYoutubeIframePlayer(playerDomID, {
-      height: 300,
-      width: 288,
-      events: {
-         onStateChange: (stat: YT.OnStateChangeEvent) => {
-            console.log("on state change");
-
-            dispatchAppState({
-               type: "set-iframe-player-state",
-               props: stat.data
-            })
-         },
-         onReady: async () => {
-            dispatchAppState({
-               type: "set-iframe-player-instance",
-               props: player
-            })
-            dispatchAppState({
-               type: "set-current-playing-playlist",
-               props: await getFirstPlaylist()
-            })
-            const idList = appState.currentPlaylist.videos.map(e => e.id);
-            // appState.iframePlayerInstance?.loadPlaylist(idList, appState.startIndex, 0);
-
-            (appState.iframePlayerInstance?.loadPlaylist as (parm: loadPlaylistParm) => void)({
-               listType: "playlist",
-               playlist: idList,
-               index: appState.startIndex,
-               startSeconds: 0,
-            });
-         },
-         onError: (err: YT.OnErrorEvent) => {
-            console.error(err);
-         },
-      },
-      host: "https://www.youtube-nocookie.com",
-   });
 
    React.useEffect(() => {
-      dispatchAppState({
-         type: "set-iframe-player-instance",
-         props: player
-      })
-      console.log(player);
-
-   }, [player]);
+      setupPlayer(playerConstructor, playerDomID, dispatchAppState);
+   }, [playerConstructor]);
 
    return (
       <>
@@ -524,41 +200,203 @@ const IframeYoutubePlayer: React.FC = () => {
 };
 
 const PlayerInterface: React.FC = () => {
-   const playPreviousVideo = (): void => {
+   const appstate = React.useContext(ContextAppState);
+   const dispatchAppState = React.useContext(ContextDispatchAppState);
+
+   const pauseVideo = (): void => {
+      appstate.player.pauseVideo();
+      dispatchAppState({
+         type: 'set-current-playing-state',
+         props: 'pausing'
+      })
 
    }
-   const pauseVideo = (): void => { }
-   const playNextVideo = (): void => { }
+   const playVideo = (): void => {
+      appstate.player.playVideo();
+      dispatchAppState({
+         type: 'set-current-playing-state',
+         props: 'playing'
+      })
+   }
 
+   const playNextVideo = (): void => {
+      appstate.player.nextVideo();
+      dispatchAppState({
+         type: 'set-current-playing-state',
+         props: 'playing'
+      })
+   }
+   const playPreviousVideo = (): void => {
+      appstate.player.previousVideo();
+      dispatchAppState({
+         type: 'set-current-playing-state',
+         props: 'playing'
+      })
+   }
+
+   const pauseNplayButtonClassName = (): string => {
+      if (appstate.playingState === 'playing') {
+         return "fas fa-pause"
+      } else {
+         return "fas fa-play"
+      }
+   }
 
    return (
       <div id="interface">
          <i className="fas fa-angle-double-right" id="previousVideo" onClick={playPreviousVideo}></i>
-         <i className="fas fa-pause" id="pause" onClick={pauseVideo}></i>
+         <i className={pauseNplayButtonClassName()} id="pause" onClick={appstate.playingState === "playing" ? pauseVideo : playVideo}></i>
          <i className="fas fa-angle-double-right" id="nextVideo" onClick={playNextVideo}></i>
       </div>
    )
 };
 
-const PlayerVolumeController: React.FC = () => {
-   return (
-      <>
-         <canvas id="canvas" width="10px" height="50px"></canvas>
-         <i className="fas fa-volume-up" id="volume"></i>
-      </>
-   )
+
+function drawVolumeRectOnCanvas(volume: number, target: HTMLCanvasElement | null): void {
+
+   if (target !== null) {
+      const field = target.getContext('2d');
+      if (field !== null) {
+         const canvas = target;
+         if (volume > 100) {
+            volume = 100;
+         }
+         const relativeVolume = volume / 100;
+         field.fillStyle = "#444444";
+         field.clearRect(0, 0, target.width, relativeVolume + 50);
+         field.fillRect(
+            0,
+            target.height,
+            target.width,
+            -relativeVolume * canvas.height
+         );
+      }
+   }
 }
+
+const VolumeCanvasImpl: React.FC<Omit<JSX.IntrinsicElements['canvas'], 'ref'> & { volumeref: React.MutableRefObject<number> }> = (props) => {
+   console.log("render");
+   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+   const volume = props.volumeref.current;
+
+   React.useEffect(() => {
+      drawVolumeRectOnCanvas(volume, canvasRef.current);
+   }, []);
+
+   return <canvas {...props} id="canvas" width="10px" height="50px" ref={canvasRef} ></canvas>
+}
+
+const VolumeCanvas = React.memo(VolumeCanvasImpl);
+
+const PlayerVolumeController: React.FC = () => {
+   const [isEditVolume, setIsEditVolume] = React.useState(false);
+   const dispatchAppstate = React.useContext(ContextDispatchAppState);
+   const appstate = React.useContext(ContextAppState);
+
+   const volumeRef = React.useRef(appstate.volume);
+   const isMouseDown = React.useRef(false);
+
+   type canvasEventHandler = React.MouseEventHandler<HTMLCanvasElement>;
+
+   const getVolumeFromCanvas = (event: Parameters<canvasEventHandler>[0]): number => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const offsetY = event.clientY - rect.top;
+      const volume = 100 - offsetY * 2;
+      if (volume <= 0) {
+         return 0;
+      }
+      return volume;
+   }
+
+   const handleOnclick: canvasEventHandler = React.useCallback((event) => {
+      const volume = getVolumeFromCanvas(event);
+      drawVolumeRectOnCanvas(volume, event.currentTarget);
+      volumeRef.current = volume;
+
+      setTimeout(() => {
+         setIsEditVolume(false);
+         dispatchAppstate({
+            type: 'set-volume',
+            props: volume
+         })
+         appstate.player.setVolume(volumeRef.current);
+      }, 500);
+   }, [appstate.player]);
+
+   const handleMousemove: canvasEventHandler = React.useCallback((event) => {
+      if (isMouseDown.current) {
+         const volume = getVolumeFromCanvas(event);
+         drawVolumeRectOnCanvas(volume, event.currentTarget);
+         volumeRef.current = volume;
+         appstate.player.setVolume(volumeRef.current);
+      }
+   }, [appstate.player]);
+
+   const handleMouseOut: canvasEventHandler = React.useCallback(() => {
+      setTimeout(() => {
+         setIsEditVolume(false);
+         dispatchAppstate({
+            type: 'set-volume',
+            props: volumeRef.current
+         })
+         appstate.player.setVolume(volumeRef.current);
+      }, 500);
+   }, [appstate.player]);
+
+   const handleMouseDown: canvasEventHandler = React.useCallback(() => {
+      isMouseDown.current = true;
+   }, []);
+   const handleMouseUp: canvasEventHandler = React.useCallback(() => {
+      isMouseDown.current = false;
+   }, []);
+
+   if (!isEditVolume) {
+      if (appstate.volume === 0) {
+         return <i className="fas fa-volume-mute" id="volume" onClick={() => { setIsEditVolume(true) }}></i>
+      } else {
+         return <i className="fas fa-volume-up" id="volume" onClick={() => { setIsEditVolume(true) }}></i>
+      }
+   } else {
+      return <VolumeCanvas
+         volumeref={volumeRef}
+         onClick={handleOnclick}
+         onMouseOut={handleMouseOut}
+         onMouseMove={handleMousemove}
+         onMouseDown={handleMouseDown}
+         onMouseUp={handleMouseUp} />
+   }
+}
+
+
 
 const PlayerSoundBar: React.FC = () => {
-   return (
-      <div id="soundbar">
-         <div id="bar1" className="bars"></div>
-         <div id="bar2" className="bars"></div>
-         <div id="bar3" className="bars"></div>
-      </div>
-   )
-}
+   const appstate = React.useContext(ContextAppState);
+   if (appstate.playingState === "playing") {
+      const styleAnimationPlaying: React.CSSProperties = {
+         animationPlayState: "running"
+      };
 
+      return (
+         <div id="soundbar">
+            <div id="bar1" style={styleAnimationPlaying}></div>
+            <div id="bar2" style={styleAnimationPlaying}></div>
+            <div id="bar3" style={styleAnimationPlaying}></div>
+         </div>
+      )
+   } else if (appstate.playingState === "pausing") {
+      const styleAnimationPausing: React.CSSProperties = {
+         animationPlayState: ""
+      };
+      return (
+         <div id="soundbar">
+            <div id="bar1" style={styleAnimationPausing}></div>
+            <div id="bar2" style={styleAnimationPausing}></div>
+            <div id="bar3" style={styleAnimationPausing}></div>
+         </div>
+      )
+   }
+
+}
 
 async function getFirstPlaylist(): Promise<PrimitivePlaylist> {
    const allPlaylists = await window.YoutubeRadio.getPlaylists();
@@ -569,33 +407,40 @@ async function getFirstPlaylist(): Promise<PrimitivePlaylist> {
    }
 }
 
-function setOnloadEventHandler(dispatchAppState: React.Dispatch<ReducerActions[keyof ReducerActions]>): void {
-   window.YoutubeRadio.onLoadPlaylist(
-      async (arg: { name: string; index: number }) => {
+function setupPlayer(playerConstructor: (domID: string, option: YT.PlayerOptions) => YT.Player, domID: string, dispatchAppState: appstateDispatcher_t): YT.Player {
+   const player = playerConstructor(domID, {
+      height: 300,
+      width: 288,
+      events: {
+         onStateChange: (stat: YT.OnStateChangeEvent) => {
+            dispatchAppState({
+               type: "set-iframe-player-state",
+               props: stat.data
+            })
+         },
+         onReady: async () => {
+            dispatchAppState({
+               type: "set-iframe-player-instance",
+               props: player
+            })
+            const firstPlaylist = await getFirstPlaylist();
+            dispatchAppState({
+               type: "set-current-playing-playlist",
+               props: firstPlaylist
+            })
 
-         const playlist = (await window.YoutubeRadio.getPlaylists()).find((e) => e.name === arg.name) ?? defaultPlaylist;
-         dispatchAppState({
-            type: 'set-current-playing-playlist',
-            props: playlist
-         })
-      }
-   )
-}
-
-function useYoutubeIframePlayer(mountElementID: string, option: YT.PlayerOptions): YT.Player | null {
-   interface extWindow extends Window {
-      onYouTubeIframeAPIReady?: () => void
-   };
-   const [plyr, setPlyr] = React.useState<YT.Player | null>(null);
-   (window as extWindow).onYouTubeIframeAPIReady = () => {
-      setPlyr(new YT.Player(mountElementID, option));
-      delete (window as extWindow).onYouTubeIframeAPIReady;
-   };
-
-   const tag = document.createElement("script");
-   tag.src = "https://www.youtube.com/iframe_api";
-   const firstScriptTag = document.getElementsByTagName("script")[0];
-   firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-   return plyr;
+            // loadPlaylist(player, firstPlaylist, 0);
+            dispatchAppState({
+               type: "set-current-playing-state",
+               props: "playing"
+            })
+            player.playVideo();
+         },
+         onError: (err: YT.OnErrorEvent) => {
+            console.error(err);
+         },
+      },
+      host: "https://www.youtube-nocookie.com",
+   })
+   return player;
 }

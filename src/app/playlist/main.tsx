@@ -2,7 +2,6 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
 import { type ReducerActions, Reducer, type AppState, DefaultAppState } from './reducer'
 import { type YoutubeRadioPreload } from '../../preload/playlist'
-import { type Playlist } from '../../lib/config'
 import { Displays, FallbackReloadPlaylist } from './components'
 import SuspenseResource from '../../lib/suspense-resource'
 
@@ -19,11 +18,10 @@ export const ContextDispatchAppState = React.createContext<(ReducerAction: Reduc
 
 export const ContextAppState = React.createContext<AppState>(DefaultAppState)
 
-export const sPlaylists = new SuspenseResource<Playlist[]>(window.YoutubeRadio.getPlaylists, [])
+export const sPlaylists = new SuspenseResource(window.YoutubeRadio.getPlaylists, [])
 
 export type dispathFunc = (ReducerAction: ReducerActions[keyof ReducerActions]) => void
 
-const sCurrentPlayingListName = new SuspenseResource<string>(window.YoutubeRadio.getCurrentPlayingListName, "");
 
 const App: React.FC = () => {
   const [appState, dispatchAppState] = React.useReducer(Reducer, DefaultAppState)
@@ -55,14 +53,7 @@ const PlaylistLoadSuspenser: React.FC<{ children: JSX.Element | JSX.Element[] }>
       props: playlists
     })
   }
-  if (!appState.isCurrentPlaylistNameLoaded) {
-    const currentPlayingListName = sCurrentPlayingListName.read()
 
-    dispatch({
-      type: 'set-current-playing-list-name',
-      props: currentPlayingListName
-    })
-  }
 
   return props.children;
 }
