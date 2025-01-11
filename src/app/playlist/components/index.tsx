@@ -28,11 +28,11 @@ export const Icons = {
 
 
 type IconedButtonPropsType = {
-  iconName: keyof typeof Icons
+  iconame: keyof typeof Icons
 } & JSX.IntrinsicElements['i'];
 
 export const IconedButton: React.FC<IconedButtonPropsType> = (props) => {
-  const className = (props.className ?? "") + ` ${Icons[props.iconName]} `
+  const className = (props.className ?? "") + ` ${Icons[props.iconame]} `
   return <i {...props} className={className}></i>
 }
 export const Wrapper: React.FC<{ wrapTarget: 'playlist-display-wrapper' | 'playlist-detail-display-wrapper' | 'playlist-editor-wrapper' | 'playlist-type-selection-wrapper', index: number, children: React.ReactNode[] | React.ReactNode }> = (props) => {
@@ -78,11 +78,11 @@ export const Thumbnail: React.FC<JSX.IntrinsicElements['img']> = (props) => {
 export const FallbackReloadPlaylist = Fallback;
 
 export const Displays = {
-  'playlists': (index: number) => <PlaylistsDisplay index={index} />,
-  'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} />,
-  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} />,
-  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} />,
-  'playlist-edit-fallback': (index: number) => <Fallback index={index} />
+  'playlists': (index: number) => <PlaylistsDisplay index={index} key="playlists" />,
+  'playlist-detail': (index: number) => <PlaylistDetailDisplay index={index} key="playlist-detail" />,
+  'playlist-editor': (index: number) => <PlaylistEditorDisplay index={index} key="playlist-editor" />,
+  'playlist-type-selection': (index: number) => <PlaylistTypeSelection index={index} key="playlist-type-selection" />,
+  'playlist-edit-fallback': (index: number) => <Fallback index={index} key="playlist-edit-fallback" />
 } as const
 
 

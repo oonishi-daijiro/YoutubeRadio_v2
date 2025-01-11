@@ -134,14 +134,14 @@ ipcMain.handle("open-playlist-window", (_, currentPlaylistName: string) => {
     show: false,
     parent: mainWindow,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       contextIsolation: true,
       preload: path.join(__dirname, "/preload/playlist.js"),
       nodeIntegration: false,
       sandbox: true,
     },
   });
-  // playlistWindow.webContents.openDevTools();
+  playlistWindow.webContents.openDevTools();
   playlistWindow.loadFile(
     path.resolve(__dirname, "./app/playlist/playlist.html")
   );
