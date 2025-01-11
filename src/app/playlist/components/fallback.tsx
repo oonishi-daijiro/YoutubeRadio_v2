@@ -11,9 +11,9 @@ const Fallback: React.FC<{ index: number }> = () => {
          <div id="playlists-display">
             {[1, 2, 3].map(pl => <PendingPlaylistDisplay key={pl} />)}
          </div>
-         <IconedButton onClick={() => { window.YoutubeRadio.close() }} iconName='close' id='close-window' />
-         <IconedButton iconName='pin' id='button-pin-player' />
-         <IconedButton iconName='reorder' id='button-reorder-playlists' />
+         <IconedButton onClick={() => { window.YoutubeRadio.close() }} iconame='close' id='close-window' />
+         <IconedButton iconame='pin' id='button-pin-player' />
+         <IconedButton iconame='reorder' id='button-reorder-playlists' />
       </Wrapper>
    )
 };

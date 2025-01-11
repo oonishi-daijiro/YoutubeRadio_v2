@@ -84,47 +84,57 @@ const App: React.FC = () => {
    }
 
    React.useEffect(() => {
-      appstate.player.stopVideo();
       appstate.player.setShuffle(false);
-      appstate.player.setLoop(true);
+      appstate.player.stopVideo();
 
       if (appstate.currentPlaylist.type === "youtube") {
          loadPlaylistCorrectly(appstate.currentPlaylist.playlistID!, appstate.startIndex);
       } else if (appstate.currentPlaylist.type === "youtube_radio") {
          loadPlaylistCorrectly(appstate.currentPlaylist.videos.map(v => v.id), appstate.startIndex);
       }
+      dispatchAppState({
+         type: "set-iframe-player-state",
+         props: -1
+      })
+      dispatchAppState({
+         type: "set-is-iframe-player-loaded-playlist",
+         props: false
+      });
    }, [appstate.currentPlaylist, appstate.player]);
 
    React.useEffect(() => {
       appstate.player.setShuffle(appstate.currentPlaylist.isShuffle);
    }, [appstate.currentPlaylist.isShuffle, appstate.player]);
 
+   const updateYoutubePlaylistFromIframePlayer = (): void => {
+      const idList = appstate.player.getPlaylist();
+
+      if (idList?.length !== undefined) {
+         const idUpdatedPlaylist = {
+            ...appstate.currentPlaylist,
+            videos: appstate.player.getPlaylist().map(i => ({ id: i, title: "" }))
+         };
+         window.YoutubeRadio.editPlaylist(appstate.currentPlaylist.name, idUpdatedPlaylist);
+      }
+   }
+
    React.useEffect(() => {
       if (appstate.iframePlayerState === 1 && !appstate.isIframePlayerLoadedPlaylist) {
-         appstate.player.setShuffle(appstate.currentPlaylist.isShuffle);
          appstate.player.setLoop(true);
+         appstate.player.setShuffle(false);
 
          if (appstate.currentPlaylist.type === "youtube") {
-            // for update playlist less api requrest.
-            appstate.player.setShuffle(false);
-            const idList = appstate.player.getPlaylist();
-
-            if (idList?.length !== undefined) {
-               const idUpdatedPlaylist = {
-                  ...appstate.currentPlaylist,
-                  videos: appstate.player.getPlaylist().map(i => ({ id: i, title: "" }))
-               };
-               window.YoutubeRadio.editPlaylist(appstate.currentPlaylist.name, idUpdatedPlaylist);
-               appstate.player.setShuffle(appstate.currentPlaylist.isShuffle);
-            }
+            updateYoutubePlaylistFromIframePlayer();
          }
 
+         appstate.player.setShuffle(appstate.currentPlaylist.isShuffle);
          dispatchAppState({
             type: "set-is-iframe-player-loaded-playlist",
             props: true
          });
       }
    }, [appstate.iframePlayerState, appstate.player, appstate.isIframePlayerLoadedPlaylist]);
+
 
    React.useEffect(() => {
       appstate.player.setVolume(appstate.volume);
@@ -179,10 +189,6 @@ function addExternalEventListenner(appState: PlayerState, dispatchAppState: apps
                type: 'set-start-index',
                props: arg.index
             })
-            dispatchAppState({
-               type: "set-is-iframe-player-loaded-playlist",
-               props: false
-            });
          }
       );
       // paused by webcontens
@@ -232,7 +238,6 @@ function addExternalEventListenner(appState: PlayerState, dispatchAppState: apps
                playlistname: plName
             }
          });
-
       });
    }
 }
@@ -334,7 +339,6 @@ const PlayerInterface: React.FC = () => {
 
 
 function drawVolumeRectOnCanvas(volume: number, target: HTMLCanvasElement | null): void {
-
    if (target !== null) {
       const field = target.getContext('2d');
       if (field !== null) {
@@ -407,6 +411,7 @@ const PlayerVolumeController: React.FC = () => {
          type: 'set-volume',
          props: volume
       })
+      appstate.player.setVolume(volume);
    }, [appstate.player]);
 
    const handleMousemove: canvasEventHandler = React.useCallback((event) => {
@@ -416,13 +421,15 @@ const PlayerVolumeController: React.FC = () => {
          volumeRef.current = volume;
          appstate.player.setVolume(volumeRef.current);
       }
-   }, [appstate.player]);
+   }, [appstate.player, volumeRef]);
 
    const handleMouseOut: canvasEventHandler = React.useCallback(() => {
       setTimeout(() => {
          setIsEditVolume(false);
          isMouseDown.current = false;
       }, 500);
+
+      isMouseDown.current = false;
 
       dispatchAppstate({
          type: 'set-volume',
@@ -432,10 +439,10 @@ const PlayerVolumeController: React.FC = () => {
 
    const handleMouseDown: canvasEventHandler = React.useCallback(() => {
       isMouseDown.current = true;
-   }, []);
+   }, [isMouseDown]);
    const handleMouseUp: canvasEventHandler = React.useCallback(() => {
       isMouseDown.current = false;
-   }, []);
+   }, [isMouseDown]);
 
    if (!isEditVolume) {
       if (appstate.volume === 0) {

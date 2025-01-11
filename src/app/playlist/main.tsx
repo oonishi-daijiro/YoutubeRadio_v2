@@ -44,16 +44,17 @@ AppRoot.render(<App />)
 const PlaylistLoadSuspenser: React.FC<{ children: JSX.Element | JSX.Element[] }> = (props) => {
   const dispatch = React.useContext(ContextDispatchAppState)
   const appState = React.useContext(ContextAppState)
+  
+  const playlists = sPlaylists.read()
 
-  if (!appState.isPlaylistsLoaded) {
-    const playlists = sPlaylists.read()
-
-    dispatch({
-      type: 'load-playlists',
-      props: playlists
-    })
-  }
-
+  React.useEffect(() => {
+    if (!appState.isPlaylistsLoaded) {
+      dispatch({
+        type: 'load-playlists',
+        props: playlists
+      })
+    }
+  }, [appState]);
 
   return props.children;
 }

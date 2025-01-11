@@ -27,7 +27,7 @@ const PlaylistDisplay: React.FC<{ playlist: PrimitivePlaylist, index: number, is
         {props.playlist.name}
       </div>
       <IconedButton
-        iconName="play"
+        iconame="play"
         className="play-button"
         onClick={() => {
           if (!props.isOrderEditing) {
@@ -88,7 +88,7 @@ const ButtonCreatePlaylist: React.FC = () => {
       pushDisplayWithAnimation(dispatch, 'playlist-type-selection')
     }}>
       <i className='fas fa-plus plus-icon'></i>
-      
+
     </div>
   )
 }
@@ -103,7 +103,7 @@ const ButtonPinPlayer: React.FC = () => {
   })
   return (
     <IconedButton
-      iconName="pin"
+      iconame="pin"
       id="button-pin-player"
       title="プレイヤーを最前面に固定"
       onClick={async () => {
@@ -123,7 +123,7 @@ const ButtonCloseWindow: React.FC = () => {
 
   return <IconedButton
     title="閉じる"
-    iconName="close"
+    iconame="close"
     id="close-window"
     onClick={() => {
       dispatch({
@@ -133,9 +133,9 @@ const ButtonCloseWindow: React.FC = () => {
 }
 
 const ButtonReorderPlaylists: React.FC<{ setIsOrderEditing: (b: boolean) => void }> = (props) => {
-  return <IconedButton title="プレイリストを並び替え" iconName="reorder" id="button-reorder-playlists" onClick={() => { props.setIsOrderEditing(true) }} />
+  return <IconedButton title="プレイリストを並び替え" iconame="reorder" id="button-reorder-playlists" onClick={() => { props.setIsOrderEditing(true) }} />
 }
 
 const ButtonSaveReorderedPlaylists: React.FC<{ onClick: () => void }> = (props) => {
-  return <IconedButton title="保存" iconName="save" id="button-reorder-playlists" onClick={() => { props.onClick() }} />
+  return <IconedButton title="保存" iconame="save" id="button-reorder-playlists" onClick={() => { props.onClick() }} />
 }
