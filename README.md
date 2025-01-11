@@ -18,7 +18,7 @@ npx webpack
 npm run build
 ```
 または
-<a href="https://github.com/oonishi-daijiro/YoutubeRadio_v2/releases/download/YoutubeRadio_v2_2.1/YoutubeRadio.Setup.2.0.0.exe">こちら</a>から(Windows)
+<a href="https://github.com/oonishi-daijiro/YoutubeRadio_v2/releases/download/YoutubeRadio_v2_2.2/YoutubeRadio.Setup.2.2.exe">こちら</a>から(Windows)
 ## スクリーンショット
 <img src="https://github.com/oonishi-daijiro/YoutubeRadio_v2/assets/72515127/c25c782a-0032-4998-99fe-a52eb4d673c7" width='50%'>
 
