@@ -11,10 +11,8 @@ export default class SuspenseResource<T extends (...arg: any) => Promise<any>> {
     this.setupPromise(...arg);
     switch (this.stat) {
       case "pending":
-        console.log("pending");
         throw this.promise as unknown as Error;
       case "fullfilled":
-        console.log("fullfilled");
         return this.data;
       case "rejected":
         return this.data;
@@ -22,7 +20,6 @@ export default class SuspenseResource<T extends (...arg: any) => Promise<any>> {
   }
 
   reload(...arg: Parameters<T>): void {
-    console.log("set stat to pending");
     this.stat = "pending";
     this.disPromiseSetup = false;
     this.setupPromise(...arg);

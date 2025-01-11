@@ -169,9 +169,7 @@ const ButtonShuffle: React.FC = () => {
       ...appState.targetPlaylist,
       isShuffle: !appState.targetPlaylist.isShuffle
     })
-    if (appState.targetPlaylist.name === appState.currentPlayingListName) {
-      setCurrentPlaylistShuffle(!appState.targetPlaylist.isShuffle)
-    }
+    setCurrentPlaylistShuffle(!appState.targetPlaylist.isShuffle, appState.targetPlaylist.name);
   }
 
   return (

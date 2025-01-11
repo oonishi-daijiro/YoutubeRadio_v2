@@ -9,6 +9,7 @@ export interface PlayerState {
   isPlayerLoaded: boolean;
   volume: number;
   startIndex: number;
+  isIframePlayerLoadedPlaylist: boolean;
 }
 
 export const defaultPlaylist: PrimitivePlaylist = {
@@ -38,6 +39,7 @@ export const DefaultPlayerState: PlayerState = {
   isPlayerLoaded: false,
   volume: 50,
   startIndex: 0,
+  isIframePlayerLoadedPlaylist: false,
 };
 
 export interface ReducerActions {
@@ -64,7 +66,36 @@ export interface ReducerActions {
     type: "set-volume";
     props: PlayerState["volume"];
   };
+  "set-start-index": {
+    type: "set-start-index";
+    props: number;
+  };
+  "set-target-playlist-shuffle": {
+    type: "set-target-playlist-shuffle";
+    props: {
+      playlistname: string;
+      shuffle: boolean;
+    };
+  };
+  "set-is-iframe-player-loaded-playlist": {
+    type: "set-is-iframe-player-loaded-playlist";
+    props: PlayerState["isPlayerLoaded"];
+  };
 }
+
+// function getCaller(): string {
+//   const error = new Error();
+//   const stack = error.stack ?? "";
+//   const stackLines = stack.split("\n");
+//   const callerIndex =
+//     stackLines.findIndex((line: string | string[]) =>
+//       line.includes("getCaller")
+//     ) + 2;
+//   if (stackLines[callerIndex].length > 0) {
+//     return stackLines[callerIndex].trim();
+//   }
+//   return "Unknown";
+// }
 
 export function Reducer(
   currentAppState: PlayerState,
@@ -89,6 +120,17 @@ export function Reducer(
       return { ...currentAppState, playingState: action.props };
     case "set-volume":
       return { ...currentAppState, volume: action.props };
+    case "set-start-index":
+      return { ...currentAppState, startIndex: action.props };
+    case "set-target-playlist-shuffle":
+      if (action.props.playlistname === currentAppState.currentPlaylist.name) {
+        currentAppState.currentPlaylist.name = action.props.playlistname;
+        return currentAppState;
+      } else {
+        return { ...currentAppState };
+      }
+    case "set-is-iframe-player-loaded-playlist":
+      return { ...currentAppState, isIframePlayerLoadedPlaylist: action.props };
   }
   return DefaultPlayerState;
 }

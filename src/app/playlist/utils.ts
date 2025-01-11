@@ -14,8 +14,11 @@ export function loadPlaylist(name: string, index: number = 0): void {
   window.YoutubeRadio.loadPlaylist(name, index);
 }
 
-export function setCurrentPlaylistShuffle(shuffle: boolean): void {
-  window.YoutubeRadio.setCurrentPlaylistShuffle(shuffle);
+export function setCurrentPlaylistShuffle(
+  shuffle: boolean,
+  playlistname: string
+): void {
+  window.YoutubeRadio.setCurrentPlaylistShuffle(shuffle, playlistname);
 }
 
 interface VideoURL {

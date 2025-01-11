@@ -3,19 +3,17 @@ import * as http from "http";
 import { type AddressInfo } from "net";
 import * as path from "path";
 
-const playerIndex = readFileSync(
-  path.resolve(__dirname, "./app/player/player.html")
-);
-const playerMainAppJs = readFileSync(
-  path.resolve(__dirname, "./app/player/main.js")
-);
-const playerStylesheet = readFileSync(
-  path.resolve(__dirname, "./app/player/style.css")
-);
-
 export function launchServer(): number {
   const server = http.createServer((req, res) => {
-    
+    const playerIndex = readFileSync(
+      path.resolve(__dirname, "./app/player/player.html")
+    );
+    const playerMainAppJs = readFileSync(
+      path.resolve(__dirname, "./app/player/main.js")
+    );
+    const playerStylesheet = readFileSync(
+      path.resolve(__dirname, "./app/player/style.css")
+    );
     switch (req.url) {
       case "/":
         res.writeHead(200, {

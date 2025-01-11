@@ -20,7 +20,9 @@ export default interface YoutubeRadioPreload {
   saveVolume: (volume: number) => Promise<void>;
   getVolume: () => Promise<number>;
   emitWindowGetReady: () => void;
-  onSetShuffleCurrentPlaylist: (callback: (shuffle: boolean) => void) => void;
+  onSetShuffleCurrentPlaylist: (
+    callback: (shuffle: boolean, playlistname: string) => void
+  ) => void;
   editPlaylist: (name: string, newPlaylist: PrimitivePlaylist) => Promise<void>;
 }
 
@@ -88,9 +90,12 @@ const api: YoutubeRadioPreload = {
     ipcRenderer.invoke("ready-to-show-player");
   },
   onSetShuffleCurrentPlaylist(callback) {
-    ipcRenderer.on("set-shuffle-current-playlist", (_, shuffle: boolean) => {
-      callback(shuffle);
-    });
+    ipcRenderer.on(
+      "set-shuffle-current-playlist",
+      (_, arg: { shuffle: boolean; playlistname: string }) => {
+        callback(arg.shuffle, arg.playlistname);
+      }
+    );
   },
   async editPlaylist(
     name: string,

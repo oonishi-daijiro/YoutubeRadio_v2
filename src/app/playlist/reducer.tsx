@@ -24,7 +24,6 @@ export interface AppState {
   targetPlaylist: PrimitivePlaylist
   switchAnimationHook: Array<typeof animationNames[number]>
   isAnimating: boolean
-  currentPlayingListName: string
 }
 
 export const DefaultAppState: AppState = {
@@ -39,7 +38,6 @@ export const DefaultAppState: AppState = {
   },
   switchAnimationHook: [''],
   isAnimating: false,
-  currentPlayingListName: '',
   isCurrentPlaylistNameLoaded: false
 }
 
@@ -211,12 +209,6 @@ export function Reducer(currentAppState: AppState, action: ReducerActions[keyof 
         ...currentAppState,
         playlists: action.props
       }
-    case 'set-current-playing-list-name':
-      return {
-        ...currentAppState,
-        currentPlayingListName: action.props,
-        isCurrentPlaylistNameLoaded: true
-      };
 
     case 'set-pending-of-edit':
       return { ...currentAppState, displays: ['playlist-edit-fallback'], switchAnimationHook: [''] };

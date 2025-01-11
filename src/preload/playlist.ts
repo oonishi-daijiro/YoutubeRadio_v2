@@ -9,7 +9,7 @@ export interface YoutubeRadioPreload {
   getPlaylists: () => Promise<config.Playlist[]>;
   close: () => void;
   loadPlaylist: (name: string, index: number) => void;
-  setCurrentPlaylistShuffle: (shuffle: boolean) => void;
+  setCurrentPlaylistShuffle: (shuffle: boolean, playlistname: string) => void;
   deletePlaylist: (name: string) => Promise<void>;
   getYoutubeTitleFromID: (url: string) => Promise<string>;
   openExternal: (url: string) => void;
@@ -36,8 +36,11 @@ const api: YoutubeRadioPreload = {
       index,
     });
   },
-  setCurrentPlaylistShuffle(shuffle: boolean) {
-    ipcRenderer.invoke("set-shuffle-current-playlist", shuffle);
+  setCurrentPlaylistShuffle(s: boolean, plname: string) {
+    ipcRenderer.invoke("set-shuffle-current-playlist", {
+      playlistname: plname,
+      shuffle: s,
+    });
   },
   async deletePlaylist(name: string): Promise<void> {
     return await ipcRenderer.invoke("delete-playlist", name);
