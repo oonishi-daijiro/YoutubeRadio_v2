@@ -83,20 +83,6 @@ export interface ReducerActions {
   };
 }
 
-// function getCaller(): string {
-//   const error = new Error();
-//   const stack = error.stack ?? "";
-//   const stackLines = stack.split("\n");
-//   const callerIndex =
-//     stackLines.findIndex((line: string | string[]) =>
-//       line.includes("getCaller")
-//     ) + 2;
-//   if (stackLines[callerIndex].length > 0) {
-//     return stackLines[callerIndex].trim();
-//   }
-//   return "Unknown";
-// }
-
 export function Reducer(
   currentAppState: PlayerState,
   action: ReducerActions[keyof ReducerActions]
@@ -124,10 +110,10 @@ export function Reducer(
       return { ...currentAppState, startIndex: action.props };
     case "set-target-playlist-shuffle":
       if (action.props.playlistname === currentAppState.currentPlaylist.name) {
-        currentAppState.currentPlaylist.name = action.props.playlistname;
-        return currentAppState;
+        currentAppState.currentPlaylist.isShuffle = action.props.shuffle;
+        return {...currentAppState};
       } else {
-        return { ...currentAppState };
+        return currentAppState;
       }
     case "set-is-iframe-player-loaded-playlist":
       return { ...currentAppState, isIframePlayerLoadedPlaylist: action.props };
