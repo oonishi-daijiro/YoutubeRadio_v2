@@ -20,7 +20,7 @@ const PlaylistDetailDisplay: React.FC<{ index: number }> = (props) => {
         pointerEvents: isPopupShown ? 'none' : 'auto',
       }}>
         <IconedButton
-          iconName="arrowLeft"
+          iconame="arrowLeft"
           className="button-back"
           onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
         <ContextSetPopupState.Provider value={setIsPopupShown}>
@@ -96,7 +96,7 @@ const ButtonPlay: React.FC<{ playlist: PrimitivePlaylist }> = (props) => {
   }
 
   return <IconedButton
-    iconName="play"
+    iconame="play"
     className="button-play navigator"
     onClick={handleOnClickButonPlayPl}
   />
@@ -113,7 +113,7 @@ const PlaylistNameDisplay: React.FC<{ name: string }> = (props) => {
 const ButtonDelete: React.FC<{ playlist: PrimitivePlaylist, onClick: () => void }> = (props) => {
 
   return <IconedButton
-    iconName="trashBin"
+    iconame="trashBin"
     className="button-remove navigator"
     onClick={() => {
       props.onClick();
@@ -124,7 +124,7 @@ const ButtonDelete: React.FC<{ playlist: PrimitivePlaylist, onClick: () => void 
 const ButtonEdit: React.FC = () => {
   const dispatch = React.useContext(ContextDispatchAppState);
   return <IconedButton
-    iconName="pencil"
+    iconame="pencil"
     className="button-edit"
     onClick={() => {
       pushDisplayWithAnimation(dispatch, 'playlist-editor')
@@ -174,7 +174,7 @@ const ButtonShuffle: React.FC = () => {
 
   return (
     <IconedButton
-      iconName="shuffle"
+      iconame="shuffle"
       onClick={handleOnClickShuffle}
       style={{
         color: appState.targetPlaylist.isShuffle ? '#353535' : '#A6A6A6'
@@ -198,9 +198,9 @@ const VideoDisplay: React.FC<{
 
   return (
     <div className="video-display">
-      <IconedButton iconName="note" className="icon-music" />
+      <IconedButton iconame="note" className="icon-music" />
       <CharterDisplay value={props.video.title} />
-      <IconedButton iconName="play" className="button-playvideo" onClick={handleOnClickPlayVideoButton} />
+      <IconedButton iconame="play" className="button-playvideo" onClick={handleOnClickPlayVideoButton} />
     </div>
   )
 }
@@ -221,6 +221,7 @@ const CharterDisplay: React.FC<{ value: string }> = (props) => {
       spellCheck="false"
       className="video-title-display charter-display"
       type="text"
+      onChange={() => { }}
       style={{
         pointerEvents: 'none'
       }} />

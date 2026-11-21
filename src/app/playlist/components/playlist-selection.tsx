@@ -29,16 +29,16 @@ export const PlaylistTypeSelection: React.FC<{ index: number }> = (props) => {
           <div className="selection" onClick={() => {
             pushEditorWithAnimation('youtube_radio')
           }}>
-            <IconedButton iconName="list" className='selectionIcon'></IconedButton>
+            <IconedButton iconame="list" className='selectionIcon'></IconedButton>
           </div>
           <div className="selection" onClick={() => {
             pushEditorWithAnimation('youtube')
           }}>
-            <IconedButton iconName="cloud" className='selectionIcon' />
+            <IconedButton iconame="cloud" className='selectionIcon' />
           </div>
         </div>
       </div>
-      <IconedButton iconName="arrowLeft" className="button-back" onClick={() => {
+      <IconedButton iconame="arrowLeft" className="button-back" onClick={() => {
         popDisplayWithAnimation(dispatch)
       }} />
     </Wrapper>

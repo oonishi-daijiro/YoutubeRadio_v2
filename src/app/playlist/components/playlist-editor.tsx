@@ -67,7 +67,7 @@ const PlaylistEditorDisplay: React.FC<{ index: number }> = (props) => {
   return (
     <Wrapper wrapTarget="playlist-editor-wrapper" index={props.index}>
       <div id="playlist-editor">
-        <IconedButton iconName="arrowLeft" className="button-back" onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
+        <IconedButton iconame="arrowLeft" className="button-back" onClick={async () => { await popDisplayWithAnimation(dispatch) }} />
         <Thumbnail src={getYoutubeThumbnailURLFromID((appState.targetPlaylist.videos[0] ?? { id: '' }).id)}
           className={`${isThumbnailHidden ? 'thumbnail-playlist-editor-hidden' : 'thumbnail-playlist-editor'} ${animationClassName}`} />
         <PlaylistNameEditor playlistEdit={playlistEdit} setPlaylistEdit={setPlaylistEdit} />
@@ -171,7 +171,7 @@ const YoutubeRadioPlaylistVideosEditor: React.FC<{ playlistEdit: PrimitivePlayli
 
   return <>
     <DnDSwapListProvider dnd={dnd} wrapElmTagName='div' wrapElmProps={{ className: 'dnd-wrap-editor-video-display' }} />
-    {playlistEdit.videos.length < 100 ? <IconedButton iconName="plusCircle" id="button-add-video" onClick={handleOnClickAddVideo} /> : <></>}
+    {playlistEdit.videos.length < 100 ? <IconedButton iconame="plusCircle" id="button-add-video" onClick={handleOnClickAddVideo} /> : <></>}
   </>
 }
 
@@ -217,7 +217,7 @@ const EditableVideoDisplay: React.FC<EditableVideoDisplayPropType> = (props) => 
   return (
     <div className={`editor-video-display ${animationHook}`}>
 
-      <IconedButton iconName="cross" className='button-remove-video' onClick={handleDelete} />
+      <IconedButton iconame="cross" className='button-remove-video' onClick={handleDelete} />
 
       <input type='text' value={props.video.title} className='charter-display' readOnly={true}
         onClick={() => { setCurrentDisplay('url') }}
@@ -242,7 +242,7 @@ const ButtonSavePlaylist: React.FC<{ playlistEdited: PrimitivePlaylist }> = (pro
   const isValid = isValidEdit(props.playlistEdited)
 
   return (
-    <IconedButton iconName="save" id="button-save-playlist"
+    <IconedButton iconame="save" id="button-save-playlist"
       style={{
         color: isValid ? '#353535' : '#A6A6A6'
       }}
