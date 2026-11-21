@@ -12,7 +12,7 @@ export default interface YoutubeRadioPreload {
   openSelectPlaylistWindow: (currentPlayingListName: string) => Promise<void>;
   onReqPreviousVideo: (callback: () => void) => void;
   onLoadPlaylist: (
-    callback: (arg: { name: string; index: number }) => Promise<void>
+    callback: (arg: { name: string; index: number }) => Promise<void>,
   ) => void;
   // createYoutubeVideo(info: config.YoutubeVideo): Promise<config.YoutubeVideo>;
   emitPlayerStartPlaying: () => void;
@@ -21,7 +21,7 @@ export default interface YoutubeRadioPreload {
   getVolume: () => Promise<number>;
   emitWindowGetReady: () => void;
   onSetShuffleCurrentPlaylist: (
-    callback: (shuffle: boolean, playlistname: string) => void
+    callback: (shuffle: boolean, playlistname: string) => void,
   ) => void;
   editPlaylist: (name: string, newPlaylist: PrimitivePlaylist) => Promise<void>;
 }
@@ -57,17 +57,17 @@ const api: YoutubeRadioPreload = {
   openSelectPlaylistWindow: async (currentPlayingListName: string) => {
     return await ipcRenderer.invoke(
       "open-playlist-window",
-      currentPlayingListName
+      currentPlayingListName,
     );
   },
   onLoadPlaylist(
-    callback: (arg: { name: string; index: number }) => Promise<void>
+    callback: (arg: { name: string; index: number }) => Promise<void>,
   ) {
     ipcRenderer.on(
       "load-playlist",
       (_, arg: { name: string; index: number }) => {
         callback(arg);
-      }
+      },
     );
   },
   emitPlayerStartPlaying(): void {
@@ -94,12 +94,12 @@ const api: YoutubeRadioPreload = {
       "set-shuffle-current-playlist",
       (_, arg: { shuffle: boolean; playlistname: string }) => {
         callback(arg.shuffle, arg.playlistname);
-      }
+      },
     );
   },
   async editPlaylist(
     name: string,
-    newPLaylist: PrimitivePlaylist
+    newPLaylist: PrimitivePlaylist,
   ): Promise<void> {
     return await ipcRenderer.invoke("edit-playlist", name, newPLaylist);
   },
