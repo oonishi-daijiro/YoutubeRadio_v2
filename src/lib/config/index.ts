@@ -1,5 +1,5 @@
 import { app } from "electron";
-import * as ElectronStore from "electron-store";
+import ElectronStore from "electron-store";
 import * as diff from "diff";
 
 import * as youtube from "../youtube";
@@ -10,7 +10,7 @@ interface _playlistTypes {
   single_video: SingleVideoPlaylist;
 }
 export type playlistTypes = keyof _playlistTypes;
-export const configFile = new ElectronStore({
+const configFile = new ElectronStore({
   cwd: app.getPath("userData"),
 });
 
@@ -67,7 +67,7 @@ export const YoutubeRadioConfig = {
     const playlists = YoutubeRadioConfig.getAllPlaylists();
     playlists.splice(
       playlists.findIndex((e) => e.name === name, 1),
-      1
+      1,
     );
     configFile.set("playlists", playlists);
   },
@@ -80,13 +80,13 @@ export const YoutubeRadioConfig = {
   },
   async editPlaylistAndSave(
     playlistName: string,
-    newPlaylist: PrimitivePlaylist
+    newPlaylist: PrimitivePlaylist,
   ) {
     const playlists = YoutubeRadioConfig.getAllPlaylists();
     const bufferPlaylist = Playlist.toPlaylist(
       newPlaylist.type,
       playlists.find((e) => e.name === playlistName) ??
-        ((defaultPlaylist.type = newPlaylist.type), defaultPlaylist)
+        ((defaultPlaylist.type = newPlaylist.type), defaultPlaylist),
     );
     await bufferPlaylist.applyPlaylist(newPlaylist);
     if (YoutubeRadioConfig.isAlreadyExistPlaylist(playlistName)) {
@@ -97,6 +97,10 @@ export const YoutubeRadioConfig = {
     }
 
     YoutubeRadioConfig.setAllPlaylists(playlists);
+  },
+  getAPIkey(): string {
+    const key = configFile.get("api-key", "") as string;
+    return key;
   },
 };
 
@@ -121,7 +125,7 @@ export class Playlist implements PrimitivePlaylist {
 
   static toPlaylist<KEY extends keyof _playlistTypes>(
     type: KEY,
-    pl: PrimitivePlaylist
+    pl: PrimitivePlaylist,
   ): _playlistTypes[KEY] {
     if (type === "youtube") {
       return new YoutubePlaylist(pl) as _playlistTypes[KEY];
